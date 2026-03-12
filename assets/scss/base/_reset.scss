@@ -1,0 +1,30 @@
+// Base Reset & Body Styles
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  @apply bg-ocean-gradient bg-fixed text-ocean-50 overflow-x-hidden min-h-screen relative;
+  font-family: theme('fontFamily.sans');
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Selection
+::selection {
+  background: theme('colors.biolume.cyan');
+  color: theme('colors.ocean.950');
+}
+
+::-moz-selection {
+  background: theme('colors.biolume.cyan');
+  color: theme('colors.ocean.950');
+}

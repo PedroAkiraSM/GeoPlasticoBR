@@ -1,0 +1,15 @@
+{
+  "name": "geoplasticobr",
+  "version": "1.0.0",
+  "description": "Sistema de mapeamento de microplásticos no Brasil",
+  "scripts": {
+    "dev": "tailwindcss -i ./assets/scss/main.scss -o ./assets/css/output.css --watch",
+    "build": "tailwindcss -i ./assets/scss/main.scss -o ./assets/css/output.css --minify"
+  },
+  "keywords": ["microplasticos", "oceano", "meio-ambiente"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

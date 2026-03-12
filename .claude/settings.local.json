@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(if [ -f \"REVISÃO AMBIENTES DE ÁGUA DOCE.xlsx\" ])",
+      "Bash(then mv \"REVISÃO AMBIENTES DE ÁGUA DOCE.xlsx\" dados-excel/)",
+      "Bash(fi)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(python extract_to_sql.py:*)",
+      "Bash(python -c:*)",
+      "Bash(python analyze_all_data.py:*)",
+      "Bash(python:*)",
+      "Bash(if [ ! -d \"dados-excel\" ])",
+      "Bash(then mkdir dados-excel)",
+      "Bash(move \"GeoPlásticoBR.xlsx\" dados-excel/)",
+      "Bash(move:*)",
+      "Bash(move \"Relatorio_Testes_68_Atualizado.xlsx\" dados-excel/)",
+      "Bash(if [ -f \".htaccess\" ])",
+      "Bash(then cat .htaccess)",
+      "Bash(else echo \"Arquivo não existe\")",
+      "Bash(ls:*)",
+      "Bash(htpasswd:*)",
+      "Bash(openssl passwd:*)",
+      "Bash(awk 'BEGIN{printf \"\"geoplastico:\"\"}{print}')"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

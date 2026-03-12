@@ -1,0 +1,505 @@
+/**
+ * GeoPlásticoBR - Sistema de Filtros com Sidebar Deslizante
+ * Design oceânico com painel lateral esquerdo
+ */
+
+/* ===================================
+   BOTÃO TOGGLE (Sempre Visível)
+   =================================== */
+
+.filter-sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 1001;
+    background: linear-gradient(135deg, rgba(0, 131, 143, 0.95) 0%, rgba(0, 96, 100, 0.98) 100%);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-left: none;
+    border-radius: 0 16px 16px 0;
+    padding: 20px 12px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(0, 255, 255, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-sidebar-toggle:hover {
+    left: 0;
+    padding-right: 16px;
+    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.7),
+                0 0 60px rgba(0, 255, 255, 0.5);
+}
+
+.filter-sidebar-toggle.active {
+    left: 380px;
+    border-radius: 0 16px 16px 0;
+    background: linear-gradient(135deg, rgba(0, 96, 100, 0.98) 0%, rgba(0, 77, 86, 0.98) 100%);
+}
+
+.filter-sidebar-toggle svg {
+    width: 24px;
+    height: 24px;
+    color: #00ffff;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8));
+    transition: transform 0.3s ease;
+}
+
+.filter-sidebar-toggle.active svg {
+    transform: rotate(180deg);
+}
+
+.filter-sidebar-toggle-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+    margin-top: 8px;
+}
+
+/* ===================================
+   SIDEBAR PANEL
+   =================================== */
+
+.filter-sidebar {
+    position: fixed;
+    top: 80px;
+    left: -400px;
+    width: 380px;
+    height: calc(100vh - 80px);
+    background: linear-gradient(135deg, rgba(0, 96, 100, 0.98) 0%, rgba(0, 77, 86, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    border-right: 2px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.8),
+                0 0 80px rgba(0, 255, 255, 0.2);
+    z-index: 1000;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.filter-sidebar.active {
+    left: 0;
+}
+
+/* ===================================
+   HEADER DO SIDEBAR
+   =================================== */
+
+.filter-sidebar-header {
+    padding: 20px 24px;
+    background: linear-gradient(180deg, rgba(0, 131, 143, 0.4) 0%, transparent 100%);
+    border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.filter-sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #00ffff;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+}
+
+.filter-sidebar-title svg {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8));
+}
+
+.filter-sidebar-subtitle {
+    margin: 8px 0 0 36px;
+    font-size: 12px;
+    color: #b2ebf2;
+    font-weight: 500;
+}
+
+/* ===================================
+   CONTEÚDO DO SIDEBAR
+   =================================== */
+
+.filter-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.filter-sidebar-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.filter-sidebar-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.filter-sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.filter-sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.5);
+}
+
+/* ===================================
+   GRUPOS DE FILTROS
+   =================================== */
+
+.filter-group {
+    margin-bottom: 32px;
+}
+
+.filter-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #b2ebf2;
+    margin-bottom: 14px;
+}
+
+.filter-value {
+    font-size: 13px;
+    color: #00ffff;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+}
+
+/* ===================================
+   SELECT PERSONALIZADO
+   =================================== */
+
+.filter-select {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 172, 193, 0.3);
+    border-radius: 10px;
+    color: #e0f7fa;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2300ffff' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+}
+
+.filter-select:hover {
+    border-color: rgba(0, 255, 255, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.filter-select:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.filter-select option {
+    background: #003d5c;
+    color: #e0f7fa;
+    padding: 10px;
+}
+
+/* ===================================
+   INPUTS DE RANGE
+   =================================== */
+
+.range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.filter-input-number {
+    flex: 1;
+    min-width: 0;
+    max-width: 140px;
+    width: 100%;
+    padding: 10px 6px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 172, 193, 0.3);
+    border-radius: 8px;
+    color: #e0f7fa;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    outline: none;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.filter-input-number:hover {
+    border-color: rgba(0, 255, 255, 0.5);
+}
+
+.filter-input-number:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+}
+
+.filter-input-number::placeholder {
+    color: rgba(178, 235, 242, 0.4);
+}
+
+.range-separator {
+    color: #00ffff;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+/* ===================================
+   BOTÕES DE PRESET
+   =================================== */
+
+.concentration-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.preset-btn {
+    padding: 12px 16px;
+    background: rgba(0, 131, 143, 0.2);
+    border: 1px solid rgba(0, 172, 193, 0.3);
+    border-radius: 8px;
+    color: #b2ebf2;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.preset-btn:hover {
+    background: rgba(0, 131, 143, 0.4);
+    border-color: rgba(0, 255, 255, 0.5);
+    color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.preset-btn.active {
+    background: linear-gradient(135deg, rgba(0, 172, 193, 0.5) 0%, rgba(0, 131, 143, 0.5) 100%);
+    border-color: #00ffff;
+    color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+/* ===================================
+   ESTATÍSTICAS
+   =================================== */
+
+.filter-stats {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 172, 193, 0.2);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stat-item:last-child {
+    margin-bottom: 0;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #b2ebf2;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #00ffff;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+}
+
+/* ===================================
+   FOOTER DO SIDEBAR (Botões de Ação)
+   =================================== */
+
+.filter-sidebar-footer {
+    padding: 24px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+    border-top: 1px solid rgba(0, 255, 255, 0.15);
+    flex-shrink: 0;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.filter-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    border: none;
+}
+
+.filter-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.filter-btn-primary {
+    background: linear-gradient(135deg, #00ffff 0%, #00d4ff 100%);
+    color: #001a1f;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+}
+
+.filter-btn-primary:hover {
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+    transform: translateY(-2px);
+}
+
+.filter-btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(0, 172, 193, 0.5);
+    color: #00ffff;
+}
+
+.filter-btn-secondary:hover {
+    background: rgba(0, 131, 143, 0.3);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+/* ===================================
+   RESPONSIVO
+   =================================== */
+
+@media (max-width: 768px) {
+    .filter-sidebar {
+        width: 85%;
+        max-width: 300px;
+        left: -100%;
+    }
+
+    .filter-sidebar.active {
+        left: 0;
+    }
+
+    .filter-sidebar-toggle.active {
+        left: calc(85% - 40px);
+    }
+
+    .concentration-presets {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-sidebar {
+        width: calc(100% - 60px);
+        max-width: none;
+    }
+
+    .filter-sidebar-toggle-text {
+        display: none;
+    }
+}
+
+/* ===================================
+   OVERLAY (para fechar ao clicar fora)
+   =================================== */
+
+.filter-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.filter-sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ===================================
+   ANIMAÇÕES
+   =================================== */
+
+@keyframes pulse-sidebar {
+    0%, 100% {
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5),
+                    0 0 40px rgba(0, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 6px 0 30px rgba(0, 0, 0, 0.7),
+                    0 0 60px rgba(0, 255, 255, 0.5);
+    }
+}
+
+.filter-sidebar-toggle:not(.active):hover {
+    animation: pulse-sidebar 2s ease-in-out infinite;
+}
+
+/* ===================================
+   AJUSTES PARA NÃO CONFLITAR COM
+   CONTROLES DO LEAFLET
+   =================================== */
+
+/* Garantir que controles do Leaflet fiquem acima */
+.leaflet-top,
+.leaflet-bottom {
+    z-index: 999 !important;
+}
+
+.leaflet-control-layers,
+.leaflet-control-zoom {
+    z-index: 999 !important;
+}
+
+/* Ajustar posição dos controles quando sidebar está aberta */
+.filter-sidebar.active ~ #map .leaflet-left {
+    left: 340px;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}

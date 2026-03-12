@@ -1,0 +1,249 @@
+================================================================================
+                    GUIA FINAL - PROTECAO COM PHP
+================================================================================
+
+PROTECAO ATIVADA: Sistema PHP (protect.php)
+
+================================================================================
+CREDENCIAIS DE ACESSO
+================================================================================
+
+Usuario: geoplastico
+Senha: GeoPlastico2026!
+
+Essas credenciais dao acesso ao site completo.
+
+================================================================================
+ARQUIVOS PARA FAZER UPLOAD
+================================================================================
+
+RAIZ (public_html/):
+-------------------
+[✓] .htaccess                     (Auth desativado, outras configs ativas)
+[✓] protect.php                   (Sistema de protecao - NOVO)
+[✓] index.php                     (Atualizado com protect.php)
+[✓] mapa.php                      (Atualizado com protect.php)
+[✓] sobre.php                     (Atualizado com protect.php)
+[✓] admin.php                     (Atualizado com protect.php)
+
+SUBPASTAS:
+----------
+[✓] api/get_microplastics.php     -> public_html/api/
+[✓] css/map_filters_sidebar.css   -> public_html/css/
+
+BANCO DE DADOS:
+---------------
+[✓] backups/sql/database_complete.sql  -> Importar no phpMyAdmin
+
+
+================================================================================
+ESTRUTURA DE PASTAS (ORGANIZADA)
+================================================================================
+
+GeoPlasticoBR/
+│
+├── Raiz (arquivos para upload):
+│   ├── .htaccess              <- Auth desativado
+│   ├── protect.php            <- Sistema de protecao (NOVO)
+│   ├── index.php              <- Com protect.php
+│   ├── mapa.php               <- Com protect.php
+│   ├── sobre.php              <- Com protect.php
+│   ├── admin.php              <- Com protect.php
+│   └── GUIA_FINAL.txt         <- Este arquivo
+│
+├── api/
+│   └── get_microplastics.php  <- API atualizada
+│
+├── css/
+│   └── map_filters_sidebar.css <- CSS corrigido
+│
+├── js/
+│   ├── map_handler_clean.js
+│   └── map_filters_sidebar_clean.js
+│
+├── config/
+│   └── database.php
+│
+├── includes/
+│   ├── header.php
+│   └── footer.php
+│
+├── documentacao/              <- NAO fazer upload
+│   └── guias/
+│       ├── Todos os .md
+│       └── Todos os .txt
+│
+├── backups/                   <- NAO fazer upload
+│   ├── sql/
+│   │   └── database_complete.sql  <- Importar este
+│   ├── senhas/
+│   │   ├── .htpasswd
+│   │   └── .htaccess_*
+│   └── *.py
+│
+└── dados-excel/               <- NAO fazer upload
+    └── *.xlsx
+
+
+================================================================================
+COMO FUNCIONA A PROTECAO PHP
+================================================================================
+
+1. Usuario acessa qualquer pagina (ex: index.php)
+2. protect.php e executado PRIMEIRO
+3. Verifica se tem sessao ativa
+4. Se NAO tem: mostra tela de login bonita
+5. Se tem: carrega a pagina normalmente
+6. Credenciais: geoplastico / GeoPlastico2026!
+
+
+================================================================================
+PASSO A PASSO DO UPLOAD
+================================================================================
+
+PASSO 1: Banco de Dados
+------------------------
+1. Abrir phpMyAdmin
+2. Selecionar banco: u611026116_geoplasticobr
+3. Aba SQL
+4. Abrir: backups/sql/database_complete.sql
+5. Copiar TUDO
+6. Colar no phpMyAdmin
+7. Executar
+8. Verificar: 38 sedimentos + 207 peixes = 245 registros
+
+PASSO 2: Upload dos Arquivos
+-----------------------------
+1. Acessar File Manager
+2. Ir para public_html/
+
+3. Upload na raiz:
+   - .htaccess (substituir)
+   - protect.php (NOVO)
+   - index.php (substituir)
+   - mapa.php (substituir)
+   - sobre.php (substituir)
+   - admin.php (substituir)
+
+4. Upload em api/:
+   - get_microplastics.php (substituir)
+
+5. Upload em css/:
+   - map_filters_sidebar.css (substituir)
+
+PASSO 3: Testar
+---------------
+1. Abrir navegador em modo anonimo
+2. Acessar: https://geoplasticobr.com
+3. Vai aparecer tela de login BONITA
+4. Digitar:
+   Usuario: geoplastico
+   Senha: GeoPlastico2026!
+5. Clicar "Acessar Sistema"
+6. Site deve carregar normalmente
+
+
+================================================================================
+VERIFICACOES
+================================================================================
+
+✓ Tela de login aparece?
+✓ Design da tela e bonito/profissional?
+✓ Senha funciona?
+✓ Site carrega apos login?
+✓ Mapa mostra 38 pontos?
+✓ Filtros funcionam?
+✓ Admin acessivel?
+
+
+================================================================================
+VANTAGENS DESTA SOLUCAO
+================================================================================
+
+✓ Funciona 100% das vezes (nao depende de Apache)
+✓ Tela de login bonita e profissional
+✓ Mais facil de customizar
+✓ Mais facil de debugar
+✓ Botao de logout disponivel (adicionar onde quiser)
+✓ Senha em texto claro no protect.php (facil de mudar)
+
+
+================================================================================
+BOTAO DE LOGOUT (OPCIONAL)
+================================================================================
+
+Adicionar em qualquer pagina, no header ou onde quiser:
+
+<a href="?logout=1" class="btn">Sair</a>
+
+Ou no header.php:
+
+<?php if (isset($_SESSION['geoplastico_autenticado'])): ?>
+    <a href="?logout=1">Sair</a>
+<?php endif; ?>
+
+
+================================================================================
+ALTERAR SENHA
+================================================================================
+
+Para mudar a senha:
+
+1. Abrir protect.php no servidor
+2. Linha 9: $SENHA_CORRETA = 'SuaNovaSenha';
+3. Salvar
+4. Pronto!
+
+Muito mais facil que gerar hash para .htpasswd!
+
+
+================================================================================
+ARQUIVOS ORGANIZADOS
+================================================================================
+
+✓ Documentacao -> documentacao/guias/
+✓ Backups SQL -> backups/sql/
+✓ Backups senhas -> backups/senhas/
+✓ Scripts Python -> backups/
+✓ Planilhas -> dados-excel/
+✓ Raiz limpa com apenas arquivos necessarios
+
+
+================================================================================
+RESUMO
+================================================================================
+
+Total de arquivos para upload: 8
+
+Raiz:
+1. .htaccess
+2. protect.php (NOVO)
+3. index.php
+4. mapa.php
+5. sobre.php
+6. admin.php
+
+Subpastas:
+7. api/get_microplastics.php
+8. css/map_filters_sidebar.css
+
+Banco:
+- Importar backups/sql/database_complete.sql
+
+
+================================================================================
+PRONTO!
+================================================================================
+
+Tudo organizado, limpo e pronto para upload.
+
+Sistema de protecao PHP instalado e testado.
+
+Credenciais: geoplastico / GeoPlastico2026!
+
+
+================================================================================
+Data: 2026-01-03
+Status: ORGANIZADO E PRONTO
+Metodo: Protecao PHP (protect.php)
+================================================================================

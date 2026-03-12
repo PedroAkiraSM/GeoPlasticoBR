@@ -1,0 +1,77 @@
+# GeoPlasticoBR - Apache Configuration
+
+# ===================================
+# PROTEÇÃO POR SENHA - DESATIVADA
+# (Usando protect.php ao invés de .htaccess)
+# ===================================
+# AuthType Basic
+# AuthName "GeoPlasticoBR - Acesso Restrito (Desenvolvimento)"
+# AuthUserFile .htpasswd
+# Require valid-user
+
+# Force UTF-8
+AddDefaultCharset UTF-8
+
+# Disable directory listing
+Options -Indexes
+
+# Error pages
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+</IfModule>
+
+# Cache Control
+<IfModule mod_headers.c>
+    # Force no cache for HTML and PHP
+    <FilesMatch "\.(html|htm|php)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # Cache CSS and JS for 1 hour but allow revalidation
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, must-revalidate, max-age=3600"
+    </FilesMatch>
+
+    # Long cache for images
+    <FilesMatch "\.(jpg|jpeg|png|gif|svg|webp|ico)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+
+    # CORS for API
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# GZIP Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json
+</IfModule>
+
+# MIME Types
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType application/json .json
+    AddType image/svg+xml .svg
+    AddType image/webp .webp
+    AddType font/woff .woff
+    AddType font/woff2 .woff2
+</IfModule>
+
+# Security
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "(\.bak|\.conf|\.dist|\.in[ci]|\.log|\.sh|\.sql|~)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

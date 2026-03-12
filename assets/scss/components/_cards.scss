@@ -1,0 +1,148 @@
+// Cards & Content Containers
+
+.card {
+  @apply relative rounded-3xl overflow-hidden;
+  @apply bg-ocean-900/30 backdrop-blur-md;
+  @apply border-2 border-ocean-600/30;
+  @apply transition-all duration-500 ease-out;
+  padding: clamp(1.5rem, 3vw, 3rem);
+  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+
+  &:hover {
+    @apply border-ocean-400/60 bg-ocean-800/40;
+    transform: translateY(-8px);
+    box-shadow:
+      0 25px 50px rgba(0, 0, 0, 0.8),
+      0 0 60px rgba(0, 212, 255, 0.3),
+      inset 0 0 40px rgba(0, 255, 255, 0.08);
+  }
+
+  // Brilho interno
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(0, 255, 255, 0.1) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// Card de destaque (CTA principal)
+.card-featured {
+  @apply card;
+  @apply border-4 border-biolume-cyan/40 bg-ocean-800/50;
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.9),
+    0 0 80px rgba(0, 255, 255, 0.4),
+    inset 0 0 60px rgba(0, 255, 255, 0.06);
+
+  &:hover {
+    @apply border-biolume-cyan/70;
+    box-shadow:
+      0 40px 80px rgba(0, 0, 0, 0.95),
+      0 0 120px rgba(0, 255, 255, 0.6),
+      inset 0 0 80px rgba(0, 255, 255, 0.12);
+  }
+}
+
+// Academic cards (seção de cards acadêmicos)
+.card-academic {
+  @apply card;
+
+  .card-icon {
+    @apply relative flex items-center justify-center;
+    @apply rounded-full;
+    @apply bg-gradient-to-br from-ocean-500/30 to-ocean-700/40;
+    @apply border-2 border-ocean-400/50;
+    width: clamp(60px, 8vw, 80px);
+    height: clamp(60px, 8vw, 80px);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 30px rgba(0, 172, 193, 0.4);
+
+    svg, img {
+      width: 60%;
+      height: 60%;
+      filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.6));
+    }
+  }
+
+  .card-title {
+    @apply text-2xl font-bold mb-4;
+    @apply text-biolume-cyan;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  }
+
+  .card-text {
+    @apply text-base leading-relaxed;
+    @apply text-ocean-100;
+    text-shadow: 0 0 8px rgba(179, 229, 252, 0.2);
+  }
+}
+
+// Timeline items
+.timeline-item {
+  @apply card;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+
+  .timeline-date {
+    @apply inline-block rounded-full;
+    @apply bg-biolume-cyan text-ocean-950;
+    @apply font-bold text-sm;
+    padding: 0.5rem 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+  }
+
+  .timeline-icon {
+    @apply flex items-center justify-center;
+    @apply rounded-full;
+    @apply bg-gradient-to-br from-ocean-500/40 to-ocean-700/50;
+    @apply border-2 border-ocean-400/60;
+    width: clamp(70px, 9vw, 90px);
+    height: clamp(70px, 9vw, 90px);
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 35px rgba(0, 212, 255, 0.5);
+  }
+}
+
+// Badge/Tag
+.badge {
+  @apply inline-flex items-center gap-2;
+  @apply rounded-full;
+  @apply bg-ocean-700/30 border-2 border-ocean-500/50;
+  @apply text-sm font-semibold uppercase tracking-widest;
+  @apply text-biolume-aqua;
+  padding: 0.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 25px rgba(0, 172, 193, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    @apply border-ocean-400/70;
+    box-shadow: 0 0 35px rgba(0, 212, 255, 0.5);
+  }
+}
+
+// Highlight box
+.highlight-box {
+  @apply rounded-2xl;
+  @apply bg-ocean-700/20 border-l-4 border-biolume-cyan;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  margin: clamp(2rem, 4vw, 3rem) 0;
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.25);
+
+  h3, h4 {
+    @apply text-biolume-cyan mb-4;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  }
+
+  p {
+    @apply text-ocean-50;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+  }
+}

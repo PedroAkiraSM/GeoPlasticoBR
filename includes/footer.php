@@ -1,0 +1,94 @@
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>GeoPlasticoBR</h3>
+                    <p>Plataforma de mapeamento cientifico de microplasticos nos ecossistemas aquaticos brasileiros.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Navegacao</h4>
+                    <a href="/">Inicio</a>
+                    <a href="/mapa.php">Mapa Interativo</a>
+                    <a href="/sobre.php">Sobre o Projeto</a>
+                    <a href="/contribuir.php">Contribuir</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Recursos</h4>
+                    <a href="/cadastro.php">Criar Conta</a>
+                    <a href="/login.php">Login</a>
+                    <a href="/sobre.php#metodologia">Metodologia</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Contato</h4>
+                    <p class="footer-contact-text">Para duvidas, sugestoes ou parcerias entre em contato pelo email:</p>
+                    <a href="mailto:contato@geoplasticobr.com">contato@geoplasticobr.com</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> GeoPlasticoBR. Todos os direitos reservados.</p>
+                <p class="footer-credits">Dados cientificos verificados por pares | Acesso aberto</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+    .site-footer {
+        background: rgba(8, 12, 24, 0.95);
+        border-top: 1px solid rgba(148, 163, 184, 0.08);
+        padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 3rem) 2rem;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; }
+    .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        gap: 3rem;
+        margin-bottom: 3rem;
+    }
+    .footer-brand h3 {
+        font-size: 1.3rem; font-weight: 800; color: #fff;
+        margin-bottom: 0.75rem; letter-spacing: -0.02em;
+    }
+    .footer-brand p {
+        font-size: 0.88rem; color: rgba(148, 163, 184, 0.6);
+        line-height: 1.7; max-width: 300px;
+    }
+    .footer-links h4 {
+        font-size: 0.8rem; font-weight: 700; color: rgba(148, 163, 184, 0.8);
+        text-transform: uppercase; letter-spacing: 0.08em;
+        margin-bottom: 1rem;
+    }
+    .footer-links a, .footer-contact-text {
+        display: block; font-size: 0.88rem;
+        color: rgba(148, 163, 184, 0.5);
+        text-decoration: none; margin-bottom: 0.6rem;
+        transition: color 0.2s;
+    }
+    .footer-contact-text { cursor: default; }
+    .footer-links a:hover { color: #60A5FA; }
+    .footer-bottom {
+        border-top: 1px solid rgba(148, 163, 184, 0.06);
+        padding-top: 1.5rem;
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 0.5rem;
+    }
+    .footer-bottom p {
+        font-size: 0.78rem; color: rgba(148, 163, 184, 0.35);
+    }
+    .footer-credits { font-size: 0.75rem !important; }
+
+    @media (max-width: 768px) {
+        .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .footer-bottom { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 480px) {
+        .footer-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+
+    <!-- JavaScript -->
+    <script src="/assets/js/particles.js"></script>
+    <script src="/assets/js/animations.js"></script>
+</body>
+</html>

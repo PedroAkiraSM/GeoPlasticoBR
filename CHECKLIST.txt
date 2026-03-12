@@ -1,0 +1,91 @@
+================================================================================
+                            CHECKLIST DE UPLOAD
+================================================================================
+
+CREDENCIAIS: geoplastico / GeoPlastico2026!
+
+================================================================================
+[ ] PASSO 1: BANCO DE DADOS (5 min)
+================================================================================
+
+1. [ ] Abrir phpMyAdmin
+2. [ ] Selecionar banco: u611026116_geoplasticobr
+3. [ ] Clicar na aba "SQL"
+4. [ ] Abrir arquivo local: backups/sql/database_complete.sql
+5. [ ] Copiar TODO o conteudo (Ctrl+A, Ctrl+C)
+6. [ ] Colar no phpMyAdmin
+7. [ ] Clicar "Executar"
+8. [ ] Verificar mensagem de sucesso
+9. [ ] Verificar total: 245 registros (38 + 207)
+
+
+================================================================================
+[ ] PASSO 2: UPLOAD RAIZ (10 min)
+================================================================================
+
+Ir para public_html/ e fazer upload de:
+
+1. [ ] .htaccess           (substituir o existente)
+2. [ ] protect.php         (NOVO - arquivo de protecao)
+3. [ ] index.php           (substituir)
+4. [ ] mapa.php            (substituir)
+5. [ ] sobre.php           (substituir)
+6. [ ] admin.php           (substituir)
+
+
+================================================================================
+[ ] PASSO 3: UPLOAD SUBPASTAS (5 min)
+================================================================================
+
+1. [ ] Ir para public_html/api/
+2. [ ] Upload: get_microplastics.php (substituir)
+
+3. [ ] Ir para public_html/css/
+4. [ ] Upload: map_filters_sidebar.css (substituir)
+
+
+================================================================================
+[ ] PASSO 4: TESTAR (5 min)
+================================================================================
+
+1. [ ] Abrir navegador em modo anonimo (Ctrl+Shift+N)
+2. [ ] Ir para: https://geoplasticobr.com
+3. [ ] Aparece tela de login bonita?
+4. [ ] Digitar: geoplastico / GeoPlastico2026!
+5. [ ] Site carrega?
+6. [ ] Ir para: https://geoplasticobr.com/mapa.php
+7. [ ] Mapa mostra 38 pontos?
+8. [ ] Filtros funcionam?
+9. [ ] Admin acessivel?
+
+
+================================================================================
+LISTA DE ARQUIVOS PARA UPLOAD
+================================================================================
+
+RAIZ (6 arquivos):
+✓ .htaccess
+✓ protect.php
+✓ index.php
+✓ mapa.php
+✓ sobre.php
+✓ admin.php
+
+API (1 arquivo):
+✓ api/get_microplastics.php
+
+CSS (1 arquivo):
+✓ css/map_filters_sidebar.css
+
+BANCO (1 arquivo):
+✓ backups/sql/database_complete.sql (importar no phpMyAdmin)
+
+
+================================================================================
+TEMPO TOTAL ESTIMADO: 25 minutos
+================================================================================
+
+
+================================================================================
+STATUS: [ ] NAO INICIADO  [ ] EM ANDAMENTO  [ ] CONCLUIDO
+================================================================================

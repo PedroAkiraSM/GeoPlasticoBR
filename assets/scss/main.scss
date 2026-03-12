@@ -1,0 +1,56 @@
+// GeoPlásticoBR - Main Stylesheet
+// Sistema de design oceânico e bioluminescente
+
+// Tailwind directives
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Base styles
+@import 'base/reset';
+@import 'base/typography';
+
+// Components
+@import 'components/particles';
+@import 'components/cards';
+@import 'components/buttons';
+@import 'components/icons';
+
+// Utilities
+@import 'utilities/spacing';
+@import 'utilities/animations';
+
+// Custom layer additions
+@layer utilities {
+  // Text shadows bioluminescentes
+  .text-glow-sm {
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+  }
+
+  .text-glow-lg {
+    text-shadow: 0 0 40px rgba(0, 255, 255, 0.8);
+  }
+
+  // Gradient text
+  .text-gradient-ocean {
+    @apply bg-gradient-to-r from-biolume-cyan via-biolume-blue to-biolume-teal bg-clip-text text-transparent;
+    filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5));
+  }
+
+  // Glass morphism
+  .glass {
+    background: rgba(0, 102, 153, 0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+  }
+
+  .glass-strong {
+    background: rgba(0, 51, 102, 0.3);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+  }
+}
