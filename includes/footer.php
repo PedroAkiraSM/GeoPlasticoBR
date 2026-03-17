@@ -25,6 +25,9 @@
                     <a href="mailto:contato@geoplasticobr.com">contato@geoplasticobr.com</a>
                 </div>
             </div>
+            <div class="footer-beta-notice">
+                <p>🚧 Este site esta em fase <strong>Beta</strong> — funcionalidades e dados podem mudar sem aviso previo.</p>
+            </div>
             <div class="footer-bottom">
                 <p>&copy; <?php echo date('Y'); ?> GeoPlasticoBR. Todos os direitos reservados.</p>
                 <p class="footer-credits">Dados cientificos verificados por pares | Acesso aberto</p>
@@ -77,6 +80,22 @@
         font-size: 0.78rem; color: rgba(148, 163, 184, 0.35);
     }
     .footer-credits { font-size: 0.75rem !important; }
+    .footer-beta-notice {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 172, 193, 0.08);
+        border: 1px solid rgba(0, 172, 193, 0.2);
+        border-radius: 8px;
+    }
+    .footer-beta-notice p {
+        font-size: 0.82rem;
+        color: rgba(0, 204, 136, 0.8);
+        margin: 0;
+    }
+    .footer-beta-notice strong {
+        color: #00CC88;
+    }
 
     @media (max-width: 768px) {
         .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }

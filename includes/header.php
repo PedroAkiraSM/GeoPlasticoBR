@@ -38,7 +38,7 @@
     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
     <nav id="mainNav" class="site-nav <?php echo !empty($heroPage) ? 'nav-transparent' : ''; ?>">
         <div class="nav-inner">
-            <a href="/" class="nav-brand">GeoPlasticoBR</a>
+            <a href="/" class="nav-brand">GeoPlasticoBR <span class="beta-badge">Beta</span></a>
             <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
@@ -113,6 +113,21 @@
     }
 
     .nav-brand:hover { opacity: 0.8; }
+
+    .beta-badge {
+        display: inline-block;
+        font-size: 0.55rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: linear-gradient(135deg, #00acc1, #00CC88);
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+        vertical-align: super;
+        line-height: 1;
+    }
 
     .nav-links {
         display: flex;
