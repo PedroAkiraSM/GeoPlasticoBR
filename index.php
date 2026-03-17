@@ -24,196 +24,213 @@ $heroPage = true;
 include 'includes/header.php';
 ?>
 
-<!-- Grain Overlay -->
-<div class="grain-overlay"></div>
-
-<!-- Hero com Video de Fundo -->
-<section class="hero-video-section">
-    <div class="hero-video-wrapper">
-        <video autoplay muted loop playsinline preload="metadata" class="hero-video" id="heroVideo">
+<!-- ============ HERO SECTION ============ -->
+<section class="hp-hero">
+    <div class="hp-hero__video-wrap">
+        <video autoplay muted loop playsinline preload="metadata" class="hp-hero__video" id="heroVideo">
             <source src="/videos/hero-bg.mp4" type="video/mp4">
         </video>
-        <div class="hero-overlay"></div>
-        <div class="hero-mesh"></div>
+        <div class="hp-hero__overlay"></div>
+        <div class="hp-hero__color-wash"></div>
+        <div class="hp-hero__vignette"></div>
     </div>
 
-    <div class="hero-content">
-        <div class="hero-eyebrow" data-anim="fade" data-delay="0">
-            <span class="eyebrow-line"></span>
-            <span>Plataforma de Monitoramento Ambiental</span>
-            <span class="eyebrow-line"></span>
-        </div>
-        <h1 class="hero-title" data-anim="fade" data-delay="1">
-            <span class="hero-title-main">GEO</span>
-            <span class="hero-title-main">PLASTICO</span>
-            <span class="hero-title-accent">BR</span>
-        </h1>
-        <p class="hero-subtitle" data-anim="fade" data-delay="2"><?php echo htmlspecialchars($_homeBlocks['hero_subtitle'] ?? 'Mapeando a poluicao invisivel nos ecossistemas aquaticos brasileiros'); ?></p>
-        <div class="hero-cta" data-anim="fade" data-delay="3">
-            <a href="/mapa.php" class="hero-btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-                    <line x1="8" y1="2" x2="8" y2="18"></line>
-                    <line x1="16" y1="6" x2="16" y2="22"></line>
-                </svg>
-                <?php echo htmlspecialchars($_homeBlocks['hero_cta_primary'] ?? 'Explorar Mapa'); ?>
-            </a>
-            <a href="/sobre.php" class="hero-btn-secondary"><?php echo htmlspecialchars($_homeBlocks['hero_cta_secondary'] ?? 'Sobre o Projeto'); ?></a>
-        </div>
+    <!-- Decorative grid lines -->
+    <div class="hp-hero__grid-lines">
+        <span></span><span></span><span></span><span></span><span></span>
     </div>
 
-    <div class="hero-scroll-indicator" data-anim="fade" data-delay="4">
-        <span>Scroll</span>
-        <div class="scroll-line"></div>
-    </div>
-</section>
-
-<!-- Secao: O Problema -->
-<section class="content-section fade-in">
-    <div class="section-divider">
-        <span class="divider-number">01</span>
-        <span class="divider-line"></span>
-    </div>
-    <div class="content-container">
-        <div class="section-header">
-            <span class="section-tag"><?php echo htmlspecialchars($_homeBlocks['problem_tag'] ?? 'O Problema'); ?></span>
-            <h2 class="section-title"><?php echo htmlspecialchars($_homeBlocks['problem_title'] ?? 'Microplasticos'); ?></h2>
-            <p class="section-desc">
-                <?php echo htmlspecialchars($_homeBlocks['problem_description'] ?? 'Fragmentos de plastico menores que 5mm contaminam silenciosamente nossos oceanos, rios e lagos.'); ?>
-            </p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-glow"></div>
-                <div class="stat-number" data-count="<?php echo $statsPoints; ?>">0</div>
-                <div class="stat-suffix">+</div>
-                <div class="stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos de Coleta'); ?></div>
-                <div class="stat-desc"><?php echo htmlspecialchars($_homeBlocks['stats_desc_1'] ?? 'Mapeados em todo o Brasil'); ?></div>
+    <!-- Main hero content - left aligned like reference -->
+    <div class="hp-hero__inner">
+        <div class="hp-hero__content" data-anim="stagger">
+            <div class="hp-hero__badge">
+                <span class="hp-hero__badge-dot"></span>
+                Monitoramento Ambiental em Tempo Real
             </div>
-            <div class="stat-card">
-                <div class="stat-glow"></div>
-                <div class="stat-number" data-count="<?php echo $statsEcosystems; ?>">0</div>
-                <div class="stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Ecossistemas'); ?></div>
-                <div class="stat-desc"><?php echo htmlspecialchars($_homeBlocks['stats_desc_2'] ?? 'Tipos de ambientes monitorados'); ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-glow"></div>
-                <div class="stat-number" data-count="<?php echo $statsRecords; ?>">0</div>
-                <div class="stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros Cientificos'); ?></div>
-                <div class="stat-desc"><?php echo htmlspecialchars($_homeBlocks['stats_desc_3'] ?? 'Dados verificados por pares'); ?></div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Secao: Ferramenta Principal -->
-<section class="content-section dark-section fade-in">
-    <div class="section-divider">
-        <span class="divider-number">02</span>
-        <span class="divider-line"></span>
-    </div>
-    <div class="content-container">
-        <div class="feature-block">
-            <div class="feature-text">
-                <span class="section-tag"><?php echo htmlspecialchars($_homeBlocks['feature_tag'] ?? 'Ferramenta Principal'); ?></span>
-                <h2 class="section-title"><?php echo htmlspecialchars($_homeBlocks['feature_title'] ?? 'Mapa Interativo'); ?></h2>
-                <p class="section-desc">
-                    Visualize em tempo real a distribuicao de microplasticos nos rios, lagos e oceanos brasileiros.
-                    Navegue por centenas de pontos de coleta, alterne entre visualizacoes e acesse dados cientificos completos.
-                </p>
-                <ul class="feature-list">
-                    <li>
-                        <span class="feature-list-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
-                        </span>
-                        Multiplas visualizacoes de mapa
-                    </li>
-                    <li>
-                        <span class="feature-list-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        </span>
-                        Dados cientificos verificados
-                    </li>
-                    <li>
-                        <span class="feature-list-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                        </span>
-                        Atualizacao continua
-                    </li>
-                    <li>
-                        <span class="feature-list-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                        </span>
-                        Filtros por ambiente e ecossistema
-                    </li>
-                </ul>
-                <a href="/mapa.php" class="hero-btn-primary" style="margin-top: 2rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-                        <line x1="8" y1="2" x2="8" y2="18"></line>
-                        <line x1="16" y1="6" x2="16" y2="22"></line>
-                    </svg>
-                    Acessar Mapa Interativo
+            <h1 class="hp-hero__title">
+                <span class="hp-hero__title-line">MAPEANDO A</span>
+                <span class="hp-hero__title-line hp-hero__title-line--accent">POLUICAO</span>
+                <span class="hp-hero__title-line">INVISIVEL</span>
+            </h1>
+            <p class="hp-hero__desc"><?php echo htmlspecialchars($_homeBlocks['hero_subtitle'] ?? 'Mapeando a poluicao invisivel nos ecossistemas aquaticos brasileiros'); ?></p>
+            <div class="hp-hero__actions">
+                <a href="/mapa.php" class="hp-btn hp-btn--primary">
+                    <span><?php echo htmlspecialchars($_homeBlocks['hero_cta_primary'] ?? 'Explorar Mapa'); ?></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
+                <a href="/sobre.php" class="hp-btn hp-btn--ghost"><?php echo htmlspecialchars($_homeBlocks['hero_cta_secondary'] ?? 'Sobre o Projeto'); ?></a>
             </div>
-            <div class="feature-visual">
-                <div class="map-preview">
-                    <div class="map-preview-chrome">
-                        <span class="chrome-dot"></span>
-                        <span class="chrome-dot"></span>
-                        <span class="chrome-dot"></span>
-                        <span class="chrome-url">geoplasticobr.com/mapa</span>
-                    </div>
-                    <div id="previewMap" style="width:100%;height:100%;"></div>
+        </div>
+
+        <!-- Floating card overlay - like Targo's consultation card -->
+        <div class="hp-hero__float-card" data-anim="float">
+            <div class="hp-hero__float-card-header">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <span>Dados ao Vivo</span>
+            </div>
+            <div class="hp-hero__float-stats">
+                <div class="hp-hero__float-stat">
+                    <span class="hp-hero__float-stat-num" data-count="<?php echo $statsPoints; ?>">0</span>
+                    <span class="hp-hero__float-stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos Mapeados'); ?></span>
+                </div>
+                <div class="hp-hero__float-divider"></div>
+                <div class="hp-hero__float-stat">
+                    <span class="hp-hero__float-stat-num" data-count="<?php echo $statsEcosystems; ?>">0</span>
+                    <span class="hp-hero__float-stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Ecossistemas'); ?></span>
+                </div>
+                <div class="hp-hero__float-divider"></div>
+                <div class="hp-hero__float-stat">
+                    <span class="hp-hero__float-stat-num" data-count="<?php echo $statsRecords; ?>">0</span>
+                    <span class="hp-hero__float-stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros'); ?></span>
+                </div>
+            </div>
+            <a href="/mapa.php" class="hp-hero__float-cta">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                Abrir Mapa Interativo
+            </a>
+        </div>
+    </div>
+
+    <!-- Bottom scroll hint -->
+    <div class="hp-hero__scroll">
+        <div class="hp-hero__scroll-line"></div>
+        <span>SCROLL</span>
+    </div>
+</section>
+
+<!-- ============ PROBLEM SECTION ============ -->
+<section class="hp-section hp-section--problem fade-in">
+    <div class="hp-container">
+        <div class="hp-problem">
+            <div class="hp-problem__text">
+                <span class="hp-tag"><?php echo htmlspecialchars($_homeBlocks['problem_tag'] ?? 'O Problema'); ?></span>
+                <h2 class="hp-heading"><?php echo htmlspecialchars($_homeBlocks['problem_title'] ?? 'Microplasticos estao em toda parte'); ?></h2>
+                <p class="hp-text">
+                    <?php echo htmlspecialchars($_homeBlocks['problem_description'] ?? 'Fragmentos de plastico menores que 5mm contaminam silenciosamente nossos oceanos, rios e lagos. Uma crise ambiental invisivel que afeta toda a cadeia alimentar.'); ?>
+                </p>
+            </div>
+            <div class="hp-problem__stats">
+                <div class="hp-stat-block">
+                    <div class="hp-stat-block__number" data-count="<?php echo $statsPoints; ?>">0</div>
+                    <div class="hp-stat-block__plus">+</div>
+                    <div class="hp-stat-block__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos de Coleta'); ?></div>
+                    <div class="hp-stat-block__sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_1'] ?? 'Mapeados em todo o Brasil'); ?></div>
+                    <div class="hp-stat-block__bar"></div>
+                </div>
+                <div class="hp-stat-block">
+                    <div class="hp-stat-block__number" data-count="<?php echo $statsEcosystems; ?>">0</div>
+                    <div class="hp-stat-block__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Ecossistemas'); ?></div>
+                    <div class="hp-stat-block__sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_2'] ?? 'Tipos de ambientes monitorados'); ?></div>
+                    <div class="hp-stat-block__bar"></div>
+                </div>
+                <div class="hp-stat-block">
+                    <div class="hp-stat-block__number" data-count="<?php echo $statsRecords; ?>">0</div>
+                    <div class="hp-stat-block__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros Cientificos'); ?></div>
+                    <div class="hp-stat-block__sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_3'] ?? 'Dados verificados por pares'); ?></div>
+                    <div class="hp-stat-block__bar"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Secao: Estatisticas -->
-<section class="content-section dark-section fade-in" id="chartSection">
-    <div class="section-divider">
-        <span class="divider-number">03</span>
-        <span class="divider-line"></span>
-    </div>
-    <div class="content-container">
-        <div class="section-header">
-            <span class="section-tag">Dados</span>
-            <h2 class="section-title">Estatisticas do Mapeamento</h2>
-            <p class="section-desc">Distribuicao de registros por ecossistema e niveis de concentracao mapeados.</p>
+<!-- ============ MAP FEATURE SECTION ============ -->
+<section class="hp-section hp-section--map fade-in">
+    <div class="hp-section__bg-glow"></div>
+    <div class="hp-container">
+        <div class="hp-map-feature">
+            <div class="hp-map-feature__info">
+                <span class="hp-tag"><?php echo htmlspecialchars($_homeBlocks['feature_tag'] ?? 'Ferramenta Principal'); ?></span>
+                <h2 class="hp-heading"><?php echo htmlspecialchars($_homeBlocks['feature_title'] ?? 'Mapa Interativo'); ?></h2>
+                <p class="hp-text">
+                    Visualize em tempo real a distribuicao de microplasticos nos rios, lagos e oceanos brasileiros.
+                </p>
+                <div class="hp-features-list">
+                    <div class="hp-features-list__item">
+                        <div class="hp-features-list__icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
+                        </div>
+                        <div>
+                            <strong>Multiplas Visualizacoes</strong>
+                            <span>Markers, clusters e heatmap</span>
+                        </div>
+                    </div>
+                    <div class="hp-features-list__item">
+                        <div class="hp-features-list__icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div>
+                            <strong>Dados Verificados</strong>
+                            <span>Revisados por pares</span>
+                        </div>
+                    </div>
+                    <div class="hp-features-list__item">
+                        <div class="hp-features-list__icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        </div>
+                        <div>
+                            <strong>Filtros Avancados</strong>
+                            <span>Ambiente, ecossistema, concentracao</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="/mapa.php" class="hp-btn hp-btn--primary" style="margin-top: 1.5rem;">
+                    <span>Acessar Mapa</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+            <div class="hp-map-feature__preview">
+                <div class="hp-map-browser">
+                    <div class="hp-map-browser__bar">
+                        <div class="hp-map-browser__dots">
+                            <span style="background:#FF5F57"></span>
+                            <span style="background:#FFBD2E"></span>
+                            <span style="background:#28CA41"></span>
+                        </div>
+                        <div class="hp-map-browser__url">geoplasticobr.com/mapa</div>
+                    </div>
+                    <div class="hp-map-browser__content">
+                        <div id="previewMap" style="width:100%;height:100%;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3 class="chart-title">Registros por Ecossistema</h3>
+    </div>
+</section>
+
+<!-- ============ CHARTS SECTION ============ -->
+<section class="hp-section hp-section--charts fade-in" id="chartSection">
+    <div class="hp-container">
+        <div class="hp-section__header">
+            <span class="hp-tag">Dados</span>
+            <h2 class="hp-heading">Estatisticas do Mapeamento</h2>
+            <p class="hp-text" style="text-align:center;">Distribuicao de registros por ecossistema e niveis de concentracao.</p>
+        </div>
+        <div class="hp-charts">
+            <div class="hp-chart-card">
+                <h3 class="hp-chart-card__title">Registros por Ecossistema</h3>
                 <canvas id="chartEcossistema"></canvas>
             </div>
-            <div class="chart-card">
-                <h3 class="chart-title">Niveis de Concentracao</h3>
+            <div class="hp-chart-card">
+                <h3 class="hp-chart-card__title">Niveis de Concentracao</h3>
                 <canvas id="chartConcentracao"></canvas>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Secao: Missao -->
-<section class="content-section fade-in">
-    <div class="section-divider">
-        <span class="divider-number">04</span>
-        <span class="divider-line"></span>
-    </div>
-    <div class="content-container">
-        <div class="section-header">
-            <span class="section-tag">Nossa Missao</span>
-            <h2 class="section-title"><?php echo htmlspecialchars($_homeBlocks['mission_title'] ?? 'Democratizar dados cientificos'); ?></h2>
+<!-- ============ MISSION SECTION ============ -->
+<section class="hp-section hp-section--mission fade-in">
+    <div class="hp-container">
+        <div class="hp-section__header">
+            <span class="hp-tag">Nossa Missao</span>
+            <h2 class="hp-heading"><?php echo htmlspecialchars($_homeBlocks['mission_title'] ?? 'Democratizar dados cientificos'); ?></h2>
         </div>
-
-        <div class="mission-grid">
-            <div class="mission-card">
-                <div class="mission-card-number">01</div>
-                <div class="mission-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <div class="hp-mission-cards">
+            <div class="hp-mission-card">
+                <div class="hp-mission-card__index">01</div>
+                <div class="hp-mission-card__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                         <polyline points="22 4 12 14.01 9 11.01"/>
                     </svg>
@@ -221,10 +238,10 @@ include 'includes/header.php';
                 <h3>Dados Verificados</h3>
                 <p>Pesquisas cientificas revisadas por pares garantindo confiabilidade e precisao.</p>
             </div>
-            <div class="mission-card">
-                <div class="mission-card-number">02</div>
-                <div class="mission-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <div class="hp-mission-card">
+                <div class="hp-mission-card__index">02</div>
+                <div class="hp-mission-card__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="2" y1="12" x2="22" y2="12"/>
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -233,10 +250,10 @@ include 'includes/header.php';
                 <h3>Acesso Aberto</h3>
                 <p>Plataforma gratuita para pesquisadores, estudantes e o publico em geral.</p>
             </div>
-            <div class="mission-card">
-                <div class="mission-card-number">03</div>
-                <div class="mission-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <div class="hp-mission-card">
+                <div class="hp-mission-card__index">03</div>
+                <div class="hp-mission-card__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2"/>
                         <line x1="9" y1="21" x2="9" y2="9"/>
                         <line x1="15" y1="21" x2="15" y2="3"/>
@@ -249,713 +266,823 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- CTA Final -->
-<section class="cta-section fade-in">
-    <div class="cta-bg-effect"></div>
-    <div class="content-container" style="text-align: center; position: relative; z-index: 2;">
-        <h2 class="cta-title"><?php echo htmlspecialchars($_homeBlocks['cta_title'] ?? 'Pronto para Explorar?'); ?></h2>
-        <p class="cta-desc">
+<!-- ============ CTA FINAL ============ -->
+<section class="hp-cta fade-in">
+    <div class="hp-cta__glow"></div>
+    <div class="hp-container hp-cta__inner">
+        <h2 class="hp-cta__title"><?php echo htmlspecialchars($_homeBlocks['cta_title'] ?? 'Pronto para Explorar?'); ?></h2>
+        <p class="hp-cta__desc">
             <?php echo htmlspecialchars($_homeBlocks['cta_description'] ?? 'Descubra a distribuicao de microplasticos nos ecossistemas aquaticos brasileiros.'); ?>
         </p>
-        <div class="hero-cta" style="justify-content: center;">
-            <a href="/mapa.php" class="hero-btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-                    <line x1="8" y1="2" x2="8" y2="18"></line>
-                    <line x1="16" y1="6" x2="16" y2="22"></line>
-                </svg>
-                Acessar Mapa Agora
+        <div class="hp-cta__actions">
+            <a href="/mapa.php" class="hp-btn hp-btn--primary hp-btn--lg">
+                <span>Acessar Mapa Agora</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
-            <a href="/contribuir.php" class="hero-btn-secondary">Contribuir com Dados</a>
+            <a href="/contribuir.php" class="hp-btn hp-btn--ghost">Contribuir com Dados</a>
         </div>
     </div>
 </section>
 
+<!-- ============ STYLES ============ -->
 <style>
-/* ===== CSS CUSTOM PROPERTIES ===== */
+/* === VARIABLES === */
 :root {
-    --c-bg-deep: #030712;
-    --c-bg-surface: rgba(8, 15, 30, 0.6);
-    --c-bg-card: rgba(12, 22, 42, 0.55);
-    --c-border: rgba(148, 163, 184, 0.08);
-    --c-border-hover: rgba(34, 211, 238, 0.25);
-    --c-accent: #22D3EE;
-    --c-accent-dim: rgba(34, 211, 238, 0.12);
-    --c-accent-glow: rgba(34, 211, 238, 0.3);
-    --c-text: #ffffff;
-    --c-text-secondary: rgba(148, 163, 184, 0.85);
-    --c-text-muted: rgba(148, 163, 184, 0.5);
-    --font-display: 'Syne', 'Plus Jakarta Sans', sans-serif;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
-    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --hp-bg: #030a12;
+    --hp-surface: rgba(6, 18, 34, 0.7);
+    --hp-card: rgba(10, 25, 47, 0.65);
+    --hp-border: rgba(34, 211, 238, 0.08);
+    --hp-border-strong: rgba(34, 211, 238, 0.2);
+    --hp-cyan: #22D3EE;
+    --hp-cyan-bright: #67E8F9;
+    --hp-cyan-dim: rgba(34, 211, 238, 0.1);
+    --hp-cyan-glow: rgba(34, 211, 238, 0.35);
+    --hp-teal: #14B8A6;
+    --hp-white: #f0f9ff;
+    --hp-gray: rgba(148, 163, 184, 0.75);
+    --hp-muted: rgba(148, 163, 184, 0.45);
+    --hp-font: 'Instrument Sans', 'Plus Jakarta Sans', sans-serif;
+    --hp-font-display: 'Bebas Neue', 'Impact', sans-serif;
+    --hp-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --hp-radius: 16px;
 }
 
-/* ===== GRAIN TEXTURE OVERLAY ===== */
-.grain-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 256px 256px;
-}
+/* === GRAIN === */
+.grain-overlay { display: none; }
 
-/* ===== HERO VIDEO SECTION ===== */
-.hero-video-section {
+/* === HERO === */
+.hp-hero {
     position: relative;
     width: 100%;
-    height: 100vh;
-    min-height: 600px;
-    overflow: hidden;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+    overflow: hidden;
+    background: var(--hp-bg);
 }
 
-.hero-video-wrapper {
+.hp-hero__video-wrap {
     position: absolute;
     inset: 0;
-    z-index: 0;
 }
 
-.hero-video {
+.hp-hero__video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: saturate(0.7) brightness(0.8);
+    filter: brightness(0.55) saturate(0.8) contrast(1.1);
 }
 
-.hero-overlay {
+.hp-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+        rgba(3, 10, 18, 0.85) 0%,
+        rgba(3, 10, 18, 0.4) 40%,
+        rgba(3, 10, 18, 0.2) 60%,
+        rgba(3, 10, 18, 0.7) 100%
+    );
+}
+
+.hp-hero__color-wash {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 80% 60% at 50% 40%, transparent 0%, rgba(3, 7, 18, 0.4) 60%),
-        linear-gradient(180deg,
-            rgba(3, 7, 18, 0.2) 0%,
-            rgba(3, 7, 18, 0.05) 30%,
-            rgba(3, 7, 18, 0.3) 60%,
-            rgba(3, 7, 18, 0.92) 100%
-        );
-}
-
-.hero-mesh {
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.06) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 50%);
+        radial-gradient(ellipse 50% 80% at 0% 100%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 80% 20%, rgba(20, 184, 166, 0.08) 0%, transparent 60%);
     mix-blend-mode: screen;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 0 2rem;
+.hp-hero__vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 70%, var(--hp-bg) 100%);
 }
 
-/* Hero Eyebrow */
-.hero-eyebrow {
+/* Decorative grid */
+.hp-hero__grid-lines {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-evenly;
+    pointer-events: none;
+    z-index: 1;
+}
+.hp-hero__grid-lines span {
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.04) 30%, rgba(34, 211, 238, 0.04) 70%, transparent);
+}
+
+/* Hero inner layout */
+.hp-hero__inner {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 140px 48px 80px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    font-family: var(--font-body);
+    justify-content: space-between;
+    gap: 60px;
+    min-height: 100vh;
+}
+
+/* Hero content - LEFT side */
+.hp-hero__content {
+    flex: 1;
+    max-width: 680px;
+}
+
+.hp-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: var(--hp-cyan-dim);
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 50px;
+    font-family: var(--hp-font);
     font-size: 0.72rem;
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--hp-cyan);
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: rgba(34, 211, 238, 0.7);
+    letter-spacing: 0.12em;
+    margin-bottom: 28px;
     opacity: 0;
     transform: translateY(20px);
 }
 
-.eyebrow-line {
+.hp-hero__badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--hp-cyan);
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+.hp-hero__title {
+    margin-bottom: 24px;
+}
+
+.hp-hero__title-line {
     display: block;
-    width: 40px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--c-accent-glow), transparent);
-}
-
-/* Hero Title */
-.hero-title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 0.88;
-    margin-bottom: 1.8rem;
+    font-family: var(--hp-font-display);
+    font-weight: 400;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--hp-white);
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
 }
 
-.hero-title-main {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: clamp(4rem, 12vw, 10rem);
-    color: #ffffff;
-    letter-spacing: -0.04em;
-    text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
-}
-
-.hero-title-accent {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: clamp(4rem, 12vw, 10rem);
-    letter-spacing: -0.04em;
-    background: linear-gradient(135deg, #22D3EE, #06B6D4, #0EA5E9);
+.hp-hero__title-line--accent {
+    background: linear-gradient(90deg, var(--hp-cyan), var(--hp-cyan-bright), var(--hp-teal));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.3));
+    filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.25));
 }
 
-.hero-subtitle {
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 2vw, 1.2rem);
-    color: var(--c-text-secondary);
-    font-weight: 400;
-    max-width: 550px;
-    margin: 0 auto 2.5rem;
-    letter-spacing: 0.01em;
+.hp-hero__desc {
+    font-family: var(--hp-font);
+    font-size: 1.05rem;
+    color: var(--hp-gray);
     line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 32px;
     opacity: 0;
     transform: translateY(20px);
 }
 
-/* Hero CTAs */
-.hero-cta {
+.hp-hero__actions {
     display: flex;
-    gap: 1rem;
+    gap: 14px;
     flex-wrap: wrap;
-    justify-content: center;
     opacity: 0;
     transform: translateY(20px);
 }
 
-.hero-btn-primary {
+/* Buttons */
+.hp-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.9rem 2rem;
-    background: var(--c-accent);
-    color: var(--c-bg-deep);
-    font-family: var(--font-body);
+    gap: 8px;
+    padding: 12px 28px;
+    font-family: var(--hp-font);
     font-weight: 700;
-    font-size: 0.9rem;
-    border-radius: 50px;
+    font-size: 0.88rem;
     text-decoration: none;
-    transition: all 0.4s var(--ease-out-expo);
+    border-radius: 50px;
+    transition: all 0.4s var(--hp-ease);
+    cursor: pointer;
     border: none;
-    box-shadow: 0 0 0 0 var(--c-accent-glow);
 }
 
-.hero-btn-primary:hover {
+.hp-btn--primary {
+    background: var(--hp-cyan);
+    color: var(--hp-bg);
+}
+.hp-btn--primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px var(--c-accent-glow), 0 0 60px rgba(34, 211, 238, 0.15);
+    box-shadow: 0 6px 25px var(--hp-cyan-glow), 0 0 80px rgba(34, 211, 238, 0.12);
 }
 
-.hero-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.9rem 2rem;
+.hp-btn--lg { padding: 15px 36px; font-size: 0.95rem; }
+
+.hp-btn--ghost {
     background: transparent;
-    color: var(--c-text-secondary);
-    font-family: var(--font-body);
-    font-weight: 500;
-    font-size: 0.9rem;
-    border-radius: 50px;
-    text-decoration: none;
-    border: 1px solid var(--c-border);
-    transition: all 0.4s var(--ease-out-expo);
+    color: var(--hp-gray);
+    border: 1px solid var(--hp-border);
+}
+.hp-btn--ghost:hover {
+    border-color: var(--hp-border-strong);
+    color: var(--hp-white);
+    background: var(--hp-cyan-dim);
 }
 
-.hero-btn-secondary:hover {
-    border-color: var(--c-border-hover);
-    color: #ffffff;
-    background: rgba(34, 211, 238, 0.05);
-}
-
-/* Hero Scroll */
-.hero-scroll-indicator {
-    position: absolute;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--c-text-muted);
-    font-family: var(--font-body);
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
+/* Floating card - RIGHT side */
+.hp-hero__float-card {
+    width: 340px;
+    flex-shrink: 0;
+    background: rgba(6, 18, 34, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 20px;
+    padding: 24px;
     opacity: 0;
-    transform: translate(-50%, 10px);
+    transform: translateY(30px) translateX(10px);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(34, 211, 238, 0.2);
 }
 
-.scroll-line {
-    width: 1px;
-    height: 40px;
-    background: linear-gradient(to bottom, var(--c-accent-glow), transparent);
-    animation: scrollPulse 2.5s ease-in-out infinite;
-}
-
-/* ===== SECTION DIVIDER ===== */
-.section-divider {
+.hp-hero__float-card-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    max-width: 1200px;
-    margin: 0 auto 3rem;
-    padding: 0 clamp(1.5rem, 5vw, 3rem);
-}
-
-.divider-number {
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--c-accent);
-    letter-spacing: 0.1em;
-    opacity: 0.6;
-}
-
-.divider-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--c-border), transparent);
-}
-
-/* ===== CONTENT SECTIONS ===== */
-.content-section {
-    padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 5vw, 3rem);
-    position: relative;
-}
-
-.dark-section {
-    background: var(--c-bg-surface);
-}
-
-.content-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.section-header {
-    text-align: center;
-    margin-bottom: clamp(3rem, 6vw, 5rem);
-}
-
-.section-tag {
-    display: inline-block;
-    font-family: var(--font-body);
-    font-size: 0.7rem;
+    gap: 10px;
+    color: var(--hp-cyan);
+    font-family: var(--hp-font);
+    font-size: 0.82rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--c-accent);
-    margin-bottom: 1.2rem;
-    padding: 0.35rem 1rem;
-    border: 1px solid rgba(34, 211, 238, 0.2);
-    border-radius: 50px;
-    background: var(--c-accent-dim);
+    letter-spacing: 0.1em;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--hp-border);
+    margin-bottom: 20px;
 }
 
-.section-title {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: clamp(2.2rem, 5vw, 3.5rem);
-    color: var(--c-text);
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+.hp-hero__float-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
-.section-desc {
-    font-family: var(--font-body);
-    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
-    color: var(--c-text-secondary);
-    line-height: 1.8;
-    max-width: 650px;
-    margin: 0 auto;
-}
-
-/* ===== STATS ===== */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-}
-
-.stat-card {
-    position: relative;
+.hp-hero__float-stat {
+    flex: 1;
     text-align: center;
-    padding: 2.5rem 2rem;
-    background: var(--c-bg-card);
-    border: 1px solid var(--c-border);
-    border-radius: 20px;
-    transition: all 0.5s var(--ease-out-expo);
-    overflow: hidden;
 }
 
-.stat-glow {
+.hp-hero__float-stat-num {
+    display: block;
+    font-family: var(--hp-font-display);
+    font-size: 2.2rem;
+    color: var(--hp-white);
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.hp-hero__float-stat-label {
+    display: block;
+    font-family: var(--hp-font);
+    font-size: 0.68rem;
+    color: var(--hp-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.hp-hero__float-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--hp-border);
+}
+
+.hp-hero__float-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: var(--hp-cyan-dim);
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 12px;
+    color: var(--hp-cyan);
+    font-family: var(--hp-font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s var(--hp-ease);
+}
+.hp-hero__float-cta:hover {
+    background: rgba(34, 211, 238, 0.18);
+    transform: translateY(-1px);
+}
+
+/* Hero scroll */
+.hp-hero__scroll {
     position: absolute;
-    top: -40%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, var(--c-accent-glow), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.5s ease;
+    bottom: 32px;
+    left: 48px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--hp-font);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--hp-muted);
+    text-transform: uppercase;
+}
+
+.hp-hero__scroll-line {
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--hp-cyan-glow), transparent);
+    animation: scrollLineAnim 2s ease-in-out infinite;
+}
+
+/* === GLOBAL SECTION STYLES === */
+.hp-section {
+    position: relative;
+    padding: clamp(80px, 12vw, 140px) 0;
+}
+
+.hp-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 48px;
+}
+
+.hp-section__header {
+    text-align: center;
+    margin-bottom: clamp(48px, 6vw, 72px);
+}
+
+.hp-section__bg-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 30%, rgba(34, 211, 238, 0.03) 0%, transparent 70%);
     pointer-events: none;
 }
 
-.stat-card:hover {
-    border-color: var(--c-border-hover);
-    transform: translateY(-6px);
+.hp-section--charts {
+    background: var(--hp-surface);
 }
 
-.stat-card:hover .stat-glow {
-    opacity: 0.15;
+.hp-tag {
+    display: inline-block;
+    padding: 5px 14px;
+    background: var(--hp-cyan-dim);
+    border: 1px solid var(--hp-border-strong);
+    border-radius: 50px;
+    font-family: var(--hp-font);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--hp-cyan);
+    margin-bottom: 20px;
 }
 
-.stat-number {
-    font-family: var(--font-display);
-    font-size: clamp(2.8rem, 5vw, 3.8rem);
-    font-weight: 800;
-    color: var(--c-text);
+.hp-heading {
+    font-family: var(--hp-font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--hp-white);
+    letter-spacing: 0.02em;
+    margin-bottom: 20px;
+    line-height: 1.1;
+}
+
+.hp-text {
+    font-family: var(--hp-font);
+    font-size: 1rem;
+    color: var(--hp-gray);
+    line-height: 1.8;
+    max-width: 560px;
+}
+
+/* === PROBLEM SECTION === */
+.hp-problem {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+}
+
+.hp-problem__text { padding-top: 16px; }
+
+.hp-problem__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.hp-stat-block {
+    position: relative;
+    padding: 28px 32px;
+    background: var(--hp-card);
+    border: 1px solid var(--hp-border);
+    border-radius: var(--hp-radius);
+    transition: all 0.4s var(--hp-ease);
+    overflow: hidden;
+}
+
+.hp-stat-block:hover {
+    border-color: var(--hp-border-strong);
+    transform: translateX(6px);
+}
+
+.hp-stat-block__bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--hp-cyan), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.hp-stat-block:hover .hp-stat-block__bar { opacity: 1; }
+
+.hp-stat-block__number {
+    font-family: var(--hp-font-display);
+    font-size: 2.8rem;
+    color: var(--hp-white);
     line-height: 1;
     display: inline;
+    letter-spacing: 0.02em;
 }
 
-.stat-suffix {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 3vw, 2.5rem);
-    font-weight: 700;
-    color: var(--c-accent);
+.hp-stat-block__plus {
+    font-family: var(--hp-font-display);
+    font-size: 2rem;
+    color: var(--hp-cyan);
     display: inline;
+    margin-left: 2px;
 }
 
-.stat-label {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
+.hp-stat-block__label {
+    font-family: var(--hp-font);
+    font-size: 0.88rem;
     font-weight: 600;
-    color: var(--c-accent);
-    margin-top: 0.8rem;
-    margin-bottom: 0.3rem;
+    color: var(--hp-cyan);
+    margin-top: 6px;
 }
 
-.stat-desc {
-    font-family: var(--font-body);
-    font-size: 0.82rem;
-    color: var(--c-text-muted);
+.hp-stat-block__sub {
+    font-family: var(--hp-font);
+    font-size: 0.78rem;
+    color: var(--hp-muted);
+    margin-top: 2px;
 }
 
-/* ===== FEATURE BLOCK ===== */
-.feature-block {
+/* === MAP FEATURE === */
+.hp-map-feature {
     display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 4rem;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 56px;
     align-items: center;
 }
 
-.feature-text .section-tag { margin-bottom: 1.5rem; }
-.feature-text .section-title { text-align: left; }
-.feature-text .section-desc { text-align: left; margin: 0 0 1.5rem 0; }
-
-.feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.hp-features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 24px;
 }
 
-.feature-list li {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: var(--c-text-secondary);
-    padding: 0.7rem 0;
+.hp-features-list__item {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    transition: color 0.3s;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--hp-card);
+    border: 1px solid var(--hp-border);
+    border-radius: 12px;
+    transition: all 0.3s var(--hp-ease);
+}
+.hp-features-list__item:hover {
+    border-color: var(--hp-border-strong);
+    transform: translateX(4px);
 }
 
-.feature-list li:hover {
-    color: var(--c-text);
-}
-
-.feature-list-icon {
+.hp-features-list__icon {
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--c-accent-dim);
-    color: var(--c-accent);
+    border-radius: 10px;
+    background: var(--hp-cyan-dim);
+    color: var(--hp-cyan);
     flex-shrink: 0;
 }
 
-.feature-visual {
-    display: flex;
-    justify-content: center;
+.hp-features-list__item strong {
+    display: block;
+    font-family: var(--hp-font);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--hp-white);
+}
+.hp-features-list__item span {
+    font-family: var(--hp-font);
+    font-size: 0.75rem;
+    color: var(--hp-muted);
 }
 
-.map-preview {
-    width: 100%;
-    aspect-ratio: 4/3;
-    border-radius: 16px;
+/* Map browser preview */
+.hp-map-browser {
+    border-radius: 18px;
     overflow: hidden;
-    border: 1px solid var(--c-border);
-    background: var(--c-bg-card);
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(34, 211, 238, 0.05);
-    transition: box-shadow 0.4s ease;
+    border: 1px solid var(--hp-border);
+    background: var(--hp-card);
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(34, 211, 238, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    transition: all 0.5s var(--hp-ease);
+}
+.hp-map-browser:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(34, 211, 238, 0.12),
+        0 0 60px rgba(34, 211, 238, 0.06);
 }
 
-.map-preview:hover {
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(34, 211, 238, 0.12);
-}
-
-.map-preview-chrome {
+.hp-map-browser__bar {
     display: flex;
     align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(8, 20, 38, 0.9);
+    border-bottom: 1px solid var(--hp-border);
+}
+
+.hp-map-browser__dots {
+    display: flex;
     gap: 6px;
-    padding: 10px 14px;
-    background: rgba(15, 23, 42, 0.8);
-    border-bottom: 1px solid var(--c-border);
 }
-
-.chrome-dot {
-    width: 8px;
-    height: 8px;
+.hp-map-browser__dots span {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: rgba(148, 163, 184, 0.2);
+    opacity: 0.8;
 }
 
-.chrome-dot:nth-child(1) { background: rgba(239, 68, 68, 0.5); }
-.chrome-dot:nth-child(2) { background: rgba(234, 179, 8, 0.5); }
-.chrome-dot:nth-child(3) { background: rgba(34, 197, 94, 0.5); }
-
-.chrome-url {
-    margin-left: 10px;
-    font-family: var(--font-body);
-    font-size: 0.7rem;
-    color: var(--c-text-muted);
-    background: rgba(148, 163, 184, 0.05);
-    padding: 3px 10px;
-    border-radius: 4px;
+.hp-map-browser__url {
+    flex: 1;
+    text-align: center;
+    font-family: var(--hp-font);
+    font-size: 0.72rem;
+    color: var(--hp-muted);
+    background: rgba(148, 163, 184, 0.06);
+    padding: 5px 16px;
+    border-radius: 6px;
 }
 
-/* ===== MISSION GRID ===== */
-.mission-grid {
+.hp-map-browser__content {
+    aspect-ratio: 16/10;
+}
+
+/* === CHARTS === */
+.hp-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.hp-chart-card {
+    background: var(--hp-card);
+    border: 1px solid var(--hp-border);
+    border-radius: var(--hp-radius);
+    padding: 28px;
+    transition: border-color 0.4s;
+}
+.hp-chart-card:hover { border-color: var(--hp-border-strong); }
+
+.hp-chart-card__title {
+    font-family: var(--hp-font);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* === MISSION CARDS === */
+.hp-mission-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 20px;
 }
 
-.mission-card {
+.hp-mission-card {
     position: relative;
-    padding: 2.5rem;
-    background: var(--c-bg-card);
-    border: 1px solid var(--c-border);
-    border-radius: 20px;
-    transition: all 0.5s var(--ease-out-expo);
+    padding: 32px;
+    background: var(--hp-card);
+    border: 1px solid var(--hp-border);
+    border-radius: var(--hp-radius);
+    transition: all 0.5s var(--hp-ease);
     overflow: hidden;
 }
-
-.mission-card:hover {
-    border-color: var(--c-border-hover);
-    transform: translateY(-4px);
+.hp-mission-card:hover {
+    border-color: var(--hp-border-strong);
+    transform: translateY(-6px);
 }
 
-.mission-card-number {
+.hp-mission-card__index {
     position: absolute;
-    top: 1.2rem;
-    right: 1.5rem;
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: rgba(34, 211, 238, 0.15);
-    letter-spacing: 0.05em;
+    top: 20px;
+    right: 24px;
+    font-family: var(--hp-font-display);
+    font-size: 2.5rem;
+    color: rgba(34, 211, 238, 0.06);
+    line-height: 1;
+    letter-spacing: 0.02em;
 }
 
-.mission-icon {
-    width: 52px;
-    height: 52px;
+.hp-mission-card__icon {
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 14px;
-    background: var(--c-accent-dim);
-    border: 1px solid rgba(34, 211, 238, 0.12);
-    margin-bottom: 1.5rem;
-    color: var(--c-accent);
-    transition: all 0.4s var(--ease-out-expo);
+    background: var(--hp-cyan-dim);
+    border: 1px solid rgba(34, 211, 238, 0.1);
+    color: var(--hp-cyan);
+    margin-bottom: 20px;
+    transition: all 0.4s var(--hp-ease);
 }
-
-.mission-card:hover .mission-icon {
+.hp-mission-card:hover .hp-mission-card__icon {
     background: rgba(34, 211, 238, 0.18);
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.1);
+    box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
 }
 
-.mission-card h3 {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
+.hp-mission-card h3 {
+    font-family: var(--hp-font);
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--c-text);
-    margin-bottom: 0.75rem;
+    color: var(--hp-white);
+    margin-bottom: 10px;
 }
 
-.mission-card p {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: var(--c-text-muted);
+.hp-mission-card p {
+    font-family: var(--hp-font);
+    font-size: 0.88rem;
+    color: var(--hp-muted);
     line-height: 1.7;
 }
 
-/* ===== CTA SECTION ===== */
-.cta-section {
+/* === CTA === */
+.hp-cta {
     position: relative;
-    padding: clamp(6rem, 12vw, 10rem) clamp(1.5rem, 5vw, 3rem);
+    padding: clamp(80px, 12vw, 140px) 0;
     overflow: hidden;
 }
 
-.cta-bg-effect {
+.hp-cta__glow {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 70% 50% at 50% 50%, rgba(34, 211, 238, 0.04) 0%, transparent 70%);
+        radial-gradient(ellipse 50% 60% at 50% 50%, rgba(34, 211, 238, 0.05) 0%, transparent 60%);
     pointer-events: none;
 }
 
-.cta-title {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: clamp(2rem, 4vw, 3rem);
-    color: var(--c-text);
-    margin-bottom: 1rem;
-    letter-spacing: -0.03em;
+.hp-cta__inner { text-align: center; position: relative; z-index: 2; }
+
+.hp-cta__title {
+    font-family: var(--hp-font-display);
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    color: var(--hp-white);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
 }
 
-.cta-desc {
-    font-family: var(--font-body);
+.hp-cta__desc {
+    font-family: var(--hp-font);
     font-size: 1.05rem;
-    color: var(--c-text-muted);
-    margin-bottom: 2.5rem;
-    max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
+    color: var(--hp-muted);
+    margin: 0 auto 36px;
+    max-width: 460px;
     line-height: 1.7;
 }
 
-/* ===== CHARTS ===== */
-.charts-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+.hp-cta__actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-.chart-card {
-    background: var(--c-bg-card);
-    border: 1px solid var(--c-border);
-    border-radius: 20px;
-    padding: 2rem;
-    transition: border-color 0.4s ease;
-}
-
-.chart-card:hover {
-    border-color: var(--c-border-hover);
-}
-
-.chart-title {
-    font-family: var(--font-display);
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.75);
-    margin-bottom: 1.5rem;
-    text-align: center;
-    letter-spacing: -0.01em;
-}
-
-/* ===== SCROLL ANIMATIONS ===== */
+/* === ANIMATIONS === */
 .fade-in {
     opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+    transform: translateY(50px);
+    transition: opacity 1s var(--hp-ease), transform 1s var(--hp-ease);
 }
-
 .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
-/* ===== HERO STAGGERED ANIMATIONS ===== */
-[data-anim="fade"] {
-    opacity: 0;
-    transform: translateY(25px);
+/* Hero stagger */
+.hp-hero.anim-ready .hp-hero__badge {
+    animation: heroSlideUp 0.8s var(--hp-ease) 0.1s forwards;
+}
+.hp-hero.anim-ready .hp-hero__title-line:nth-child(1) {
+    animation: heroSlideUp 0.9s var(--hp-ease) 0.25s forwards;
+}
+.hp-hero.anim-ready .hp-hero__title-line:nth-child(2) {
+    animation: heroSlideUp 0.9s var(--hp-ease) 0.4s forwards;
+}
+.hp-hero.anim-ready .hp-hero__title-line:nth-child(3) {
+    animation: heroSlideUp 0.9s var(--hp-ease) 0.55s forwards;
+}
+.hp-hero.anim-ready .hp-hero__desc {
+    animation: heroSlideUp 0.9s var(--hp-ease) 0.7s forwards;
+}
+.hp-hero.anim-ready .hp-hero__actions {
+    animation: heroSlideUp 1s var(--hp-ease) 0.9s forwards;
+}
+.hp-hero.anim-ready .hp-hero__float-card {
+    animation: heroFloatIn 1.2s var(--hp-ease) 0.6s forwards;
 }
 
-.hero-anim-active [data-anim="fade"][data-delay="0"] { animation: heroReveal 1s var(--ease-out-expo) 0.2s forwards; }
-.hero-anim-active [data-anim="fade"][data-delay="1"] { animation: heroReveal 1s var(--ease-out-expo) 0.4s forwards; }
-.hero-anim-active [data-anim="fade"][data-delay="2"] { animation: heroReveal 1s var(--ease-out-expo) 0.7s forwards; }
-.hero-anim-active [data-anim="fade"][data-delay="3"] { animation: heroReveal 1.2s var(--ease-out-expo) 1s forwards; }
-.hero-anim-active [data-anim="fade"][data-delay="4"] { animation: heroReveal 1s var(--ease-out-expo) 1.5s forwards; }
-
-@keyframes heroReveal {
-    0% { opacity: 0; transform: translateY(25px); }
-    100% { opacity: 1; transform: translateY(0); }
+@keyframes heroSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes scrollPulse {
-    0%, 100% { opacity: 0.3; transform: scaleY(1); }
-    50% { opacity: 0.8; transform: scaleY(1.15); }
+@keyframes heroFloatIn {
+    from { opacity: 0; transform: translateY(30px) translateX(10px); }
+    to { opacity: 1; transform: translateY(0) translateX(0); }
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 900px) {
-    .feature-block {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+@keyframes scrollLineAnim {
+    0%, 100% { opacity: 0.3; transform: scaleX(1); }
+    50% { opacity: 0.8; transform: scaleX(1.15); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+    .hp-hero__inner {
+        flex-direction: column;
+        justify-content: center;
+        padding: 120px 32px 60px;
+        gap: 40px;
     }
-    .feature-visual { order: -1; }
-    .feature-text .section-title,
-    .feature-text .section-desc { text-align: center; }
-    .feature-text { display: flex; flex-direction: column; align-items: center; }
-    .feature-list { width: 100%; max-width: 400px; }
-    .stats-grid { grid-template-columns: 1fr; }
-    .mission-grid { grid-template-columns: 1fr; }
-    .charts-grid { grid-template-columns: 1fr; }
+    .hp-hero__content { max-width: 100%; text-align: center; }
+    .hp-hero__desc { margin-left: auto; margin-right: auto; }
+    .hp-hero__actions { justify-content: center; }
+    .hp-hero__title-line { text-align: center; }
+    .hp-hero__float-card { width: 100%; max-width: 400px; align-self: center; }
+    .hp-hero__scroll { left: 32px; }
+    .hp-problem { grid-template-columns: 1fr; gap: 40px; }
+    .hp-map-feature { grid-template-columns: 1fr; gap: 40px; }
+    .hp-map-feature__preview { order: -1; }
 }
 
 @media (max-width: 768px) {
-    .hero-title-main,
-    .hero-title-accent {
-        font-size: clamp(3rem, 15vw, 5rem);
-    }
-    .hero-eyebrow { font-size: 0.6rem; gap: 0.6rem; }
-    .eyebrow-line { width: 24px; }
-    .section-divider { margin-bottom: 2rem; }
-}
-
-@media (min-width: 901px) and (max-width: 1100px) {
-    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-    .mission-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .hp-hero__inner { padding: 100px 20px 50px; }
+    .hp-hero__title-line { font-size: clamp(2.5rem, 12vw, 4rem); }
+    .hp-container { padding: 0 20px; }
+    .hp-hero__scroll { left: 20px; }
+    .hp-charts { grid-template-columns: 1fr; }
+    .hp-mission-cards { grid-template-columns: 1fr; }
+    .hp-hero__float-card { max-width: 100%; }
+    .hp-hero__grid-lines { display: none; }
 }
 </style>
 
-<!-- Google Fonts: Syne (display) -->
+<!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Leaflet for preview map -->
+<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -964,49 +1091,45 @@ include 'includes/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ===== Hero staggered animation trigger =====
+    // === Hero stagger animation ===
     requestAnimationFrame(function() {
-        document.querySelector('.hero-video-section').classList.add('hero-anim-active');
+        document.querySelector('.hp-hero').classList.add('anim-ready');
     });
 
-    // ===== Scroll fade-in =====
+    // === Scroll fade-in + counter animation ===
     var observer = new IntersectionObserver(function(entries) {
         entries.forEach(function(entry) {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-
-                // Animate stat counters when stats section appears
-                entry.target.querySelectorAll('.stat-number[data-count]').forEach(function(el) {
-                    animateCounter(el);
-                });
+                entry.target.querySelectorAll('[data-count]').forEach(animateCounter);
             }
         });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.12 });
 
-    document.querySelectorAll('.fade-in').forEach(function(el) {
-        observer.observe(el);
-    });
+    document.querySelectorAll('.fade-in').forEach(function(el) { observer.observe(el); });
 
-    // ===== Counter Animation =====
+    // Also animate hero float card counters
+    setTimeout(function() {
+        document.querySelectorAll('.hp-hero__float-stat-num[data-count]').forEach(animateCounter);
+    }, 1200);
+
     function animateCounter(el) {
         var target = parseInt(el.getAttribute('data-count'), 10);
         if (isNaN(target) || el.dataset.animated) return;
         el.dataset.animated = '1';
-        var duration = 1800;
+        var duration = 1600;
         var start = performance.now();
         function step(now) {
-            var elapsed = now - start;
-            var progress = Math.min(elapsed / duration, 1);
-            // ease-out-expo
-            var eased = 1 - Math.pow(1 - progress, 4);
+            var p = Math.min((now - start) / duration, 1);
+            var eased = 1 - Math.pow(1 - p, 4);
             el.textContent = Math.round(target * eased);
-            if (progress < 1) requestAnimationFrame(step);
+            if (p < 1) requestAnimationFrame(step);
             else el.textContent = target;
         }
         requestAnimationFrame(step);
     }
 
-    // ===== Preview Map =====
+    // === Preview Map ===
     var pm = document.getElementById('previewMap');
     if (pm) {
         var previewMap = L.map(pm, {
@@ -1042,10 +1165,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (d.latitude && d.longitude) {
                             var color = getPreviewColor(d.concentration_value);
                             L.circleMarker([d.latitude, d.longitude], {
-                                radius: 4,
+                                radius: 5,
                                 fillColor: color,
                                 color: color,
-                                fillOpacity: 0.7,
+                                fillOpacity: 0.75,
                                 weight: 0
                             }).addTo(previewMap);
                         }
@@ -1054,14 +1177,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // ===== Charts =====
+    // === Charts ===
     fetch('/api/get_microplastics.php')
         .then(function(r) { return r.json(); })
         .then(function(res) {
             if (!res.success || !res.data) return;
             var data = res.data;
 
-            // Ecossistema chart
+            // Ecossistema
             var ecoCounts = {};
             data.forEach(function(d) {
                 var eco = d.ecossistema || 'Outro';
@@ -1088,22 +1211,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         plugins: {
                             legend: {
                                 position: 'bottom',
-                                labels: { color: 'rgba(148,163,184,0.75)', font: { family: 'Plus Jakarta Sans', size: 11 }, padding: 14, usePointStyle: true, pointStyleWidth: 8 }
+                                labels: { color: 'rgba(148,163,184,0.7)', font: { family: 'Instrument Sans, Plus Jakarta Sans, sans-serif', size: 11 }, padding: 14, usePointStyle: true, pointStyleWidth: 8 }
                             }
                         }
                     }
                 });
             }
 
-            // Concentration chart
-            var levels = { 'Baixa (0-1k)': 0, 'Media (1k-3k)': 0, 'Elevada (3k-5k)': 0, 'Alta (5k-8k)': 0, 'Critica (8k+)': 0 };
+            // Concentracao
+            var levels = { 'Baixa': 0, 'Media': 0, 'Elevada': 0, 'Alta': 0, 'Critica': 0 };
             data.forEach(function(d) {
                 var v = d.concentration_value || 0;
-                if (v < 1000) levels['Baixa (0-1k)']++;
-                else if (v < 3000) levels['Media (1k-3k)']++;
-                else if (v < 5000) levels['Elevada (3k-5k)']++;
-                else if (v < 8000) levels['Alta (5k-8k)']++;
-                else levels['Critica (8k+)']++;
+                if (v < 1000) levels['Baixa']++;
+                else if (v < 3000) levels['Media']++;
+                else if (v < 5000) levels['Elevada']++;
+                else if (v < 8000) levels['Alta']++;
+                else levels['Critica']++;
             });
 
             var ctx2 = document.getElementById('chartConcentracao');
@@ -1121,17 +1244,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     options: {
                         responsive: true,
-                        plugins: {
-                            legend: { display: false }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { color: 'rgba(148,163,184,0.5)', font: { family: 'Plus Jakarta Sans' } },
-                                grid: { color: 'rgba(148,163,184,0.06)' }
+                                ticks: { color: 'rgba(148,163,184,0.4)', font: { family: 'Instrument Sans, Plus Jakarta Sans' } },
+                                grid: { color: 'rgba(148,163,184,0.05)' }
                             },
                             x: {
-                                ticks: { color: 'rgba(148,163,184,0.5)', font: { family: 'Plus Jakarta Sans', size: 10 } },
+                                ticks: { color: 'rgba(148,163,184,0.5)', font: { family: 'Instrument Sans, Plus Jakarta Sans', size: 11 } },
                                 grid: { display: false }
                             }
                         }
