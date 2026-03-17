@@ -65,6 +65,11 @@
 
     // ===== POPUP =====
     function buildPopup(item) {
+        // Fish popup
+        if (item.type === 'fish') {
+            return buildFishPopup(item);
+        }
+
         var color = getColor(item.concentration_value);
         var level = getLevel(item.concentration_value);
 
@@ -110,18 +115,69 @@
         return html;
     }
 
+    function buildFishPopup(item) {
+        var pct = item.total_individuals > 0
+            ? Math.round((item.individuals_with_microplastics / item.total_individuals) * 100) : 0;
+        var pctColor = pct >= 75 ? '#CC0000' : pct >= 50 ? '#FFA500' : pct >= 25 ? '#FFD700' : '#00CC88';
+
+        var html = '<div class="popup-card">';
+        html += '<div class="popup-header">';
+        html += '<h3 class="popup-title" style="font-style:italic;">' + item.species + '</h3>';
+        html += '<div class="popup-badges">';
+        html += '<span class="popup-badge" style="background:#0e7490;">Peixe</span>';
+        if (item.habit) html += '<span class="popup-badge popup-badge-outline">' + item.habit + '</span>';
+        html += '</div></div>';
+
+        html += '<div class="popup-body">';
+        html += '<div class="popup-row"><span class="popup-key">Sistema</span><span class="popup-val">' + (item.freshwater_system || '—') + '</span></div>';
+        html += '<div class="popup-row"><span class="popup-key">Total Individuos</span><span class="popup-val">' + item.total_individuals + '</span></div>';
+        html += '<div class="popup-row"><span class="popup-key">C/ Microplasticos</span><span class="popup-val">' + item.individuals_with_microplastics + '</span></div>';
+
+        html += '<div class="popup-concentration">';
+        html += '<div class="popup-conc-bar"><div class="popup-conc-fill" style="width:' + pct + '%;background:' + pctColor + ';"></div></div>';
+        html += '<div class="popup-conc-info">';
+        html += '<span class="popup-conc-value">' + pct + '% contaminados</span>';
+        html += '</div>';
+        html += '</div>';
+
+        if (item.microplastic_types && item.microplastic_types.length > 0) {
+            html += '<div class="popup-row"><span class="popup-key">Tipos</span><span class="popup-val">' + item.microplastic_types.join(', ') + '</span></div>';
+        }
+        if (item.occurrence_tissues) {
+            html += '<div class="popup-row"><span class="popup-key">Tecidos</span><span class="popup-val">' + item.occurrence_tissues + '</span></div>';
+        }
+
+        html += '<div class="popup-row"><span class="popup-key">Coordenadas</span><span class="popup-val">' + item.latitude.toFixed(4) + ', ' + item.longitude.toFixed(4) + '</span></div>';
+
+        if (item.author) html += '<div class="popup-author">' + item.author + '</div>';
+        if (item.reference) html += '<div class="popup-ref">' + item.reference + '</div>';
+
+        html += '</div></div>';
+        return html;
+    }
+
     // ===== MARKER =====
     function createMarker(item) {
         if (!item.latitude || !item.longitude) return null;
 
-        var color = getColor(item.concentration_value);
-        var size = 12;
-        if (item.concentration_value >= 5000) size = 16;
-        if (item.concentration_value >= 8000) size = 20;
+        var color, size, iconHtml;
+
+        if (item.type === 'fish') {
+            // Fish marker: teal diamond shape
+            color = '#0e7490';
+            size = 14;
+            iconHtml = '<div style="width:' + size + 'px;height:' + size + 'px;background:' + color + ';border-radius:3px;transform:rotate(45deg);border:2px solid rgba(255,255,255,0.9);box-shadow:0 2px 8px rgba(0,0,0,0.4),0 0 12px ' + color + '40;"></div>';
+        } else {
+            color = getColor(item.concentration_value);
+            size = 12;
+            if (item.concentration_value >= 5000) size = 16;
+            if (item.concentration_value >= 8000) size = 20;
+            iconHtml = '<div style="width:' + size + 'px;height:' + size + 'px;background:' + color + ';border-radius:50%;border:2px solid rgba(255,255,255,0.9);box-shadow:0 2px 8px rgba(0,0,0,0.4),0 0 12px ' + color + '40;"></div>';
+        }
 
         var icon = L.divIcon({
             className: 'geo-marker',
-            html: '<div style="width:' + size + 'px;height:' + size + 'px;background:' + color + ';border-radius:50%;border:2px solid rgba(255,255,255,0.9);box-shadow:0 2px 8px rgba(0,0,0,0.4),0 0 12px ' + color + '40;"></div>',
+            html: iconHtml,
             iconSize: [size, size],
             iconAnchor: [size / 2, size / 2]
         });
@@ -139,6 +195,17 @@
     // ===== FILTER =====
     function applyFilters() {
         filteredData = allData.filter(function(item) {
+            // Fish items: only filter by search (species/system)
+            if (item.type === 'fish') {
+                if (activeFilters.search) {
+                    var q = activeFilters.search.toLowerCase();
+                    var sp = (item.species || '').toLowerCase();
+                    var sys = (item.freshwater_system || '').toLowerCase();
+                    if (sp.indexOf(q) === -1 && sys.indexOf(q) === -1) return false;
+                }
+                return true;
+            }
+
             if (activeFilters.env !== 'all' && item.tipo_ambiente !== activeFilters.env) return false;
 
             if (activeFilters.search) {
@@ -340,6 +407,10 @@
             .then(function(result) {
                 if (result.success && result.data) {
                     allData = result.data;
+                    // Merge fish data if available
+                    if (result.fish && result.fish.data && result.fish.data.length > 0) {
+                        allData = allData.concat(result.fish.data);
+                    }
                     filteredData = allData.slice();
                     renderMarkers();
                     updateStats();

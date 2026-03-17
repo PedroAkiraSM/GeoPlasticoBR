@@ -104,10 +104,10 @@ if (isset($_POST['add_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) 
     try {
         $stmt = $pdo->prepare("INSERT INTO microplastics_fish
             (species, habit, total_individuals, individuals_with_microplastics, fiber, film, fragment,
-             foam, pellets, sphere, plastic_dimension, occurrence_tissues, freshwater_system, author, reference, doi)
+             foam, pellets, sphere, plastic_dimension, occurrence_tissues, freshwater_system, latitude, longitude, author, reference, doi)
             VALUES (:species, :habit, :total_individuals, :individuals_with_microplastics, :fiber, :film,
                     :fragment, :foam, :pellets, :sphere, :plastic_dimension, :occurrence_tissues,
-                    :freshwater_system, :author, :reference, :doi)");
+                    :freshwater_system, :latitude, :longitude, :author, :reference, :doi)");
 
         $stmt->execute([
             ':species' => $_POST['species'],
@@ -123,6 +123,8 @@ if (isset($_POST['add_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) 
             ':plastic_dimension' => $_POST['plastic_dimension'] ?: null,
             ':occurrence_tissues' => $_POST['occurrence_tissues'] ?: null,
             ':freshwater_system' => $_POST['freshwater_system'] ?: null,
+            ':latitude' => !empty($_POST['latitude']) ? (float)$_POST['latitude'] : null,
+            ':longitude' => !empty($_POST['longitude']) ? (float)$_POST['longitude'] : null,
             ':author' => $_POST['author'] ?: null,
             ':reference' => $_POST['reference'] ?: null,
             ':doi' => $_POST['doi'] ?: null,
@@ -514,6 +516,14 @@ $user = getCurrentUser();
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Sistema de Agua Doce</label>
                             <input type="text" name="freshwater_system" placeholder="Amazon River" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Latitude</label>
+                            <input type="text" name="latitude" placeholder="Ex: -23.5505" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Longitude</label>
+                            <input type="text" name="longitude" placeholder="Ex: -46.6333" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Tecidos Afetados</label>

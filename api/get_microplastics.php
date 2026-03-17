@@ -114,4 +114,49 @@ if (isset($_GET['limit'])) $filters['limit'] = $_GET['limit'];
 
 $response = getMicroplastics($filters);
 $response['thresholds'] = getUnitsWithThresholds();
+
+// Include fish data with coordinates
+try {
+    $pdo = getDatabaseConnection();
+    if ($pdo) {
+        $fishQuery = "SELECT id, species, habit, total_individuals, individuals_with_microplastics,
+                             fiber, film, fragment, foam, pellets, sphere,
+                             plastic_dimension, occurrence_tissues, freshwater_system,
+                             latitude, longitude, author, reference
+                      FROM microplastics_fish
+                      WHERE approved = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL";
+        $fishResults = $pdo->query($fishQuery)->fetchAll();
+        $fishData = [];
+        foreach ($fishResults as $row) {
+            $fishData[] = [
+                'id' => (int)$row['id'],
+                'species' => $row['species'],
+                'habit' => $row['habit'],
+                'total_individuals' => (int)$row['total_individuals'],
+                'individuals_with_microplastics' => (int)$row['individuals_with_microplastics'],
+                'microplastic_types' => array_filter([
+                    $row['fiber'] ? 'Fibra' : null,
+                    $row['film'] ? 'Filme' : null,
+                    $row['fragment'] ? 'Fragmento' : null,
+                    $row['foam'] ? 'Espuma' : null,
+                    $row['pellets'] ? 'Pellet' : null,
+                    $row['sphere'] ? 'Esfera' : null,
+                ]),
+                'plastic_dimension' => $row['plastic_dimension'],
+                'occurrence_tissues' => $row['occurrence_tissues'],
+                'freshwater_system' => $row['freshwater_system'],
+                'latitude' => (float)$row['latitude'],
+                'longitude' => (float)$row['longitude'],
+                'author' => $row['author'],
+                'reference' => $row['reference'],
+                'type' => 'fish'
+            ];
+        }
+        $response['fish'] = ['count' => count($fishData), 'data' => $fishData];
+    }
+} catch (PDOException $e) {
+    error_log("Fish query error: " . $e->getMessage());
+    $response['fish'] = ['count' => 0, 'data' => []];
+}
+
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
