@@ -178,6 +178,178 @@ if (isset($_POST['bulk_update_fish_coords']) && validateCsrfToken($_POST['csrf_t
     $messageType = 'success';
 }
 
+// Importar planilha CSV
+if (isset($_POST['import_csv']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    $importType = $_POST['import_type'] ?? '';
+    $importResults = ['inserted' => 0, 'skipped' => 0, 'errors' => []];
+
+    if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === UPLOAD_ERR_OK) {
+        $tmpFile = $_FILES['csv_file']['tmp_name'];
+        $fileName = $_FILES['csv_file']['name'];
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if ($ext !== 'csv') {
+            $message = 'Apenas arquivos CSV sao aceitos. Salve sua planilha como CSV (separado por virgula ou ponto-e-virgula).';
+            $messageType = 'error';
+        } else {
+            $handle = fopen($tmpFile, 'r');
+
+            // Detect delimiter (comma or semicolon)
+            $firstLine = fgets($handle);
+            rewind($handle);
+            $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+
+            // Read header row
+            $header = fgetcsv($handle, 0, $delimiter);
+            if ($header) {
+                // Normalize headers: lowercase, trim, remove BOM
+                $header = array_map(function($h) {
+                    $h = trim($h);
+                    $h = preg_replace('/^\x{FEFF}/u', '', $h); // Remove BOM
+                    return strtolower(str_replace(' ', '_', $h));
+                }, $header);
+            }
+
+            if ($importType === 'sediment') {
+                // Required: system
+                $requiredCols = ['system'];
+                $allCols = ['system','sampling_point','latitude','longitude','concentration_sediment',
+                            'concentration_value','total_concentration','concentration_variation',
+                            'depth','author','reference','tipo_ambiente','ecossistema','matriz','unidade'];
+
+                $missingRequired = array_diff($requiredCols, $header);
+                if (!empty($missingRequired)) {
+                    $message = 'Colunas obrigatorias ausentes: ' . implode(', ', $missingRequired) . '. Colunas encontradas: ' . implode(', ', $header);
+                    $messageType = 'error';
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO microplastics_sediment
+                        (system, sampling_point, latitude, longitude, concentration_sediment, concentration_value,
+                         total_concentration, concentration_variation, depth, author, reference,
+                         tipo_ambiente, ecossistema, matriz, unidade, approved)
+                        VALUES (:system, :sampling_point, :latitude, :longitude, :concentration_sediment, :concentration_value,
+                                :total_concentration, :concentration_variation, :depth, :author, :reference,
+                                :tipo_ambiente, :ecossistema, :matriz, :unidade, 1)");
+
+                    $lineNum = 1;
+                    while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+                        $lineNum++;
+                        if (count($row) < count($header)) {
+                            $row = array_pad($row, count($header), '');
+                        }
+                        $data = array_combine($header, array_slice($row, 0, count($header)));
+
+                        if (empty(trim($data['system'] ?? ''))) {
+                            $importResults['skipped']++;
+                            continue;
+                        }
+
+                        try {
+                            $stmt->execute([
+                                ':system' => trim($data['system'] ?? ''),
+                                ':sampling_point' => trim($data['sampling_point'] ?? '') ?: null,
+                                ':latitude' => !empty($data['latitude']) ? (float)str_replace(',', '.', $data['latitude']) : null,
+                                ':longitude' => !empty($data['longitude']) ? (float)str_replace(',', '.', $data['longitude']) : null,
+                                ':concentration_sediment' => trim($data['concentration_sediment'] ?? '') ?: null,
+                                ':concentration_value' => !empty($data['concentration_value']) ? (float)str_replace(',', '.', $data['concentration_value']) : 0,
+                                ':total_concentration' => trim($data['total_concentration'] ?? '') ?: null,
+                                ':concentration_variation' => trim($data['concentration_variation'] ?? '') ?: null,
+                                ':depth' => trim($data['depth'] ?? '') ?: null,
+                                ':author' => trim($data['author'] ?? '') ?: null,
+                                ':reference' => trim($data['reference'] ?? '') ?: null,
+                                ':tipo_ambiente' => trim($data['tipo_ambiente'] ?? '') ?: null,
+                                ':ecossistema' => trim($data['ecossistema'] ?? '') ?: null,
+                                ':matriz' => trim($data['matriz'] ?? '') ?: null,
+                                ':unidade' => trim($data['unidade'] ?? '') ?: null,
+                            ]);
+                            $importResults['inserted']++;
+                        } catch (PDOException $e) {
+                            $importResults['errors'][] = "Linha $lineNum: " . $e->getMessage();
+                        }
+                    }
+                }
+            } elseif ($importType === 'fish') {
+                $requiredCols = ['species'];
+                $missingRequired = array_diff($requiredCols, $header);
+                if (!empty($missingRequired)) {
+                    $message = 'Colunas obrigatorias ausentes: ' . implode(', ', $missingRequired) . '. Colunas encontradas: ' . implode(', ', $header);
+                    $messageType = 'error';
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO microplastics_fish
+                        (species, habit, total_individuals, individuals_with_microplastics,
+                         fiber, film, fragment, foam, pellets, sphere,
+                         plastic_dimension, occurrence_tissues, freshwater_system,
+                         latitude, longitude, author, reference, doi)
+                        VALUES (:species, :habit, :total_individuals, :individuals_with_microplastics,
+                                :fiber, :film, :fragment, :foam, :pellets, :sphere,
+                                :plastic_dimension, :occurrence_tissues, :freshwater_system,
+                                :latitude, :longitude, :author, :reference, :doi)");
+
+                    $lineNum = 1;
+                    while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+                        $lineNum++;
+                        if (count($row) < count($header)) {
+                            $row = array_pad($row, count($header), '');
+                        }
+                        $data = array_combine($header, array_slice($row, 0, count($header)));
+
+                        if (empty(trim($data['species'] ?? ''))) {
+                            $importResults['skipped']++;
+                            continue;
+                        }
+
+                        try {
+                            $boolVal = function($key) use ($data) {
+                                $v = strtolower(trim($data[$key] ?? ''));
+                                return in_array($v, ['1', 'true', 'sim', 'yes', 'x']) ? 1 : 0;
+                            };
+
+                            $stmt->execute([
+                                ':species' => trim($data['species']),
+                                ':habit' => trim($data['habit'] ?? '') ?: null,
+                                ':total_individuals' => !empty($data['total_individuals']) ? (int)$data['total_individuals'] : 0,
+                                ':individuals_with_microplastics' => !empty($data['individuals_with_microplastics']) ? (int)$data['individuals_with_microplastics'] : 0,
+                                ':fiber' => $boolVal('fiber'),
+                                ':film' => $boolVal('film'),
+                                ':fragment' => $boolVal('fragment'),
+                                ':foam' => $boolVal('foam'),
+                                ':pellets' => $boolVal('pellets'),
+                                ':sphere' => $boolVal('sphere'),
+                                ':plastic_dimension' => trim($data['plastic_dimension'] ?? '') ?: null,
+                                ':occurrence_tissues' => trim($data['occurrence_tissues'] ?? '') ?: null,
+                                ':freshwater_system' => trim($data['freshwater_system'] ?? '') ?: null,
+                                ':latitude' => !empty($data['latitude']) ? (float)str_replace(',', '.', $data['latitude']) : null,
+                                ':longitude' => !empty($data['longitude']) ? (float)str_replace(',', '.', $data['longitude']) : null,
+                                ':author' => trim($data['author'] ?? '') ?: null,
+                                ':reference' => trim($data['reference'] ?? '') ?: null,
+                                ':doi' => trim($data['doi'] ?? '') ?: null,
+                            ]);
+                            $importResults['inserted']++;
+                        } catch (PDOException $e) {
+                            $importResults['errors'][] = "Linha $lineNum: " . $e->getMessage();
+                        }
+                    }
+                }
+            }
+
+            fclose($handle);
+
+            if (empty($message)) {
+                $errorCount = count($importResults['errors']);
+                $message = "Importacao concluida: {$importResults['inserted']} inseridos, {$importResults['skipped']} ignorados (linhas vazias)";
+                if ($errorCount > 0) {
+                    $message .= ", $errorCount erros";
+                    $messageType = 'error';
+                } else {
+                    $messageType = 'success';
+                }
+            }
+        }
+    } else {
+        $message = 'Nenhum arquivo enviado ou erro no upload.';
+        $messageType = 'error';
+    }
+}
+
 // ========================================
 // Buscar dados para exibicao
 // ========================================
@@ -245,6 +417,10 @@ $user = getCurrentUser();
                 <button onclick="showTab('fish')" id="tab-fish"
                         class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
                     + Peixes
+                </button>
+                <button onclick="showTab('importar')" id="tab-importar"
+                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Importar CSV
                 </button>
                 <button onclick="showTab('configuracoes')" id="tab-configuracoes"
                         class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
@@ -609,7 +785,10 @@ $user = getCurrentUser();
             <!-- Peixes sem coordenadas - edição em lote -->
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-2">Peixes sem Coordenadas</h2>
-                <p class="text-sm text-gray-500 mb-4">Preencha latitude e longitude para que apareçam no mapa. Dica: procure as coordenadas do rio/sistema no Google Maps.</p>
+                <p class="text-sm text-gray-500 mb-2">Preencha latitude e longitude para que apareçam no mapa. Dica: procure as coordenadas do rio/sistema no Google Maps.</p>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-sm text-blue-700">
+                    <strong>Varias especies no mesmo local?</strong> Pode usar as mesmas coordenadas — no mapa, elas aparecem agrupadas em um cluster com numero. Ao clicar, os marcadores se abrem em formato de aranha para visualizar cada um individualmente.
+                </div>
 
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -701,6 +880,121 @@ $user = getCurrentUser();
             </div>
             <?php endif; ?>
         </div>
+        <!-- ========== TAB: IMPORTAR CSV ========== -->
+        <div id="form-importar" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Importar Planilha CSV</h2>
+                <p class="text-sm text-gray-500 mb-6">Suba um arquivo CSV para importar dados em lote. Aceita separador por virgula (,) ou ponto-e-virgula (;).</p>
+
+                <?php if (!empty($importResults['errors'])): ?>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <h3 class="font-semibold text-red-800 mb-2">Erros na importacao (<?php echo count($importResults['errors']); ?>):</h3>
+                    <div class="max-h-40 overflow-y-auto text-sm text-red-700">
+                        <?php foreach (array_slice($importResults['errors'], 0, 20) as $err): ?>
+                            <p><?php echo htmlspecialchars($err); ?></p>
+                        <?php endforeach; ?>
+                        <?php if (count($importResults['errors']) > 20): ?>
+                            <p class="font-semibold mt-2">... e mais <?php echo count($importResults['errors']) - 20; ?> erros</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+
+                    <!-- Tipo de dados -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de Dados</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="relative cursor-pointer" id="label-sediment-import">
+                                <input type="radio" name="import_type" value="sediment" class="sr-only peer" checked onchange="updateImportTemplate()">
+                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition hover:border-gray-300">
+                                    <div class="font-semibold text-gray-900 mb-1">Sedimento / Agua</div>
+                                    <p class="text-xs text-gray-500">Dados de microplasticos em sedimentos, agua, areia</p>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer" id="label-fish-import">
+                                <input type="radio" name="import_type" value="fish" class="sr-only peer" onchange="updateImportTemplate()">
+                                <div class="border-2 border-gray-200 rounded-xl p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition hover:border-gray-300">
+                                    <div class="font-semibold text-gray-900 mb-1">Peixes</div>
+                                    <p class="text-xs text-gray-500">Dados de microplasticos em especies de peixes</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Colunas esperadas -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-800 text-sm mb-2">Colunas esperadas no CSV:</h3>
+                        <div id="template-sediment" class="text-xs text-gray-600 space-y-1">
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border text-red-600">system*</span> Nome do sistema aquatico (obrigatorio)</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">sampling_point</span> Ponto de amostragem</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">latitude</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">longitude</span> Coordenadas decimais</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">concentration_sediment</span> Concentracao (texto, ex: "2101/Kg")</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">concentration_value</span> Valor numerico da concentracao</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">unidade</span> Unidade de medida</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">tipo_ambiente</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">ecossistema</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">matriz</span> Classificacao</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">total_concentration</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">concentration_variation</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">depth</span></p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">author</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">reference</span> Autoria e referencia</p>
+                        </div>
+                        <div id="template-fish" class="text-xs text-gray-600 space-y-1 hidden">
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border text-red-600">species*</span> Nome da especie (obrigatorio)</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">habit</span> Habito alimentar (Omnivore, Carnivore, Herbivore, Insectivore, Detritivore, Piscivore)</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">total_individuals</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">individuals_with_microplastics</span> Contagens</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">fiber</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">film</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">fragment</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">foam</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">pellets</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">sphere</span> Tipos (1/0, sim/nao, true/false, x)</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">plastic_dimension</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">occurrence_tissues</span> Dimensao e tecidos</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">freshwater_system</span> Sistema de agua doce</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">latitude</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">longitude</span> Coordenadas decimais</p>
+                            <p><span class="font-mono bg-white px-1.5 py-0.5 rounded border">author</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">reference</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border">doi</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Upload -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Arquivo CSV</label>
+                        <div class="relative">
+                            <input type="file" name="csv_file" accept=".csv" required id="csvFileInput"
+                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg"
+                                   onchange="previewCSV(this)">
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Tamanho maximo: 10MB. Formato: CSV (virgula ou ponto-e-virgula)</p>
+                    </div>
+
+                    <!-- Preview -->
+                    <div id="csvPreview" class="hidden">
+                        <h3 class="font-semibold text-gray-800 text-sm mb-2">Pre-visualizacao (primeiras 5 linhas):</h3>
+                        <div class="overflow-x-auto border rounded-lg">
+                            <table class="w-full text-xs" id="csvPreviewTable">
+                                <thead class="bg-gray-50" id="csvPreviewHead"></thead>
+                                <tbody class="divide-y" id="csvPreviewBody"></tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1" id="csvPreviewCount"></p>
+                    </div>
+
+                    <button type="submit" name="import_csv" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Importar Dados
+                    </button>
+                </form>
+            </div>
+
+            <!-- Baixar template -->
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-3">Baixar Template</h2>
+                <p class="text-sm text-gray-500 mb-4">Baixe um modelo CSV com as colunas corretas para preencher.</p>
+                <div class="flex gap-4">
+                    <button onclick="downloadTemplate('sediment')" class="px-5 py-2.5 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition text-sm">
+                        Template Sedimento
+                    </button>
+                    <button onclick="downloadTemplate('fish')" class="px-5 py-2.5 bg-teal-100 text-teal-700 font-semibold rounded-lg hover:bg-teal-200 transition text-sm">
+                        Template Peixes
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- ========== TAB: CONFIGURACOES ========== -->
         <div id="form-configuracoes" class="tab-content hidden">
             <?php if (file_exists(__DIR__ . '/admin/tab_configuracoes.php')) include __DIR__ . '/admin/tab_configuracoes.php'; ?>
@@ -733,6 +1027,91 @@ $user = getCurrentUser();
             const btn = document.getElementById('tab-' + tab);
             btn.classList.add('bg-white', 'shadow', 'text-slate-800');
             btn.classList.remove('text-gray-500');
+        }
+
+        function updateImportTemplate() {
+            var type = document.querySelector('input[name="import_type"]:checked').value;
+            document.getElementById('template-sediment').classList.toggle('hidden', type !== 'sediment');
+            document.getElementById('template-fish').classList.toggle('hidden', type !== 'fish');
+        }
+
+        function previewCSV(input) {
+            var file = input.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var text = e.target.result;
+                var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ''; });
+                if (lines.length < 2) {
+                    document.getElementById('csvPreview').classList.add('hidden');
+                    return;
+                }
+
+                var delim = (lines[0].split(';').length > lines[0].split(',').length) ? ';' : ',';
+
+                function parseCSVLine(line, d) {
+                    var result = [];
+                    var current = '';
+                    var inQuotes = false;
+                    for (var i = 0; i < line.length; i++) {
+                        var ch = line[i];
+                        if (inQuotes) {
+                            if (ch === '"' && line[i+1] === '"') { current += '"'; i++; }
+                            else if (ch === '"') { inQuotes = false; }
+                            else { current += ch; }
+                        } else {
+                            if (ch === '"') { inQuotes = true; }
+                            else if (ch === d) { result.push(current.trim()); current = ''; }
+                            else { current += ch; }
+                        }
+                    }
+                    result.push(current.trim());
+                    return result;
+                }
+
+                var headers = parseCSVLine(lines[0], delim);
+                var thead = '<tr>';
+                headers.forEach(function(h) {
+                    thead += '<th class="px-2 py-1.5 text-left font-semibold text-gray-700 whitespace-nowrap">' + h + '</th>';
+                });
+                thead += '</tr>';
+                document.getElementById('csvPreviewHead').innerHTML = thead;
+
+                var tbody = '';
+                var previewCount = Math.min(lines.length - 1, 5);
+                for (var i = 1; i <= previewCount; i++) {
+                    var cols = parseCSVLine(lines[i], delim);
+                    tbody += '<tr class="hover:bg-gray-50">';
+                    for (var j = 0; j < headers.length; j++) {
+                        var val = (cols[j] || '').substring(0, 50);
+                        tbody += '<td class="px-2 py-1.5 text-gray-600 whitespace-nowrap">' + val + '</td>';
+                    }
+                    tbody += '</tr>';
+                }
+                document.getElementById('csvPreviewBody').innerHTML = tbody;
+                document.getElementById('csvPreviewCount').textContent = (lines.length - 1) + ' linhas de dados encontradas';
+                document.getElementById('csvPreview').classList.remove('hidden');
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function downloadTemplate(type) {
+            var content, filename;
+            if (type === 'sediment') {
+                content = 'system;sampling_point;latitude;longitude;concentration_sediment;concentration_value;unidade;tipo_ambiente;ecossistema;matriz;total_concentration;concentration_variation;depth;author;reference\n';
+                content += 'Amazon River;AMZ1;-3.146601;-59.383157;2101/Kg;2101;part/Kg;Doce;Rio;Sedimento;417/Kg - 2101/Kg;Space;5;Gerolin, C. et al. (2020);Microplastics in sediments from Amazon rivers\n';
+                filename = 'template_sedimento.csv';
+            } else {
+                content = 'species;habit;total_individuals;individuals_with_microplastics;fiber;film;fragment;foam;pellets;sphere;plastic_dimension;occurrence_tissues;freshwater_system;latitude;longitude;author;reference;doi\n';
+                content += 'Astyanax lacustris;Omnivore;132;38;1;0;1;0;0;1;;Stomach, Gills;Uruguay River;-30.123;-57.456;Silva, A. et al. (2023);Titulo do artigo;\n';
+                filename = 'template_peixes.csv';
+            }
+            var BOM = '\uFEFF';
+            var blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
         }
     </script>
 </body>
