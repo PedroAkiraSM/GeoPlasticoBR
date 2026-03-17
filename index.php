@@ -99,6 +99,14 @@ include 'includes/header.php';
 </section>
 
 <!-- ============ PROBLEM SECTION ============ -->
+<div class="hp-divider">
+    <div class="hp-divider__inner">
+        <span class="hp-divider__num">01</span>
+        <span class="hp-divider__line"></span>
+        <span class="hp-divider__label">O Problema</span>
+        <span class="hp-divider__line"></span>
+    </div>
+</div>
 <section class="hp-section hp-section--problem fade-in">
     <div class="hp-container">
         <div class="hp-problem">
@@ -135,6 +143,14 @@ include 'includes/header.php';
 </section>
 
 <!-- ============ MAP FEATURE SECTION ============ -->
+<div class="hp-divider">
+    <div class="hp-divider__inner">
+        <span class="hp-divider__num">02</span>
+        <span class="hp-divider__line"></span>
+        <span class="hp-divider__label">Ferramenta</span>
+        <span class="hp-divider__line"></span>
+    </div>
+</div>
 <section class="hp-section hp-section--map fade-in">
     <div class="hp-section__bg-glow"></div>
     <div class="hp-container">
@@ -199,6 +215,14 @@ include 'includes/header.php';
 </section>
 
 <!-- ============ CHARTS SECTION ============ -->
+<div class="hp-divider">
+    <div class="hp-divider__inner">
+        <span class="hp-divider__num">03</span>
+        <span class="hp-divider__line"></span>
+        <span class="hp-divider__label">Dados</span>
+        <span class="hp-divider__line"></span>
+    </div>
+</div>
 <section class="hp-section hp-section--charts fade-in" id="chartSection">
     <div class="hp-container">
         <div class="hp-section__header">
@@ -220,6 +244,14 @@ include 'includes/header.php';
 </section>
 
 <!-- ============ MISSION SECTION ============ -->
+<div class="hp-divider">
+    <div class="hp-divider__inner">
+        <span class="hp-divider__num">04</span>
+        <span class="hp-divider__line"></span>
+        <span class="hp-divider__label">Missao</span>
+        <span class="hp-divider__line"></span>
+    </div>
+</div>
 <section class="hp-section hp-section--mission fade-in">
     <div class="hp-container">
         <div class="hp-section__header">
@@ -620,10 +652,49 @@ body {
     animation: scrollLineAnim 2s ease-in-out infinite;
 }
 
+/* === SECTION DIVIDERS === */
+.hp-divider {
+    padding: 0 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.hp-divider__inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0;
+}
+
+.hp-divider__num {
+    font-family: var(--hp-font-display);
+    font-size: 1.1rem;
+    color: var(--hp-cyan);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.hp-divider__line {
+    flex: 1;
+    height: 1px;
+    background: rgba(148, 163, 184, 0.1);
+}
+
+.hp-divider__label {
+    font-family: var(--hp-font);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--hp-muted);
+    flex-shrink: 0;
+}
+
 /* === GLOBAL SECTION STYLES === */
 .hp-section {
     position: relative;
-    padding: clamp(80px, 12vw, 140px) 0;
+    padding: clamp(60px, 8vw, 100px) 0;
 }
 
 .hp-container {
@@ -642,7 +713,9 @@ body {
 }
 
 .hp-section--charts {
-    background: var(--hp-surface);
+    background: rgba(8, 14, 24, 0.95);
+    border-top: 1px solid rgba(148, 163, 184, 0.06);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
 }
 
 .hp-tag {
@@ -1067,11 +1140,13 @@ body {
     .hp-hero__inner { padding: 100px 20px 50px; }
     .hp-hero__title-line { font-size: clamp(2.5rem, 12vw, 4rem); }
     .hp-container { padding: 0 20px; }
+    .hp-divider { padding: 0 20px; }
     .hp-hero__scroll { left: 20px; }
     .hp-charts { grid-template-columns: 1fr; }
     .hp-mission-cards { grid-template-columns: 1fr; }
     .hp-hero__float-card { max-width: 100%; }
     .hp-hero__grid-lines { display: none; }
+    .hp-divider__label { display: none; }
 }
 </style>
 
