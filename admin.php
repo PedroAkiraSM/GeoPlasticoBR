@@ -9,6 +9,7 @@ if (!isAdmin()) {
 }
 
 require_once 'config/database.php';
+require_once __DIR__ . '/config/cms.php';
 $pdo = getDatabaseConnection();
 $message = '';
 $messageType = '';
@@ -200,6 +201,22 @@ $user = getCurrentUser();
                         class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
                     + Peixes
                 </button>
+                <button onclick="showTab('configuracoes')" id="tab-configuracoes"
+                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Configuracoes
+                </button>
+                <button onclick="showTab('blocos')" id="tab-blocos"
+                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Blocos
+                </button>
+                <button onclick="showTab('tipos')" id="tab-tipos"
+                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Tipos
+                </button>
+                <button onclick="showTab('unidades')" id="tab-unidades"
+                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Unidades
+                </button>
             </nav>
         </div>
 
@@ -232,10 +249,12 @@ $user = getCurrentUser();
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
                                         <form method="POST" class="inline">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                             <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
                                             <button name="approve_user" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded text-xs font-semibold">Aprovar</button>
                                         </form>
                                         <form method="POST" class="inline">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                             <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
                                             <button name="reject_user" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-semibold">Rejeitar</button>
                                         </form>
@@ -324,10 +343,12 @@ $user = getCurrentUser();
                             </div>
                             <div class="flex gap-2">
                                 <form method="POST">
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <input type="hidden" name="data_id" value="<?php echo $d['id']; ?>">
                                     <button name="approve_data" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm font-semibold">Aprovar</button>
                                 </form>
                                 <form method="POST">
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <input type="hidden" name="data_id" value="<?php echo $d['id']; ?>">
                                     <button name="reject_data" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-semibold">Rejeitar</button>
                                 </form>
@@ -351,33 +372,27 @@ $user = getCurrentUser();
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Ambiente <span class="text-red-500">*</span></label>
                             <select name="tipo_ambiente" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <option value="">Selecione...</option>
-                                <option value="Doce">Doce</option>
-                                <option value="Marinho">Marinho</option>
+                                <?php foreach (getDataTypes('ambiente') as $a): ?>
+                                <option value="<?= htmlspecialchars($a['name']) ?>"><?= htmlspecialchars($a['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Ecossistema</label>
                             <select name="ecossistema" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <option value="">Selecione...</option>
-                                <option value="Rio">Rio</option>
-                                <option value="Lago">Lago</option>
-                                <option value="Bacia">Bacia</option>
-                                <option value="Córrego">Corrego</option>
-                                <option value="Praia">Praia</option>
-                                <option value="Estuário">Estuario</option>
-                                <option value="Ilha">Ilha</option>
-                                <option value="Região costeira">Regiao costeira</option>
-                                <option value="Plataforma">Plataforma</option>
-                                <option value="Oceano aberto">Oceano aberto</option>
-                                <option value="Laguna">Laguna</option>
+                                <?php foreach (getDataTypes('ecossistema') as $e): ?>
+                                <option value="<?= htmlspecialchars($e['name']) ?>"><?= htmlspecialchars($e['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Matriz</label>
                             <select name="matriz" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <option value="">Selecione...</option>
-                                <option value="Sedimento">Sedimento</option>
-                                <option value="Água">Agua</option>
+                                <?php foreach (getDataTypes('matriz') as $m): ?>
+                                <option value="<?= htmlspecialchars($m['name']) ?>"><?= htmlspecialchars($m['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
@@ -410,12 +425,9 @@ $user = getCurrentUser();
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Unidade</label>
                             <select name="unidade" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <option value="">Selecione...</option>
-                                <option value="part/Kg">part/Kg</option>
-                                <option value="part/m³">part/m3</option>
-                                <option value="part/m²">part/m2</option>
-                                <option value="part/L">part/L</option>
-                                <option value="part/mL">part/mL</option>
-                                <option value="part/cm²">part/cm2</option>
+                                <?php foreach (getUnitsWithThresholds() as $u): ?>
+                                <option value="<?= htmlspecialchars($u['name']) ?>"><?= htmlspecialchars($u['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
@@ -523,6 +535,25 @@ $user = getCurrentUser();
                     <button type="submit" name="add_fish" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">Adicionar Dados de Peixe</button>
                 </form>
             </div>
+        </div>
+        <!-- ========== TAB: CONFIGURACOES ========== -->
+        <div id="form-configuracoes" class="tab-content hidden">
+            <?php if (file_exists(__DIR__ . '/admin/tab_configuracoes.php')) include __DIR__ . '/admin/tab_configuracoes.php'; ?>
+        </div>
+
+        <!-- ========== TAB: BLOCOS ========== -->
+        <div id="form-blocos" class="tab-content hidden">
+            <?php if (file_exists(__DIR__ . '/admin/tab_blocos.php')) include __DIR__ . '/admin/tab_blocos.php'; ?>
+        </div>
+
+        <!-- ========== TAB: TIPOS ========== -->
+        <div id="form-tipos" class="tab-content hidden">
+            <?php if (file_exists(__DIR__ . '/admin/tab_tipos.php')) include __DIR__ . '/admin/tab_tipos.php'; ?>
+        </div>
+
+        <!-- ========== TAB: UNIDADES ========== -->
+        <div id="form-unidades" class="tab-content hidden">
+            <?php if (file_exists(__DIR__ . '/admin/tab_unidades.php')) include __DIR__ . '/admin/tab_unidades.php'; ?>
         </div>
     </div>
 
