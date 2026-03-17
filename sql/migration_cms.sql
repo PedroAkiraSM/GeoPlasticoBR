@@ -153,10 +153,51 @@ INSERT IGNORE INTO measurement_units (name, description) VALUES
 ('part/mL', 'Particulas por mililitro'),
 ('part/cm²', 'Particulas por centimetro quadrado');
 
--- Concentration Thresholds for part/Kg (matching current map_v2.js breakpoints)
+-- Concentration Thresholds for all units
+-- part/Kg
 INSERT IGNORE INTO concentration_thresholds (unit_id, level, min_value, max_value, color) VALUES
 ((SELECT id FROM measurement_units WHERE name = 'part/Kg'), 'baixo', 0, 1000, '#00CC88'),
 ((SELECT id FROM measurement_units WHERE name = 'part/Kg'), 'medio', 1000, 3000, '#FFD700'),
 ((SELECT id FROM measurement_units WHERE name = 'part/Kg'), 'elevado', 3000, 5000, '#FFA500'),
 ((SELECT id FROM measurement_units WHERE name = 'part/Kg'), 'alto', 5000, 8000, '#FF6600'),
 ((SELECT id FROM measurement_units WHERE name = 'part/Kg'), 'critico', 8000, NULL, '#CC0000');
+
+-- part/m³
+INSERT IGNORE INTO concentration_thresholds (unit_id, level, min_value, max_value, color) VALUES
+((SELECT id FROM measurement_units WHERE name = 'part/m³'), 'baixo', 0, 100, '#00CC88'),
+((SELECT id FROM measurement_units WHERE name = 'part/m³'), 'medio', 100, 500, '#FFD700'),
+((SELECT id FROM measurement_units WHERE name = 'part/m³'), 'elevado', 500, 1000, '#FFA500'),
+((SELECT id FROM measurement_units WHERE name = 'part/m³'), 'alto', 1000, 5000, '#FF6600'),
+((SELECT id FROM measurement_units WHERE name = 'part/m³'), 'critico', 5000, NULL, '#CC0000');
+
+-- part/m²
+INSERT IGNORE INTO concentration_thresholds (unit_id, level, min_value, max_value, color) VALUES
+((SELECT id FROM measurement_units WHERE name = 'part/m²'), 'baixo', 0, 500, '#00CC88'),
+((SELECT id FROM measurement_units WHERE name = 'part/m²'), 'medio', 500, 2000, '#FFD700'),
+((SELECT id FROM measurement_units WHERE name = 'part/m²'), 'elevado', 2000, 5000, '#FFA500'),
+((SELECT id FROM measurement_units WHERE name = 'part/m²'), 'alto', 5000, 10000, '#FF6600'),
+((SELECT id FROM measurement_units WHERE name = 'part/m²'), 'critico', 10000, NULL, '#CC0000');
+
+-- part/L
+INSERT IGNORE INTO concentration_thresholds (unit_id, level, min_value, max_value, color) VALUES
+((SELECT id FROM measurement_units WHERE name = 'part/L'), 'baixo', 0, 10, '#00CC88'),
+((SELECT id FROM measurement_units WHERE name = 'part/L'), 'medio', 10, 50, '#FFD700'),
+((SELECT id FROM measurement_units WHERE name = 'part/L'), 'elevado', 50, 100, '#FFA500'),
+((SELECT id FROM measurement_units WHERE name = 'part/L'), 'alto', 100, 500, '#FF6600'),
+((SELECT id FROM measurement_units WHERE name = 'part/L'), 'critico', 500, NULL, '#CC0000');
+
+-- part/mL
+INSERT IGNORE INTO concentration_thresholds (unit_id, level, min_value, max_value, color) VALUES
+((SELECT id FROM measurement_units WHERE name = 'part/mL'), 'baixo', 0, 1, '#00CC88'),
+((SELECT id FROM measurement_units WHERE name = 'part/mL'), 'medio', 1, 5, '#FFD700'),
+((SELECT id FROM measurement_units WHERE name = 'part/mL'), 'elevado', 5, 10, '#FFA500'),
+((SELECT id FROM measurement_units WHERE name = 'part/mL'), 'alto', 10, 50, '#FF6600'),
+((SELECT id FROM measurement_units WHERE name = 'part/mL'), 'critico', 50, NULL, '#CC0000');
+
+-- part/cm²
+INSERT IGNORE INTO concentration_thresholds (unit_id, level, min_value, max_value, color) VALUES
+((SELECT id FROM measurement_units WHERE name = 'part/cm²'), 'baixo', 0, 100, '#00CC88'),
+((SELECT id FROM measurement_units WHERE name = 'part/cm²'), 'medio', 100, 500, '#FFD700'),
+((SELECT id FROM measurement_units WHERE name = 'part/cm²'), 'elevado', 500, 1000, '#FFA500'),
+((SELECT id FROM measurement_units WHERE name = 'part/cm²'), 'alto', 1000, 5000, '#FF6600'),
+((SELECT id FROM measurement_units WHERE name = 'part/cm²'), 'critico', 5000, NULL, '#CC0000');

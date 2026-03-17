@@ -93,11 +93,16 @@ $_thresholdUnits = getUnitsWithThresholds();
                 <label class="filter-label">Concentracao</label>
                 <div class="filter-chips" id="filterConcentration">
                     <button class="chip active" data-min="0" data-max="999999">Todas</button>
-                    <button class="chip" data-min="0" data-max="1000">Baixa</button>
-                    <button class="chip" data-min="1000" data-max="3000">Media</button>
-                    <button class="chip" data-min="3000" data-max="5000">Elevada</button>
-                    <button class="chip" data-min="5000" data-max="8000">Alta</button>
-                    <button class="chip" data-min="8000" data-max="999999">Critica</button>
+                    <?php
+                    $concLabels = ['baixo' => 'Baixa', 'medio' => 'Media', 'elevado' => 'Elevada', 'alto' => 'Alta', 'critico' => 'Critica'];
+                    if (!empty($_thresholdUnits) && !empty($_thresholdUnits[0]['thresholds'])):
+                        foreach ($_thresholdUnits[0]['thresholds'] as $t):
+                            $cMin = (int)$t['min_value'];
+                            $cMax = $t['max_value'] !== null ? (int)$t['max_value'] : 999999;
+                            $cLabel = $concLabels[$t['level']] ?? $t['level'];
+                    ?>
+                    <button class="chip" data-min="<?php echo $cMin; ?>" data-max="<?php echo $cMax; ?>"><?php echo htmlspecialchars($cLabel); ?></button>
+                    <?php endforeach; endif; ?>
                 </div>
             </div>
             <button class="filter-clear" id="filterClear">Limpar filtros</button>
