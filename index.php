@@ -288,9 +288,9 @@ include 'includes/header.php';
 <style>
 /* === VARIABLES === */
 :root {
-    --hp-bg: #030a12;
-    --hp-surface: rgba(6, 18, 34, 0.7);
-    --hp-card: rgba(10, 25, 47, 0.65);
+    --hp-bg: #050b14;
+    --hp-surface: rgba(5, 11, 20, 0.95);
+    --hp-card: rgba(8, 16, 30, 0.8);
     --hp-border: rgba(34, 211, 238, 0.08);
     --hp-border-strong: rgba(34, 211, 238, 0.2);
     --hp-cyan: #22D3EE;
@@ -307,8 +307,12 @@ include 'includes/header.php';
     --hp-radius: 16px;
 }
 
-/* === GRAIN === */
-.grain-overlay { display: none; }
+/* === OVERRIDE BODY GRADIENT === */
+body {
+    background: #050b14 !important;
+    background-image: none !important;
+}
+.light-rays { display: none !important; }
 
 /* === HERO === */
 .hp-hero {
@@ -348,15 +352,15 @@ include 'includes/header.php';
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 50% 80% at 0% 100%, rgba(34, 211, 238, 0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 50% at 80% 20%, rgba(20, 184, 166, 0.08) 0%, transparent 60%);
+        radial-gradient(ellipse 40% 60% at 0% 100%, rgba(34, 211, 238, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 30% 40% at 85% 15%, rgba(20, 184, 166, 0.04) 0%, transparent 50%);
     mix-blend-mode: screen;
 }
 
 .hp-hero__vignette {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 70%, var(--hp-bg) 100%);
+    background: linear-gradient(to bottom, transparent 60%, #050b14 100%);
 }
 
 /* Decorative grid */
@@ -371,7 +375,7 @@ include 'includes/header.php';
 .hp-hero__grid-lines span {
     width: 1px;
     height: 100%;
-    background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.04) 30%, rgba(34, 211, 238, 0.04) 70%, transparent);
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.03) 70%, transparent);
 }
 
 /* Hero inner layout */
@@ -634,10 +638,7 @@ include 'includes/header.php';
 }
 
 .hp-section__bg-glow {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 60% 40% at 50% 30%, rgba(34, 211, 238, 0.03) 0%, transparent 70%);
-    pointer-events: none;
+    display: none;
 }
 
 .hp-section--charts {
@@ -960,11 +961,7 @@ include 'includes/header.php';
 }
 
 .hp-cta__glow {
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 50% 60% at 50% 50%, rgba(34, 211, 238, 0.05) 0%, transparent 60%);
-    pointer-events: none;
+    display: none;
 }
 
 .hp-cta__inner { text-align: center; position: relative; z-index: 2; }
