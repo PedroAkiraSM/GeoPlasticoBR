@@ -178,6 +178,59 @@ if (isset($_POST['bulk_update_fish_coords']) && validateCsrfToken($_POST['csrf_t
     $messageType = 'success';
 }
 
+// Editar peixe completo
+if (isset($_POST['edit_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    try {
+        $stmt = $pdo->prepare("UPDATE microplastics_fish SET
+            species = :species, habit = :habit, total_individuals = :total_individuals,
+            individuals_with_microplastics = :individuals_with_microplastics,
+            fiber = :fiber, film = :film, fragment = :fragment, foam = :foam, pellets = :pellets, sphere = :sphere,
+            plastic_dimension = :plastic_dimension, occurrence_tissues = :occurrence_tissues,
+            freshwater_system = :freshwater_system, latitude = :latitude, longitude = :longitude,
+            author = :author, reference = :reference, doi = :doi
+            WHERE id = :id");
+        $stmt->execute([
+            ':id' => (int)$_POST['fish_id'],
+            ':species' => $_POST['species'],
+            ':habit' => $_POST['habit'] ?: null,
+            ':total_individuals' => $_POST['total_individuals'] ?: 0,
+            ':individuals_with_microplastics' => $_POST['individuals_with_microplastics'] ?: 0,
+            ':fiber' => isset($_POST['fiber']) ? 1 : 0,
+            ':film' => isset($_POST['film']) ? 1 : 0,
+            ':fragment' => isset($_POST['fragment']) ? 1 : 0,
+            ':foam' => isset($_POST['foam']) ? 1 : 0,
+            ':pellets' => isset($_POST['pellets']) ? 1 : 0,
+            ':sphere' => isset($_POST['sphere']) ? 1 : 0,
+            ':plastic_dimension' => $_POST['plastic_dimension'] ?: null,
+            ':occurrence_tissues' => $_POST['occurrence_tissues'] ?: null,
+            ':freshwater_system' => $_POST['freshwater_system'] ?: null,
+            ':latitude' => !empty($_POST['latitude']) ? (float)$_POST['latitude'] : null,
+            ':longitude' => !empty($_POST['longitude']) ? (float)$_POST['longitude'] : null,
+            ':author' => $_POST['author'] ?: null,
+            ':reference' => $_POST['reference'] ?: null,
+            ':doi' => $_POST['doi'] ?: null,
+        ]);
+        $message = 'Peixe atualizado com sucesso!';
+        $messageType = 'success';
+    } catch (PDOException $e) {
+        $message = 'Erro: ' . $e->getMessage();
+        $messageType = 'error';
+    }
+}
+
+// Excluir peixe
+if (isset($_POST['delete_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    try {
+        $stmt = $pdo->prepare("DELETE FROM microplastics_fish WHERE id = :id");
+        $stmt->execute([':id' => (int)$_POST['fish_id']]);
+        $message = 'Registro excluido com sucesso!';
+        $messageType = 'success';
+    } catch (PDOException $e) {
+        $message = 'Erro: ' . $e->getMessage();
+        $messageType = 'error';
+    }
+}
+
 // Importar planilha CSV
 if (isset($_POST['import_csv']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
     $importType = $_POST['import_type'] ?? '';
@@ -359,6 +412,15 @@ $pending_data = $pdo->query("SELECT ms.*, u.nome as submitter_name FROM micropla
 $fish_no_coords = $pdo->query("SELECT id, species, freshwater_system, latitude, longitude FROM microplastics_fish WHERE latitude IS NULL OR longitude IS NULL ORDER BY freshwater_system, species")->fetchAll();
 $fish_with_coords = $pdo->query("SELECT id, species, freshwater_system, latitude, longitude FROM microplastics_fish WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY freshwater_system, species")->fetchAll();
 $fish_total = $pdo->query("SELECT COUNT(*) FROM microplastics_fish")->fetchColumn();
+$all_fish = $pdo->query("SELECT * FROM microplastics_fish ORDER BY species")->fetchAll();
+
+// Peixe sendo editado
+$editing_fish = null;
+if (isset($_GET['edit_fish_id'])) {
+    $stmtEdit = $pdo->prepare("SELECT * FROM microplastics_fish WHERE id = :id");
+    $stmtEdit->execute([':id' => (int)$_GET['edit_fish_id']]);
+    $editing_fish = $stmtEdit->fetch();
+}
 
 $user = getCurrentUser();
 ?>
@@ -765,120 +827,166 @@ $user = getCurrentUser();
                 </form>
             </div>
 
-            <!-- Status dos peixes -->
-            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-6">
+            <!-- Formulario de edicao (aparece quando clica em Editar) -->
+            <?php if ($editing_fish): ?>
+            <div class="bg-yellow-50 border border-yellow-300 rounded-xl shadow-lg p-6 md:p-8 mt-6" id="editFishForm">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-900">Status das Coordenadas</h2>
-                    <div class="flex gap-3 text-sm">
-                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium"><?php echo count($fish_with_coords); ?> com coordenadas</span>
-                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full font-medium"><?php echo count($fish_no_coords); ?> sem coordenadas</span>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium"><?php echo $fish_total; ?> total</span>
-                    </div>
+                    <h2 class="text-xl font-bold text-gray-900">Editando: <span class="italic text-blue-700"><?php echo htmlspecialchars($editing_fish['species']); ?></span> <span class="text-sm text-gray-500">(ID <?php echo $editing_fish['id']; ?>)</span></h2>
+                    <a href="admin.php#form-fish" onclick="showTab('fish')" class="text-sm text-gray-500 hover:text-gray-800 font-medium">Cancelar</a>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
-                    <div class="bg-green-500 h-3 rounded-full transition-all" style="width: <?php echo $fish_total > 0 ? round(count($fish_with_coords) / $fish_total * 100) : 0; ?>%"></div>
-                </div>
-                <p class="text-xs text-gray-500"><?php echo $fish_total > 0 ? round(count($fish_with_coords) / $fish_total * 100) : 0; ?>% dos peixes com coordenadas — apenas estes aparecem no mapa</p>
-            </div>
-
-            <?php if (count($fish_no_coords) > 0): ?>
-            <!-- Peixes sem coordenadas - edição em lote -->
-            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-2">Peixes sem Coordenadas</h2>
-                <p class="text-sm text-gray-500 mb-2">Preencha latitude e longitude para que apareçam no mapa. Dica: procure as coordenadas do rio/sistema no Google Maps.</p>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-sm text-blue-700">
-                    <strong>Varias especies no mesmo local?</strong> Pode usar as mesmas coordenadas — no mapa, elas aparecem agrupadas em um cluster com numero. Ao clicar, os marcadores se abrem em formato de aranha para visualizar cada um individualmente.
-                </div>
-
-                <form method="POST">
+                <form method="POST" class="space-y-4">
                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-
-                    <!-- Filtro por sistema -->
-                    <div class="mb-4">
-                        <input type="text" id="fishFilterInput" placeholder="Filtrar por especie ou sistema..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" oninput="filterFishRows()">
-                    </div>
-
-                    <div class="overflow-x-auto max-h-[600px] overflow-y-auto border rounded-lg">
-                        <table class="w-full text-sm" id="fishTable">
-                            <thead class="bg-gray-50 sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-3 py-2 text-left font-semibold text-gray-700 w-8">#</th>
-                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Especie</th>
-                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Sistema</th>
-                                    <th class="px-3 py-2 text-left font-semibold text-gray-700 w-36">Latitude</th>
-                                    <th class="px-3 py-2 text-left font-semibold text-gray-700 w-36">Longitude</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <?php foreach ($fish_no_coords as $i => $fish): ?>
-                                <tr class="fish-row hover:bg-blue-50 transition" data-species="<?php echo strtolower(htmlspecialchars($fish['species'])); ?>" data-system="<?php echo strtolower(htmlspecialchars($fish['freshwater_system'] ?? '')); ?>">
-                                    <td class="px-3 py-2 text-gray-400"><?php echo $fish['id']; ?></td>
-                                    <td class="px-3 py-2 font-medium text-gray-900 italic"><?php echo htmlspecialchars($fish['species']); ?></td>
-                                    <td class="px-3 py-2 text-gray-600"><?php echo htmlspecialchars($fish['freshwater_system'] ?? '—'); ?></td>
-                                    <td class="px-3 py-1">
-                                        <input type="hidden" name="bulk_fish_id[]" value="<?php echo $fish['id']; ?>">
-                                        <input type="text" name="bulk_fish_lat[]" placeholder="-15.78" class="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    </td>
-                                    <td class="px-3 py-1">
-                                        <input type="text" name="bulk_fish_lng[]" placeholder="-47.92" class="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    </td>
-                                </tr>
+                    <input type="hidden" name="fish_id" value="<?php echo $editing_fish['id']; ?>">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Especie *</label>
+                            <input type="text" name="species" required value="<?php echo htmlspecialchars($editing_fish['species']); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Habito Alimentar</label>
+                            <select name="habit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                                <option value="">Selecione...</option>
+                                <?php foreach(['Omnivore'=>'Onivoro','Carnivore'=>'Carnivoro','Herbivore'=>'Herbivoro','Insectivore'=>'Insetivoro','Detritivore'=>'Detritivoro','Piscivore'=>'Piscivoro'] as $v=>$l): ?>
+                                <option value="<?php echo $v; ?>" <?php echo ($editing_fish['habit'] === $v) ? 'selected' : ''; ?>><?php echo $l; ?></option>
                                 <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Total Individuos</label>
+                            <input type="number" name="total_individuals" value="<?php echo $editing_fish['total_individuals']; ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">C/ Microplasticos</label>
+                            <input type="number" name="individuals_with_microplastics" value="<?php echo $editing_fish['individuals_with_microplastics']; ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Tipos de Microplasticos</label>
+                            <div class="flex flex-wrap gap-4">
+                                <?php foreach(['fiber'=>'Fibras','film'=>'Filmes','fragment'=>'Fragmentos','foam'=>'Espumas','pellets'=>'Pellets','sphere'=>'Esferas'] as $k=>$l): ?>
+                                <label class="flex items-center gap-1.5 text-sm"><input type="checkbox" name="<?php echo $k; ?>" class="w-4 h-4" <?php echo $editing_fish[$k] ? 'checked' : ''; ?>> <?php echo $l; ?></label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Dimensao Plasticos</label>
+                            <input type="text" name="plastic_dimension" value="<?php echo htmlspecialchars($editing_fish['plastic_dimension'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Sistema de Agua Doce</label>
+                            <input type="text" name="freshwater_system" value="<?php echo htmlspecialchars($editing_fish['freshwater_system'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Latitude</label>
+                            <input type="text" name="latitude" value="<?php echo $editing_fish['latitude']; ?>" placeholder="-23.5505" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Longitude</label>
+                            <input type="text" name="longitude" value="<?php echo $editing_fish['longitude']; ?>" placeholder="-46.6333" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Tecidos Afetados</label>
+                            <input type="text" name="occurrence_tissues" value="<?php echo htmlspecialchars($editing_fish['occurrence_tissues'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Autor(es)</label>
+                            <input type="text" name="author" value="<?php echo htmlspecialchars($editing_fish['author'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Referencia</label>
+                            <textarea name="reference" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"><?php echo htmlspecialchars($editing_fish['reference'] ?? ''); ?></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">DOI</label>
+                            <input type="text" name="doi" value="<?php echo htmlspecialchars($editing_fish['doi'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
                     </div>
-
-                    <div class="mt-4 flex items-center justify-between">
-                        <p class="text-xs text-gray-400">Apenas linhas com ambas coordenadas preenchidas serao atualizadas</p>
-                        <button type="submit" name="bulk_update_fish_coords" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition">
-                            Salvar Coordenadas
-                        </button>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" name="edit_fish" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">Salvar Alteracoes</button>
+                        <a href="admin.php" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition text-center">Cancelar</a>
                     </div>
                 </form>
             </div>
-
-            <script>
-            function filterFishRows() {
-                var q = document.getElementById('fishFilterInput').value.toLowerCase();
-                document.querySelectorAll('.fish-row').forEach(function(row) {
-                    var species = row.getAttribute('data-species');
-                    var system = row.getAttribute('data-system');
-                    row.style.display = (species.indexOf(q) !== -1 || system.indexOf(q) !== -1) ? '' : 'none';
-                });
-            }
-            </script>
+            <script>document.getElementById('editFishForm').scrollIntoView({behavior:'smooth'});</script>
             <?php endif; ?>
 
-            <?php if (count($fish_with_coords) > 0): ?>
-            <!-- Peixes COM coordenadas -->
+            <!-- Status dos peixes -->
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Peixes com Coordenadas <span class="text-sm font-normal text-green-600">(aparecem no mapa)</span></h2>
-                <div class="overflow-x-auto max-h-[400px] overflow-y-auto border rounded-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Todos os Peixes</h2>
+                    <div class="flex gap-3 text-sm">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium"><?php echo count($fish_with_coords); ?> no mapa</span>
+                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full font-medium"><?php echo count($fish_no_coords); ?> sem coords</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium"><?php echo $fish_total; ?> total</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                    <div class="bg-green-500 h-3 rounded-full transition-all" style="width: <?php echo $fish_total > 0 ? round(count($fish_with_coords) / $fish_total * 100) : 0; ?>%"></div>
+                </div>
+
+                <!-- Filtro -->
+                <div class="mb-4">
+                    <input type="text" id="fishListFilter" placeholder="Filtrar por especie, sistema ou habito..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" oninput="filterAllFish()">
+                </div>
+
+                <!-- Tabela completa -->
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto border rounded-lg">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-50 sticky top-0">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
-                                <th class="px-3 py-2 text-left font-semibold text-gray-700 w-8">#</th>
-                                <th class="px-3 py-2 text-left font-semibold text-gray-700">Especie</th>
-                                <th class="px-3 py-2 text-left font-semibold text-gray-700">Sistema</th>
-                                <th class="px-3 py-2 text-left font-semibold text-gray-700">Lat</th>
-                                <th class="px-3 py-2 text-left font-semibold text-gray-700">Lng</th>
+                                <th class="px-2 py-2 text-left font-semibold text-gray-700 w-8">#</th>
+                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Especie</th>
+                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Habito</th>
+                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Sistema</th>
+                                <th class="px-2 py-2 text-center font-semibold text-gray-700">Ind.</th>
+                                <th class="px-2 py-2 text-center font-semibold text-gray-700">C/MP</th>
+                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Coords</th>
+                                <th class="px-2 py-2 text-center font-semibold text-gray-700 w-24">Acoes</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            <?php foreach ($fish_with_coords as $fish): ?>
-                            <tr class="hover:bg-green-50">
-                                <td class="px-3 py-2 text-gray-400"><?php echo $fish['id']; ?></td>
-                                <td class="px-3 py-2 font-medium text-gray-900 italic"><?php echo htmlspecialchars($fish['species']); ?></td>
-                                <td class="px-3 py-2 text-gray-600"><?php echo htmlspecialchars($fish['freshwater_system'] ?? '—'); ?></td>
-                                <td class="px-3 py-2 text-gray-600"><?php echo $fish['latitude']; ?></td>
-                                <td class="px-3 py-2 text-gray-600"><?php echo $fish['longitude']; ?></td>
+                            <?php foreach ($all_fish as $fish): ?>
+                            <tr class="fish-list-row hover:bg-gray-50 transition"
+                                data-search="<?php echo strtolower(htmlspecialchars($fish['species'] . ' ' . ($fish['freshwater_system'] ?? '') . ' ' . ($fish['habit'] ?? ''))); ?>">
+                                <td class="px-2 py-1.5 text-gray-400 text-xs"><?php echo $fish['id']; ?></td>
+                                <td class="px-2 py-1.5 font-medium text-gray-900 italic text-xs"><?php echo htmlspecialchars($fish['species']); ?></td>
+                                <td class="px-2 py-1.5 text-gray-600 text-xs"><?php echo htmlspecialchars($fish['habit'] ?? '—'); ?></td>
+                                <td class="px-2 py-1.5 text-gray-600 text-xs"><?php echo htmlspecialchars($fish['freshwater_system'] ?? '—'); ?></td>
+                                <td class="px-2 py-1.5 text-center text-xs"><?php echo $fish['total_individuals'] ?? 0; ?></td>
+                                <td class="px-2 py-1.5 text-center text-xs"><?php echo $fish['individuals_with_microplastics'] ?? 0; ?></td>
+                                <td class="px-2 py-1.5 text-xs">
+                                    <?php if ($fish['latitude'] && $fish['longitude']): ?>
+                                        <span class="text-green-600" title="<?php echo $fish['latitude'] . ', ' . $fish['longitude']; ?>">&#10003; <?php echo round($fish['latitude'], 2) . ', ' . round($fish['longitude'], 2); ?></span>
+                                    <?php else: ?>
+                                        <span class="text-red-400">Sem coords</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-2 py-1.5 text-center">
+                                    <div class="flex gap-1 justify-center">
+                                        <a href="admin.php?edit_fish_id=<?php echo $fish['id']; ?>#form-fish"
+                                           onclick="showTab('fish')"
+                                           class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition">Editar</a>
+                                        <form method="POST" class="inline" onsubmit="return confirm('Excluir <?php echo htmlspecialchars(addslashes($fish['species'])); ?>?');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                            <input type="hidden" name="fish_id" value="<?php echo $fish['id']; ?>">
+                                            <button type="submit" name="delete_fish" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition">Excluir</button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-            <?php endif; ?>
+
+            <script>
+            function filterAllFish() {
+                var q = document.getElementById('fishListFilter').value.toLowerCase();
+                document.querySelectorAll('.fish-list-row').forEach(function(row) {
+                    row.style.display = row.getAttribute('data-search').indexOf(q) !== -1 ? '' : 'none';
+                });
+            }
+            </script>
         </div>
         <!-- ========== TAB: IMPORTAR CSV ========== -->
         <div id="form-importar" class="tab-content hidden">
