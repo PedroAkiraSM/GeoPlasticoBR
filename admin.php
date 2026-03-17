@@ -13,6 +13,7 @@ require_once __DIR__ . '/config/cms.php';
 $pdo = getDatabaseConnection();
 $message = '';
 $messageType = '';
+$activeTab = $_POST['_tab'] ?? $_GET['tab'] ?? 'users';
 
 // ========================================
 // Processar acoes POST
@@ -463,48 +464,31 @@ $user = getCurrentUser();
 
         <!-- Tab Navigation -->
         <div class="mb-8">
-            <nav class="flex space-x-1 bg-gray-100 rounded-lg p-1">
-                <button onclick="showTab('users')" id="tab-users"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold bg-white shadow text-slate-800">
-                    Usuarios <?php if (count($pending_users) > 0): ?><span class="bg-red-500 text-white rounded-full px-2 py-0.5 text-xs ml-1"><?php echo count($pending_users); ?></span><?php endif; ?>
+            <?php
+            $tabs = [
+                'users' => 'Usuarios' . (count($pending_users) > 0 ? ' <span class="bg-red-500 text-white rounded-full px-2 py-0.5 text-xs ml-1">' . count($pending_users) . '</span>' : ''),
+                'pending_data' => 'Dados Pendentes' . (count($pending_data) > 0 ? ' <span class="bg-orange-500 text-white rounded-full px-2 py-0.5 text-xs ml-1">' . count($pending_data) . '</span>' : ''),
+                'sediment' => '+ Sedimento',
+                'fish' => '+ Peixes',
+                'importar' => 'Importar CSV',
+                'configuracoes' => 'Configuracoes',
+                'blocos' => 'Blocos',
+                'tipos' => 'Tipos',
+                'unidades' => 'Unidades',
+            ];
+            ?>
+            <nav class="flex space-x-1 bg-gray-100 rounded-lg p-1 flex-wrap">
+                <?php foreach ($tabs as $tabKey => $tabLabel): ?>
+                <button onclick="showTab('<?php echo $tabKey; ?>')" id="tab-<?php echo $tabKey; ?>"
+                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold <?php echo $activeTab === $tabKey ? 'bg-white shadow text-slate-800' : 'text-gray-500 hover:text-gray-700'; ?>">
+                    <?php echo $tabLabel; ?>
                 </button>
-                <button onclick="showTab('pending_data')" id="tab-pending_data"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Dados Pendentes <?php if (count($pending_data) > 0): ?><span class="bg-orange-500 text-white rounded-full px-2 py-0.5 text-xs ml-1"><?php echo count($pending_data); ?></span><?php endif; ?>
-                </button>
-                <button onclick="showTab('sediment')" id="tab-sediment"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    + Sedimento
-                </button>
-                <button onclick="showTab('fish')" id="tab-fish"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    + Peixes
-                </button>
-                <button onclick="showTab('importar')" id="tab-importar"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Importar CSV
-                </button>
-                <button onclick="showTab('configuracoes')" id="tab-configuracoes"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Configuracoes
-                </button>
-                <button onclick="showTab('blocos')" id="tab-blocos"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Blocos
-                </button>
-                <button onclick="showTab('tipos')" id="tab-tipos"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Tipos
-                </button>
-                <button onclick="showTab('unidades')" id="tab-unidades"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Unidades
-                </button>
+                <?php endforeach; ?>
             </nav>
         </div>
 
         <!-- ========== TAB: USUARIOS ========== -->
-        <div id="form-users" class="tab-content">
+        <div id="form-users" class="tab-content <?php echo $activeTab !== 'users' ? 'hidden' : ''; ?>">
             <!-- Usuarios pendentes -->
             <?php if (count($pending_users) > 0): ?>
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -601,7 +585,7 @@ $user = getCurrentUser();
         </div>
 
         <!-- ========== TAB: DADOS PENDENTES ========== -->
-        <div id="form-pending_data" class="tab-content hidden">
+        <div id="form-pending_data" class="tab-content <?php echo $activeTab !== 'pending_data' ? 'hidden' : ''; ?>">
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Dados Pendentes de Aprovacao</h2>
                 <?php if (count($pending_data) === 0): ?>
@@ -645,7 +629,7 @@ $user = getCurrentUser();
         </div>
 
         <!-- ========== TAB: SEDIMENTO ========== -->
-        <div id="form-sediment" class="tab-content hidden">
+        <div id="form-sediment" class="tab-content <?php echo $activeTab !== 'sediment' ? 'hidden' : ''; ?>">
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Adicionar Dados de Microplasticos</h2>
                 <form method="POST" class="space-y-6">
@@ -749,7 +733,7 @@ $user = getCurrentUser();
         </div>
 
         <!-- ========== TAB: PEIXES ========== -->
-        <div id="form-fish" class="tab-content hidden">
+        <div id="form-fish" class="tab-content <?php echo $activeTab !== 'fish' ? 'hidden' : ''; ?>">
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Adicionar Dados de Peixes</h2>
                 <form method="POST" class="space-y-6">
@@ -832,7 +816,7 @@ $user = getCurrentUser();
             <div class="bg-yellow-50 border border-yellow-300 rounded-xl shadow-lg p-6 md:p-8 mt-6" id="editFishForm">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-gray-900">Editando: <span class="italic text-blue-700"><?php echo htmlspecialchars($editing_fish['species']); ?></span> <span class="text-sm text-gray-500">(ID <?php echo $editing_fish['id']; ?>)</span></h2>
-                    <a href="admin.php#form-fish" onclick="showTab('fish')" class="text-sm text-gray-500 hover:text-gray-800 font-medium">Cancelar</a>
+                    <a href="admin.php?tab=fish" class="text-sm text-gray-500 hover:text-gray-800 font-medium">Cancelar</a>
                 </div>
                 <form method="POST" class="space-y-4">
                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -902,7 +886,7 @@ $user = getCurrentUser();
                     </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" name="edit_fish" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">Salvar Alteracoes</button>
-                        <a href="admin.php" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition text-center">Cancelar</a>
+                        <a href="admin.php?tab=fish" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition text-center">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -962,8 +946,7 @@ $user = getCurrentUser();
                                 </td>
                                 <td class="px-2 py-1.5 text-center">
                                     <div class="flex gap-1 justify-center">
-                                        <a href="admin.php?edit_fish_id=<?php echo $fish['id']; ?>#form-fish"
-                                           onclick="showTab('fish')"
+                                        <a href="admin.php?tab=fish&edit_fish_id=<?php echo $fish['id']; ?>"
                                            class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition">Editar</a>
                                         <form method="POST" class="inline" onsubmit="return confirm('Excluir <?php echo htmlspecialchars(addslashes($fish['species'])); ?>?');">
                                             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
@@ -989,7 +972,7 @@ $user = getCurrentUser();
             </script>
         </div>
         <!-- ========== TAB: IMPORTAR CSV ========== -->
-        <div id="form-importar" class="tab-content hidden">
+        <div id="form-importar" class="tab-content <?php echo $activeTab !== 'importar' ? 'hidden' : ''; ?>">
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Importar Planilha CSV</h2>
                 <p class="text-sm text-gray-500 mb-6">Suba um arquivo CSV para importar dados em lote. Aceita separador por virgula (,) ou ponto-e-virgula (;).</p>
@@ -1104,22 +1087,22 @@ $user = getCurrentUser();
         </div>
 
         <!-- ========== TAB: CONFIGURACOES ========== -->
-        <div id="form-configuracoes" class="tab-content hidden">
+        <div id="form-configuracoes" class="tab-content <?php echo $activeTab !== 'configuracoes' ? 'hidden' : ''; ?>">
             <?php if (file_exists(__DIR__ . '/admin/tab_configuracoes.php')) include __DIR__ . '/admin/tab_configuracoes.php'; ?>
         </div>
 
         <!-- ========== TAB: BLOCOS ========== -->
-        <div id="form-blocos" class="tab-content hidden">
+        <div id="form-blocos" class="tab-content <?php echo $activeTab !== 'blocos' ? 'hidden' : ''; ?>">
             <?php if (file_exists(__DIR__ . '/admin/tab_blocos.php')) include __DIR__ . '/admin/tab_blocos.php'; ?>
         </div>
 
         <!-- ========== TAB: TIPOS ========== -->
-        <div id="form-tipos" class="tab-content hidden">
+        <div id="form-tipos" class="tab-content <?php echo $activeTab !== 'tipos' ? 'hidden' : ''; ?>">
             <?php if (file_exists(__DIR__ . '/admin/tab_tipos.php')) include __DIR__ . '/admin/tab_tipos.php'; ?>
         </div>
 
         <!-- ========== TAB: UNIDADES ========== -->
-        <div id="form-unidades" class="tab-content hidden">
+        <div id="form-unidades" class="tab-content <?php echo $activeTab !== 'unidades' ? 'hidden' : ''; ?>">
             <?php if (file_exists(__DIR__ . '/admin/tab_unidades.php')) include __DIR__ . '/admin/tab_unidades.php'; ?>
         </div>
     </div>
@@ -1135,7 +1118,29 @@ $user = getCurrentUser();
             const btn = document.getElementById('tab-' + tab);
             btn.classList.add('bg-white', 'shadow', 'text-slate-800');
             btn.classList.remove('text-gray-500');
+            // Persistir tab ativa na URL
+            history.replaceState(null, '', 'admin.php?tab=' + tab + window.location.hash);
         }
+
+        // Ao submeter qualquer form, injetar _tab para voltar na mesma aba
+        document.querySelectorAll('form[method="POST"], form[method="post"]').forEach(function(form) {
+            form.addEventListener('submit', function() {
+                if (!form.querySelector('input[name="_tab"]')) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_tab';
+                    // Detectar qual tab contem este form
+                    var parent = form.closest('.tab-content');
+                    if (parent && parent.id) {
+                        input.value = parent.id.replace('form-', '');
+                    } else {
+                        var params = new URLSearchParams(window.location.search);
+                        input.value = params.get('tab') || 'users';
+                    }
+                    form.appendChild(input);
+                }
+            });
+        });
 
         function updateImportTemplate() {
             var type = document.querySelector('input[name="import_type"]:checked').value;
