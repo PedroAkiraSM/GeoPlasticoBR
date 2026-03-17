@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/auth.php';
 requireLogin();
-$pageTitle = "Sobre o Projeto - GeoPlasticoBR";
+require_once __DIR__ . '/config/cms.php';
+$_sobreBlocks = getBlocks('sobre');
+$pageTitle = "Sobre o Projeto - " . getSetting('site_name', 'GeoPlasticoBR');
 $pageDescription = "Conhea o GeoPlasticoBR: plataforma de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros.";
 include 'includes/header.php';
 ?>
@@ -9,11 +11,10 @@ include 'includes/header.php';
 <!-- Hero -->
 <section class="sobre-hero fade-in">
     <div class="content-container">
-        <span class="section-tag">Sobre o Projeto</span>
-        <h1 class="sobre-title">GeoPlasticoBR</h1>
+        <span class="section-tag"><?php echo htmlspecialchars($_sobreBlocks['hero_tag'] ?? 'Sobre o Projeto'); ?></span>
+        <h1 class="sobre-title"><?php echo htmlspecialchars($_sobreBlocks['hero_title'] ?? 'GeoPlasticoBR'); ?></h1>
         <p class="sobre-subtitle">
-            Uma plataforma cientifica de mapeamento de microplasticos
-            nos ecossistemas aquaticos brasileiros.
+            <?php echo htmlspecialchars($_sobreBlocks['hero_subtitle'] ?? 'Uma plataforma cientifica de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros.'); ?>
         </p>
     </div>
 </section>
@@ -25,17 +26,9 @@ include 'includes/header.php';
             <div class="about-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
-            <h2 class="about-title">O que e o GeoPlasticoBR?</h2>
+            <h2 class="about-title"><?php echo htmlspecialchars($_sobreBlocks['what_title'] ?? 'O que e o GeoPlasticoBR?'); ?></h2>
             <p class="about-text">
-                O GeoPlasticoBR e uma plataforma digital que reune e visualiza dados cientificos sobre a
-                presenca de microplasticos em ecossistemas aquaticos brasileiros. A partir de pesquisas
-                publicadas e revisadas por pares, o projeto compila informacoes de concentracao, localizacao
-                e tipo de microplasticos encontrados em rios, lagos, praias e oceanos do Brasil.
-            </p>
-            <p class="about-text">
-                Microplasticos sao fragmentos de plastico menores que 5mm, praticamente invisiveis a olho nu,
-                mas que representam uma seria ameaca aos ecossistemas aquaticos e a saude humana. Eles provem
-                da degradacao de plasticos maiores, de cosmeticos, tecidos sinteticos e processos industriais.
+                <?php echo htmlspecialchars($_sobreBlocks['what_description'] ?? 'O GeoPlasticoBR e uma plataforma digital que reune e visualiza dados cientificos sobre a presenca de microplasticos em ecossistemas aquaticos brasileiros.'); ?>
             </p>
         </div>
     </div>
@@ -51,23 +44,23 @@ include 'includes/header.php';
         <div class="objectives-grid">
             <div class="objective-card">
                 <div class="objective-number">01</div>
-                <h3>Centralizar Dados</h3>
-                <p>Reunir em uma unica plataforma os dados dispersos em dezenas de publicacoes cientificas sobre microplasticos no Brasil.</p>
+                <h3><?php echo htmlspecialchars($_sobreBlocks['obj1_title'] ?? 'Centralizar Dados'); ?></h3>
+                <p><?php echo htmlspecialchars($_sobreBlocks['obj1_description'] ?? 'Reunir em uma unica plataforma os dados dispersos em dezenas de publicacoes cientificas sobre microplasticos no Brasil.'); ?></p>
             </div>
             <div class="objective-card">
                 <div class="objective-number">02</div>
-                <h3>Visualizar Espacialmente</h3>
-                <p>Permitir a visualizacao geografica dos dados, revelando padroes e areas criticas de contaminacao.</p>
+                <h3><?php echo htmlspecialchars($_sobreBlocks['obj2_title'] ?? 'Visualizar Espacialmente'); ?></h3>
+                <p><?php echo htmlspecialchars($_sobreBlocks['obj2_description'] ?? 'Permitir a visualizacao geografica dos dados, revelando padroes e areas criticas de contaminacao.'); ?></p>
             </div>
             <div class="objective-card">
                 <div class="objective-number">03</div>
-                <h3>Democratizar o Acesso</h3>
-                <p>Tornar dados cientificos acessiveis para pesquisadores, estudantes, gestores ambientais e o publico em geral.</p>
+                <h3><?php echo htmlspecialchars($_sobreBlocks['obj3_title'] ?? 'Democratizar o Acesso'); ?></h3>
+                <p><?php echo htmlspecialchars($_sobreBlocks['obj3_description'] ?? 'Tornar dados cientificos acessiveis para pesquisadores, estudantes, gestores ambientais e o publico em geral.'); ?></p>
             </div>
             <div class="objective-card">
                 <div class="objective-number">04</div>
-                <h3>Apoiar Politicas Publicas</h3>
-                <p>Fornecer evidencias para a formulacao de politicas ambientais e acoes de combate a poluicao plastica.</p>
+                <h3><?php echo htmlspecialchars($_sobreBlocks['obj4_title'] ?? 'Apoiar Politicas Publicas'); ?></h3>
+                <p><?php echo htmlspecialchars($_sobreBlocks['obj4_description'] ?? 'Fornecer evidencias para a formulacao de politicas ambientais e acoes de combate a poluicao plastica.'); ?></p>
             </div>
         </div>
     </div>
@@ -80,16 +73,9 @@ include 'includes/header.php';
             <div class="about-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h2 class="about-title">Metodologia</h2>
+            <h2 class="about-title"><?php echo htmlspecialchars($_sobreBlocks['methodology_title'] ?? 'Metodologia'); ?></h2>
             <p class="about-text">
-                Os dados apresentados no GeoPlasticoBR sao extraidos de artigos cientificos publicados em
-                periodicos revisados por pares. Cada registro inclui informacoes sobre o tipo de ambiente
-                (agua doce ou marinho), ecossistema, ponto de amostragem, coordenadas geograficas,
-                concentracao de microplasticos, matriz analisada (sedimento ou agua) e a referencia bibliografica.
-            </p>
-            <p class="about-text">
-                Os dados passam por um processo de curadoria antes de serem publicados no mapa, garantindo
-                a qualidade e confiabilidade das informacoes apresentadas.
+                <?php echo htmlspecialchars($_sobreBlocks['methodology_description'] ?? 'Todos os dados sao submetidos a revisao por pares antes de serem publicados na plataforma.'); ?>
             </p>
         </div>
     </div>

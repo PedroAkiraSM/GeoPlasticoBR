@@ -1,27 +1,34 @@
+<?php
+require_once __DIR__ . '/../config/cms.php';
+$_siteName = getSetting('site_name', 'GeoPlasticoBR');
+$_siteDesc = getSetting('site_description', 'Plataforma de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros. Dados cientificos verificados sobre poluicao plastica.');
+$_logoPath = getSetting('logo_path', '');
+$_versionLabel = getSetting('version_label', 'Beta');
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($pageTitle) ? $pageTitle : 'GeoPlasticoBR'; ?></title>
-    <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Plataforma de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros. Dados cientificos verificados sobre poluicao plastica.'; ?>">
+    <title><?php echo isset($pageTitle) ? $pageTitle : $_siteName; ?></title>
+    <meta name="description" content="<?php echo isset($pageDescription) ? htmlspecialchars($pageDescription) : htmlspecialchars($_siteDesc); ?>">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="<?php echo isset($pageTitle) ? $pageTitle : 'GeoPlasticoBR'; ?>">
-    <meta property="og:description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Plataforma de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros.'; ?>">
+    <meta property="og:title" content="<?php echo isset($pageTitle) ? $pageTitle : htmlspecialchars($_siteName); ?>">
+    <meta property="og:description" content="<?php echo isset($pageDescription) ? htmlspecialchars($pageDescription) : htmlspecialchars($_siteDesc); ?>">
     <meta property="og:url" content="https://geoplasticobr.com<?php echo $_SERVER['REQUEST_URI']; ?>">
     <meta property="og:image" content="https://geoplasticobr.com/assets/images/og-image.svg">
-    <meta property="og:site_name" content="GeoPlasticoBR">
+    <meta property="og:site_name" content="<?php echo htmlspecialchars($_siteName); ?>">
     <meta property="og:locale" content="pt_BR">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<?php echo isset($pageTitle) ? $pageTitle : 'GeoPlasticoBR'; ?>">
-    <meta name="twitter:description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Plataforma de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros.'; ?>">
+    <meta name="twitter:title" content="<?php echo isset($pageTitle) ? $pageTitle : htmlspecialchars($_siteName); ?>">
+    <meta name="twitter:description" content="<?php echo isset($pageDescription) ? htmlspecialchars($pageDescription) : htmlspecialchars($_siteDesc); ?>">
     <meta name="twitter:image" content="https://geoplasticobr.com/assets/images/og-image.svg">
 
     <link href="/assets/css/output.css?v=<?php echo time(); ?>" rel="stylesheet">
@@ -38,7 +45,7 @@
     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
     <nav id="mainNav" class="site-nav <?php echo !empty($heroPage) ? 'nav-transparent' : ''; ?>">
         <div class="nav-inner">
-            <a href="/" class="nav-brand">GeoPlasticoBR <span class="beta-badge">Beta</span></a>
+            <a href="/" class="nav-brand"><?php if ($_logoPath): ?><img src="/<?php echo htmlspecialchars($_logoPath); ?>" alt="<?php echo htmlspecialchars($_siteName); ?>" class="nav-logo"><?php else: ?><?php echo htmlspecialchars($_siteName); ?><?php endif; ?> <?php if ($_versionLabel && $_versionLabel !== 'Estavel'): ?><span class="beta-badge"><?php echo htmlspecialchars($_versionLabel); ?></span><?php endif; ?></a>
             <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
@@ -113,6 +120,7 @@
     }
 
     .nav-brand:hover { opacity: 0.8; }
+    .nav-logo { height: 28px; vertical-align: middle; margin-right: 4px; }
 
     .beta-badge {
         display: inline-block;

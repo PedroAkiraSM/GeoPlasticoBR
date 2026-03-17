@@ -1,10 +1,27 @@
     <!-- Footer -->
+    <?php
+    $_footerSiteName = getSetting('site_name', 'GeoPlasticoBR');
+    $_footerDesc = getSetting('site_description', 'Plataforma de mapeamento cientifico de microplasticos nos ecossistemas aquaticos brasileiros.');
+    $_footerEmail = getSetting('contact_email', 'contato@geoplasticobr.com');
+    $_footerText = getSetting('footer_text', 'Dados cientificos verificados por pares | Acesso aberto');
+    $_footerVersion = getSetting('version_label', 'Beta');
+    $_fbUrl = getSetting('facebook_url', '');
+    $_igUrl = getSetting('instagram_url', '');
+    $_liUrl = getSetting('linkedin_url', '');
+    ?>
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <h3>GeoPlasticoBR</h3>
-                    <p>Plataforma de mapeamento cientifico de microplasticos nos ecossistemas aquaticos brasileiros.</p>
+                    <h3><?php echo htmlspecialchars($_footerSiteName); ?></h3>
+                    <p><?php echo htmlspecialchars($_footerDesc); ?></p>
+                    <?php if ($_fbUrl || $_igUrl || $_liUrl): ?>
+                    <div class="footer-social">
+                        <?php if ($_fbUrl): ?><a href="<?php echo htmlspecialchars($_fbUrl); ?>" target="_blank" rel="noopener">Facebook</a><?php endif; ?>
+                        <?php if ($_igUrl): ?><a href="<?php echo htmlspecialchars($_igUrl); ?>" target="_blank" rel="noopener">Instagram</a><?php endif; ?>
+                        <?php if ($_liUrl): ?><a href="<?php echo htmlspecialchars($_liUrl); ?>" target="_blank" rel="noopener">LinkedIn</a><?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <div class="footer-links">
                     <h4>Navegacao</h4>
@@ -22,15 +39,17 @@
                 <div class="footer-links">
                     <h4>Contato</h4>
                     <p class="footer-contact-text">Para duvidas, sugestoes ou parcerias entre em contato pelo email:</p>
-                    <a href="mailto:contato@geoplasticobr.com">contato@geoplasticobr.com</a>
+                    <a href="mailto:<?php echo htmlspecialchars($_footerEmail); ?>"><?php echo htmlspecialchars($_footerEmail); ?></a>
                 </div>
             </div>
+            <?php if ($_footerVersion && $_footerVersion !== 'Estavel'): ?>
             <div class="footer-beta-notice">
-                <p>🚧 Este site esta em fase <strong>Beta</strong> — funcionalidades e dados podem mudar sem aviso previo.</p>
+                <p>🚧 Este site esta em fase <strong><?php echo htmlspecialchars($_footerVersion); ?></strong> — funcionalidades e dados podem mudar sem aviso previo.</p>
             </div>
+            <?php endif; ?>
             <div class="footer-bottom">
-                <p>&copy; <?php echo date('Y'); ?> GeoPlasticoBR. Todos os direitos reservados.</p>
-                <p class="footer-credits">Dados cientificos verificados por pares | Acesso aberto</p>
+                <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($_footerSiteName); ?>. Todos os direitos reservados.</p>
+                <p class="footer-credits"><?php echo htmlspecialchars($_footerText); ?></p>
             </div>
         </div>
     </footer>
@@ -69,6 +88,12 @@
         transition: color 0.2s;
     }
     .footer-contact-text { cursor: default; }
+    .footer-social { display: flex; gap: 12px; margin-top: 0.75rem; }
+    .footer-social a {
+        font-size: 0.82rem; color: rgba(148, 163, 184, 0.5);
+        text-decoration: none; transition: color 0.2s;
+    }
+    .footer-social a:hover { color: #60A5FA; }
     .footer-links a:hover { color: #60A5FA; }
     .footer-bottom {
         border-top: 1px solid rgba(148, 163, 184, 0.06);

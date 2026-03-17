@@ -3,6 +3,7 @@ require_once __DIR__ . '/auth.php';
 requireLogin();
 
 require_once 'config/database.php';
+require_once __DIR__ . '/config/cms.php';
 
 $message = '';
 $messageType = '';
@@ -98,25 +99,18 @@ include 'includes/header.php';
                         <label>Tipo de Ambiente <span class="req">*</span></label>
                         <select name="tipo_ambiente" required>
                             <option value="">Selecione...</option>
-                            <option value="Doce">Agua Doce</option>
-                            <option value="Marinho">Marinho</option>
+                            <?php foreach (getDataTypes('ambiente') as $dt): ?>
+                            <option value="<?php echo htmlspecialchars($dt['name']); ?>"><?php echo htmlspecialchars($dt['name']); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-field">
                         <label>Ecossistema</label>
                         <select name="ecossistema">
                             <option value="">Selecione...</option>
-                            <option value="Rio">Rio</option>
-                            <option value="Lago">Lago</option>
-                            <option value="Bacia">Bacia</option>
-                            <option value="Córrego">Corrego</option>
-                            <option value="Praia">Praia</option>
-                            <option value="Estuário">Estuario</option>
-                            <option value="Ilha">Ilha</option>
-                            <option value="Região costeira">Regiao costeira</option>
-                            <option value="Plataforma">Plataforma</option>
-                            <option value="Oceano aberto">Oceano aberto</option>
-                            <option value="Laguna">Laguna</option>
+                            <?php foreach (getDataTypes('ecossistema') as $dt): ?>
+                            <option value="<?php echo htmlspecialchars($dt['name']); ?>"><?php echo htmlspecialchars($dt['name']); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
@@ -125,20 +119,18 @@ include 'includes/header.php';
                         <label>Matriz</label>
                         <select name="matriz">
                             <option value="">Selecione...</option>
-                            <option value="Sedimento">Sedimento</option>
-                            <option value="Água">Agua</option>
+                            <?php foreach (getDataTypes('matriz') as $dt): ?>
+                            <option value="<?php echo htmlspecialchars($dt['name']); ?>"><?php echo htmlspecialchars($dt['name']); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-field">
                         <label>Unidade</label>
                         <select name="unidade">
                             <option value="">Selecione...</option>
-                            <option value="part/Kg">part/Kg</option>
-                            <option value="part/m³">part/m3</option>
-                            <option value="part/m²">part/m2</option>
-                            <option value="part/L">part/L</option>
-                            <option value="part/mL">part/mL</option>
-                            <option value="part/cm²">part/cm2</option>
+                            <?php foreach (getUnitsWithThresholds() as $u): ?>
+                            <option value="<?php echo htmlspecialchars($u['name']); ?>"><?php echo htmlspecialchars($u['name']); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>

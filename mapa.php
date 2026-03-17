@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/auth.php';
 requireLogin();
+require_once __DIR__ . '/config/cms.php';
+$_mapaBlocks = getBlocks('mapa');
+$_thresholdUnits = getUnitsWithThresholds();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -23,9 +26,9 @@ requireLogin();
     <!-- Top Bar -->
     <header class="map-topbar">
         <div class="topbar-left">
-            <a href="/" class="topbar-brand">GeoPlasticoBR</a>
+            <a href="/" class="topbar-brand"><?php echo htmlspecialchars($_mapaBlocks['brand'] ?? getSetting('site_name', 'GeoPlasticoBR')); ?></a>
             <span class="topbar-sep"></span>
-            <span class="topbar-page">Mapa Interativo</span>
+            <span class="topbar-page"><?php echo htmlspecialchars($_mapaBlocks['page_label'] ?? 'Mapa Interativo'); ?></span>
         </div>
         <div class="topbar-stats">
             <div class="topbar-stat">
@@ -72,25 +75,18 @@ requireLogin();
                 <label class="filter-label">Ecossistema</label>
                 <select class="filter-select" id="filterEcossistema">
                     <option value="">Todos</option>
-                    <option value="Rio">Rio</option>
-                    <option value="Lago">Lago</option>
-                    <option value="Bacia">Bacia</option>
-                    <option value="Córrego">Corrego</option>
-                    <option value="Praia">Praia</option>
-                    <option value="Estuário">Estuario</option>
-                    <option value="Ilha">Ilha</option>
-                    <option value="Região costeira">Regiao costeira</option>
-                    <option value="Plataforma">Plataforma</option>
-                    <option value="Oceano aberto">Oceano aberto</option>
-                    <option value="Laguna">Laguna</option>
+                    <?php foreach (getDataTypes('ecossistema') as $dt): ?>
+                    <option value="<?php echo htmlspecialchars($dt['name']); ?>"><?php echo htmlspecialchars($dt['name']); ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="filter-section">
                 <label class="filter-label">Matriz</label>
                 <div class="filter-chips" id="filterMatriz">
                     <button class="chip active" data-value="">Todas</button>
-                    <button class="chip" data-value="Sedimento">Sedimento</button>
-                    <button class="chip" data-value="Água">Agua</button>
+                    <?php foreach (getDataTypes('matriz') as $dt): ?>
+                    <button class="chip" data-value="<?php echo htmlspecialchars($dt['name']); ?>"><?php echo htmlspecialchars($dt['name']); ?></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <div class="filter-section">
@@ -128,11 +124,16 @@ requireLogin();
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="legend-content" id="legendContent">
-            <div class="legend-item"><span class="legend-dot" style="background:#00CC88;"></span><span>0 - 1.000 (Baixa)</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#FFD700;"></span><span>1.000 - 3.000 (Media)</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span>3.000 - 5.000 (Elevada)</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#FF6600;"></span><span>5.000 - 8.000 (Alta)</span></div>
-            <div class="legend-item"><span class="legend-dot" style="background:#CC0000;"></span><span>&gt; 8.000 (Critica)</span></div>
+            <?php
+            $levelLabels = ['baixo' => 'Baixa', 'medio' => 'Media', 'elevado' => 'Elevada', 'alto' => 'Alta', 'critico' => 'Critica'];
+            if (!empty($_thresholdUnits)):
+                foreach ($_thresholdUnits[0]['thresholds'] as $t):
+                    $min = number_format((float)$t['min_value'], 0, ',', '.');
+                    $max = $t['max_value'] !== null ? number_format((float)$t['max_value'], 0, ',', '.') : null;
+                    $label = $levelLabels[$t['level']] ?? $t['level'];
+            ?>
+            <div class="legend-item"><span class="legend-dot" style="background:<?php echo htmlspecialchars($t['color']); ?>;"></span><span><?php echo $max !== null ? "$min - $max ($label)" : "&gt; $min ($label)"; ?></span></div>
+            <?php endforeach; endif; ?>
         </div>
     </div>
 
@@ -155,6 +156,9 @@ requireLogin();
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script>
+    window.GEO_THRESHOLDS = <?php echo json_encode($_thresholdUnits, JSON_UNESCAPED_UNICODE); ?>;
+    </script>
     <script src="/js/map_v2.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

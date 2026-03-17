@@ -16,7 +16,10 @@ if ($pdo) {
     } catch (Exception $e) {}
 }
 
-$pageTitle = "GeoPlasticoBR - Mapeamento de Microplasticos no Brasil";
+require_once __DIR__ . '/config/cms.php';
+$_homeBlocks = getBlocks('home');
+
+$pageTitle = getSetting('site_name', 'GeoPlasticoBR') . " - Mapeamento de Microplasticos no Brasil";
 $heroPage = true;
 include 'includes/header.php';
 ?>
@@ -36,7 +39,7 @@ include 'includes/header.php';
             <span class="hero-title-main">PLASTICO</span>
             <span class="hero-title-accent">BR</span>
         </h1>
-        <p class="hero-subtitle">Mapeando a poluicao invisivel nos ecossistemas aquaticos brasileiros</p>
+        <p class="hero-subtitle"><?php echo htmlspecialchars($_homeBlocks['hero_subtitle'] ?? 'Mapeando a poluicao invisivel nos ecossistemas aquaticos brasileiros'); ?></p>
         <div class="hero-cta">
             <a href="/mapa.php" class="hero-btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -44,9 +47,9 @@ include 'includes/header.php';
                     <line x1="8" y1="2" x2="8" y2="18"></line>
                     <line x1="16" y1="6" x2="16" y2="22"></line>
                 </svg>
-                Explorar Mapa
+                <?php echo htmlspecialchars($_homeBlocks['hero_cta_primary'] ?? 'Explorar Mapa'); ?>
             </a>
-            <a href="/sobre.php" class="hero-btn-secondary">Sobre o Projeto</a>
+            <a href="/sobre.php" class="hero-btn-secondary"><?php echo htmlspecialchars($_homeBlocks['hero_cta_secondary'] ?? 'Sobre o Projeto'); ?></a>
         </div>
     </div>
 
@@ -60,29 +63,28 @@ include 'includes/header.php';
 <section class="content-section fade-in">
     <div class="content-container">
         <div class="section-header">
-            <span class="section-tag">O Problema</span>
-            <h2 class="section-title">Microplasticos</h2>
+            <span class="section-tag"><?php echo htmlspecialchars($_homeBlocks['problem_tag'] ?? 'O Problema'); ?></span>
+            <h2 class="section-title"><?php echo htmlspecialchars($_homeBlocks['problem_title'] ?? 'Microplasticos'); ?></h2>
             <p class="section-desc">
-                Fragmentos de plastico menores que <strong>5mm</strong> contaminam silenciosamente nossos oceanos,
-                rios e lagos. Praticamente invisiveis a olho nu, mas com impacto imenso nos ecossistemas aquaticos.
+                <?php echo htmlspecialchars($_homeBlocks['problem_description'] ?? 'Fragmentos de plastico menores que 5mm contaminam silenciosamente nossos oceanos, rios e lagos.'); ?>
             </p>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number"><?php echo $statsPoints; ?>+</div>
-                <div class="stat-label">Pontos de Coleta</div>
-                <div class="stat-desc">Mapeados em todo o Brasil</div>
+                <div class="stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos de Coleta'); ?></div>
+                <div class="stat-desc"><?php echo htmlspecialchars($_homeBlocks['stats_desc_1'] ?? 'Mapeados em todo o Brasil'); ?></div>
             </div>
             <div class="stat-card">
                 <div class="stat-number"><?php echo $statsEcosystems; ?></div>
-                <div class="stat-label">Ecossistemas</div>
-                <div class="stat-desc">Tipos de ambientes monitorados</div>
+                <div class="stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Ecossistemas'); ?></div>
+                <div class="stat-desc"><?php echo htmlspecialchars($_homeBlocks['stats_desc_2'] ?? 'Tipos de ambientes monitorados'); ?></div>
             </div>
             <div class="stat-card">
                 <div class="stat-number"><?php echo $statsRecords; ?></div>
-                <div class="stat-label">Registros Cientificos</div>
-                <div class="stat-desc">Dados verificados por pares</div>
+                <div class="stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros Cientificos'); ?></div>
+                <div class="stat-desc"><?php echo htmlspecialchars($_homeBlocks['stats_desc_3'] ?? 'Dados verificados por pares'); ?></div>
             </div>
         </div>
     </div>
@@ -93,8 +95,8 @@ include 'includes/header.php';
     <div class="content-container">
         <div class="feature-block">
             <div class="feature-text">
-                <span class="section-tag">Ferramenta Principal</span>
-                <h2 class="section-title">Mapa Interativo</h2>
+                <span class="section-tag"><?php echo htmlspecialchars($_homeBlocks['feature_tag'] ?? 'Ferramenta Principal'); ?></span>
+                <h2 class="section-title"><?php echo htmlspecialchars($_homeBlocks['feature_title'] ?? 'Mapa Interativo'); ?></h2>
                 <p class="section-desc">
                     Visualize em tempo real a distribuicao de microplasticos nos rios, lagos e oceanos brasileiros.
                     Navegue por centenas de pontos de coleta, alterne entre visualizacoes e acesse dados cientificos completos.
@@ -149,7 +151,7 @@ include 'includes/header.php';
     <div class="content-container">
         <div class="section-header">
             <span class="section-tag">Nossa Missao</span>
-            <h2 class="section-title">Democratizar dados cientificos</h2>
+            <h2 class="section-title"><?php echo htmlspecialchars($_homeBlocks['mission_title'] ?? 'Democratizar dados cientificos'); ?></h2>
         </div>
 
         <div class="mission-grid">
@@ -191,9 +193,9 @@ include 'includes/header.php';
 <!-- CTA Final -->
 <section class="cta-section fade-in">
     <div class="content-container" style="text-align: center;">
-        <h2 class="cta-title">Pronto para Explorar?</h2>
+        <h2 class="cta-title"><?php echo htmlspecialchars($_homeBlocks['cta_title'] ?? 'Pronto para Explorar?'); ?></h2>
         <p class="cta-desc">
-            Descubra a distribuicao de microplasticos nos ecossistemas aquaticos brasileiros.
+            <?php echo htmlspecialchars($_homeBlocks['cta_description'] ?? 'Descubra a distribuicao de microplasticos nos ecossistemas aquaticos brasileiros.'); ?>
         </p>
         <div class="hero-cta" style="justify-content: center;">
             <a href="/mapa.php" class="hero-btn-primary">
@@ -734,9 +736,22 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(r) { return r.json(); })
             .then(function(res) {
                 if (res.success && res.data) {
+                    var thresholds = res.thresholds && res.thresholds.length > 0 ? res.thresholds[0].thresholds : null;
+                    function getPreviewColor(val) {
+                        if (thresholds) {
+                            for (var i = 0; i < thresholds.length; i++) {
+                                var t = thresholds[i];
+                                var min = parseFloat(t.min_value);
+                                var max = t.max_value !== null ? parseFloat(t.max_value) : Infinity;
+                                if (val >= min && val < max) return t.color;
+                            }
+                            return '#6b7280';
+                        }
+                        return val < 1000 ? '#00CC88' : val < 3000 ? '#FFD700' : val < 5000 ? '#FFA500' : val < 8000 ? '#FF6600' : '#CC0000';
+                    }
                     res.data.forEach(function(d) {
                         if (d.latitude && d.longitude) {
-                            var color = d.concentration_value < 1000 ? '#00CC88' : d.concentration_value < 3000 ? '#FFD700' : d.concentration_value < 5000 ? '#FFA500' : d.concentration_value < 8000 ? '#FF6600' : '#CC0000';
+                            var color = getPreviewColor(d.concentration_value);
                             L.circleMarker([d.latitude, d.longitude], {
                                 radius: 4,
                                 fillColor: color,

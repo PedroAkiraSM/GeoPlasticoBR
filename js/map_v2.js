@@ -22,8 +22,23 @@
 
     var API_URL = '/api/get_microplastics.php';
 
-    // ===== COLORS =====
+    // ===== COLORS (dynamic from CMS thresholds) =====
+    var _thresholds = (window.GEO_THRESHOLDS && window.GEO_THRESHOLDS.length > 0)
+        ? window.GEO_THRESHOLDS[0].thresholds : null;
+
+    var _levelLabels = { baixo: 'Baixa', medio: 'Media', elevado: 'Elevada', alto: 'Alta', critico: 'Critica' };
+
     function getColor(val) {
+        if (_thresholds) {
+            for (var i = 0; i < _thresholds.length; i++) {
+                var t = _thresholds[i];
+                var min = parseFloat(t.min_value);
+                var max = t.max_value !== null ? parseFloat(t.max_value) : Infinity;
+                if (val >= min && val < max) return t.color;
+            }
+            return '#6b7280';
+        }
+        // Fallback
         if (val < 1000) return '#00CC88';
         if (val < 3000) return '#FFD700';
         if (val < 5000) return '#FFA500';
@@ -32,6 +47,15 @@
     }
 
     function getLevel(val) {
+        if (_thresholds) {
+            for (var i = 0; i < _thresholds.length; i++) {
+                var t = _thresholds[i];
+                var min = parseFloat(t.min_value);
+                var max = t.max_value !== null ? parseFloat(t.max_value) : Infinity;
+                if (val >= min && val < max) return _levelLabels[t.level] || t.level;
+            }
+            return 'Desconhecido';
+        }
         if (val < 1000) return 'Baixa';
         if (val < 3000) return 'Media';
         if (val < 5000) return 'Elevada';
@@ -160,7 +184,13 @@
                 blur: 20,
                 maxZoom: 10,
                 max: 1,
-                gradient: {
+                gradient: _thresholds ? (function() {
+                    var g = {};
+                    for (var i = 0; i < _thresholds.length; i++) {
+                        g[((i + 1) / _thresholds.length).toFixed(1)] = _thresholds[i].color;
+                    }
+                    return g;
+                })() : {
                     0.2: '#00CC88',
                     0.4: '#FFD700',
                     0.6: '#FFA500',

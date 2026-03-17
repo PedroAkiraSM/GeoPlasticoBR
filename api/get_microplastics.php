@@ -6,6 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Cache-Control: no-cache, must-revalidate');
 
 require_once '../config/database.php';
+require_once '../config/cms.php';
 
 function getMicroplastics($filters = []) {
     $pdo = getDatabaseConnection();
@@ -112,4 +113,5 @@ if (isset($_GET['max_concentration'])) $filters['max_concentration'] = $_GET['ma
 if (isset($_GET['limit'])) $filters['limit'] = $_GET['limit'];
 
 $response = getMicroplastics($filters);
+$response['thresholds'] = getUnitsWithThresholds();
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
