@@ -473,29 +473,30 @@ body {
    GLASS CARD — Light Liquid Glass
    ================================================================ */
 .lg-glass {
-    background: var(--lg-glass-bg);
-    border: 1px solid var(--lg-glass-border);
-    border-radius: var(--lg-radius);
-    padding: 28px;
-    position: relative; overflow: hidden;
-    backdrop-filter: blur(var(--lg-glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--lg-glass-blur)) saturate(150%);
-    transition: all 0.5s var(--lg-ease);
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(0, 80, 120, 0.12) !important;
+    border-radius: var(--lg-radius) !important;
+    padding: 28px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(25px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(150%) !important;
+    transition: all 0.5s var(--lg-ease) !important;
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.06),
-        0 1px 3px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 
 .lg-glass:hover {
-    background: var(--lg-glass-bg-hover);
-    border-color: var(--lg-glass-border-hover);
-    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(8, 145, 178, 0.25) !important;
+    transform: translateY(-4px) !important;
     box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.08),
-        0 4px 12px rgba(0, 0, 0, 0.04),
-        0 0 0 1px rgba(8, 145, 178, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        0 16px 48px rgba(0, 0, 0, 0.1),
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(8, 145, 178, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
 }
 
 /* Glass shine */
@@ -515,16 +516,18 @@ body {
 
 .lg-glass > *:not(.lg-glass__shine) { position: relative; z-index: 2; }
 
-/* Hero glass card (dark context) */
+/* Hero glass card (dark context — opacity controlled by GSAP) */
 .lg-glass--hero {
-    width: 360px; flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    width: 360px !important;
+    flex-shrink: 0 !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
     box-shadow:
         0 24px 80px rgba(0, 0, 0, 0.3),
         0 8px 24px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25);
-    opacity: 0; transform: translateY(30px);
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    opacity: 0;
+    transform: translateY(30px);
 }
 .lg-glass--hero::before {
     background: linear-gradient(135deg,
