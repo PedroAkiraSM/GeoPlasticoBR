@@ -10,9 +10,9 @@ $statsRecords = 0;
 $statsEcosystems = 0;
 if ($pdo) {
     try {
-        $statsPoints = (int)$pdo->query("SELECT COUNT(*) FROM microplastics_sediment WHERE approved = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL")->fetchColumn();
-        $statsRecords = (int)$pdo->query("SELECT COUNT(*) FROM microplastics_sediment WHERE approved = 1")->fetchColumn();
-        $statsEcosystems = (int)$pdo->query("SELECT COUNT(DISTINCT ecossistema) FROM microplastics_sediment WHERE approved = 1 AND ecossistema IS NOT NULL")->fetchColumn();
+        $statsPoints = (int)$pdo->query("SELECT COUNT(*) FROM samples WHERE approved = 1 AND latitude IS NOT NULL AND longitude IS NOT NULL")->fetchColumn();
+        $statsRecords = (int)$pdo->query("SELECT COUNT(*) FROM samples WHERE approved = 1")->fetchColumn();
+        $statsEcosystems = (int)$pdo->query("SELECT COUNT(*) FROM sample_categories WHERE is_active = 1")->fetchColumn();
     } catch (Exception $e) {}
 }
 
@@ -24,188 +24,144 @@ $heroPage = true;
 include 'includes/header.php';
 ?>
 
+<!-- ============ FLOATING ORBS (Background Light Sources) ============ -->
+<div class="lg-orbs" aria-hidden="true">
+    <div class="lg-orb lg-orb--1"></div>
+    <div class="lg-orb lg-orb--2"></div>
+    <div class="lg-orb lg-orb--3"></div>
+    <div class="lg-orb lg-orb--4"></div>
+</div>
+
 <!-- ============ HERO SECTION ============ -->
-<section class="hp-hero">
-    <div class="hp-hero__video-wrap">
-        <video autoplay muted loop playsinline preload="metadata" class="hp-hero__video" id="heroVideo">
+<section class="lg-hero">
+    <div class="lg-hero__bg">
+        <video autoplay muted loop playsinline preload="metadata" class="lg-hero__video" id="heroVideo">
             <source src="/videos/hero-bg.mp4" type="video/mp4">
         </video>
-        <div class="hp-hero__overlay"></div>
-        <div class="hp-hero__color-wash"></div>
-        <div class="hp-hero__vignette"></div>
+        <div class="lg-hero__overlay"></div>
     </div>
 
-    <!-- Decorative grid lines -->
-    <div class="hp-hero__grid-lines">
-        <span></span><span></span><span></span><span></span><span></span>
-    </div>
-
-    <!-- Main hero content - left aligned like reference -->
-    <div class="hp-hero__inner">
-        <div class="hp-hero__content" data-anim="stagger">
-            <div class="hp-hero__badge">
-                <span class="hp-hero__badge-dot"></span>
-                Monitoramento Ambiental em Tempo Real
+    <div class="lg-hero__inner">
+        <div class="lg-hero__content" data-anim="stagger">
+            <div class="lg-hero__badge">
+                <span class="lg-hero__badge-dot"></span>
+                Monitoramento Ambiental
             </div>
-            <h1 class="hp-hero__title">
-                <span class="hp-hero__title-line">MAPEANDO A</span>
-                <span class="hp-hero__title-line hp-hero__title-line--accent">POLUICAO</span>
-                <span class="hp-hero__title-line">INVISIVEL</span>
+            <h1 class="lg-hero__title">
+                Mapeando a<br>
+                <span class="lg-hero__title--glow">poluicao invisivel</span>
             </h1>
-            <p class="hp-hero__desc"><?php echo htmlspecialchars($_homeBlocks['hero_subtitle'] ?? 'Mapeando a poluicao invisivel nos ecossistemas aquaticos brasileiros'); ?></p>
-            <div class="hp-hero__actions">
-                <a href="/mapa.php" class="hp-btn hp-btn--primary">
+            <p class="lg-hero__desc"><?php echo htmlspecialchars($_homeBlocks['hero_subtitle'] ?? 'Plataforma cientifica de mapeamento de microplasticos nos ecossistemas aquaticos brasileiros.'); ?></p>
+            <div class="lg-hero__actions">
+                <a href="/mapa.php" class="lg-btn lg-btn--primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
                     <span><?php echo htmlspecialchars($_homeBlocks['hero_cta_primary'] ?? 'Explorar Mapa'); ?></span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
-                <a href="/sobre.php" class="hp-btn hp-btn--ghost"><?php echo htmlspecialchars($_homeBlocks['hero_cta_secondary'] ?? 'Sobre o Projeto'); ?></a>
+                <a href="/sobre.php" class="lg-btn lg-btn--glass"><?php echo htmlspecialchars($_homeBlocks['hero_cta_secondary'] ?? 'Sobre o Projeto'); ?></a>
             </div>
         </div>
 
-        <!-- Floating card overlay - like Targo's consultation card -->
-        <div class="hp-hero__float-card" data-anim="float">
-            <div class="hp-hero__float-card-header">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                <span>Dados ao Vivo</span>
+        <!-- Liquid Glass Stats Card -->
+        <div class="lg-glass-card lg-glass-card--hero" id="heroGlassCard">
+            <div class="lg-glass-card__shine"></div>
+            <div class="lg-glass-card__header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Dados em Tempo Real
             </div>
-            <div class="hp-hero__float-stats">
-                <div class="hp-hero__float-stat">
-                    <span class="hp-hero__float-stat-num" data-count="<?php echo $statsPoints; ?>">0</span>
-                    <span class="hp-hero__float-stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos Mapeados'); ?></span>
+            <div class="lg-glass-card__stats">
+                <div class="lg-glass-card__stat">
+                    <span class="lg-glass-card__num" data-count="<?php echo $statsPoints; ?>">0</span>
+                    <span class="lg-glass-card__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos'); ?></span>
                 </div>
-                <div class="hp-hero__float-divider"></div>
-                <div class="hp-hero__float-stat">
-                    <span class="hp-hero__float-stat-num" data-count="<?php echo $statsEcosystems; ?>">0</span>
-                    <span class="hp-hero__float-stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Ecossistemas'); ?></span>
+                <div class="lg-glass-card__divider"></div>
+                <div class="lg-glass-card__stat">
+                    <span class="lg-glass-card__num" data-count="<?php echo $statsEcosystems; ?>">0</span>
+                    <span class="lg-glass-card__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Categorias'); ?></span>
                 </div>
-                <div class="hp-hero__float-divider"></div>
-                <div class="hp-hero__float-stat">
-                    <span class="hp-hero__float-stat-num" data-count="<?php echo $statsRecords; ?>">0</span>
-                    <span class="hp-hero__float-stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros'); ?></span>
+                <div class="lg-glass-card__divider"></div>
+                <div class="lg-glass-card__stat">
+                    <span class="lg-glass-card__num" data-count="<?php echo $statsRecords; ?>">0</span>
+                    <span class="lg-glass-card__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros'); ?></span>
                 </div>
             </div>
-            <a href="/mapa.php" class="hp-hero__float-cta">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            <a href="/mapa.php" class="lg-glass-card__cta">
                 Abrir Mapa Interativo
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
         </div>
     </div>
 
-    <!-- Bottom scroll hint -->
-    <div class="hp-hero__scroll">
-        <div class="hp-hero__scroll-line"></div>
-        <span>SCROLL</span>
+    <div class="lg-hero__scroll">
+        <div class="lg-hero__scroll-line"></div>
     </div>
 </section>
 
-<!-- ============ PROBLEM SECTION ============ -->
-<div class="hp-divider">
-    <div class="hp-divider__inner">
-        <span class="hp-divider__num">01</span>
-        <span class="hp-divider__line"></span>
-        <span class="hp-divider__label">O Problema</span>
-        <span class="hp-divider__line"></span>
-    </div>
-</div>
-<section class="hp-section hp-section--problem fade-in">
-    <div class="hp-container">
-        <div class="hp-problem">
-            <div class="hp-problem__text">
-                <span class="hp-tag"><?php echo htmlspecialchars($_homeBlocks['problem_tag'] ?? 'O Problema'); ?></span>
-                <h2 class="hp-heading"><?php echo htmlspecialchars($_homeBlocks['problem_title'] ?? 'Microplasticos estao em toda parte'); ?></h2>
-                <p class="hp-text">
+<!-- ============ PROBLEM / CONTEXT ============ -->
+<section class="lg-section" id="problema">
+    <div class="lg-container">
+        <div class="lg-eyebrow">O Problema</div>
+        <div class="lg-problem">
+            <div class="lg-problem__text">
+                <h2 class="lg-h2"><?php echo htmlspecialchars($_homeBlocks['problem_title'] ?? 'Microplasticos estao em toda parte'); ?></h2>
+                <p class="lg-p">
                     <?php echo htmlspecialchars($_homeBlocks['problem_description'] ?? 'Fragmentos de plastico menores que 5mm contaminam silenciosamente nossos oceanos, rios e lagos. Uma crise ambiental invisivel que afeta toda a cadeia alimentar.'); ?>
                 </p>
             </div>
-            <div class="hp-problem__stats">
-                <div class="hp-stat-block">
-                    <div class="hp-stat-block__number" data-count="<?php echo $statsPoints; ?>">0</div>
-                    <div class="hp-stat-block__plus">+</div>
-                    <div class="hp-stat-block__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos de Coleta'); ?></div>
-                    <div class="hp-stat-block__sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_1'] ?? 'Mapeados em todo o Brasil'); ?></div>
-                    <div class="hp-stat-block__bar"></div>
+            <div class="lg-problem__stats">
+                <div class="lg-glass-card lg-glass-card--stat">
+                    <span class="lg-glass-card__num" data-count="<?php echo $statsPoints; ?>">0</span>
+                    <span class="lg-glass-card__stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_1'] ?? 'Pontos de Coleta'); ?></span>
+                    <span class="lg-glass-card__stat-sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_1'] ?? 'Mapeados em todo o Brasil'); ?></span>
                 </div>
-                <div class="hp-stat-block">
-                    <div class="hp-stat-block__number" data-count="<?php echo $statsEcosystems; ?>">0</div>
-                    <div class="hp-stat-block__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Ecossistemas'); ?></div>
-                    <div class="hp-stat-block__sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_2'] ?? 'Tipos de ambientes monitorados'); ?></div>
-                    <div class="hp-stat-block__bar"></div>
+                <div class="lg-glass-card lg-glass-card--stat">
+                    <span class="lg-glass-card__num" data-count="<?php echo $statsEcosystems; ?>">0</span>
+                    <span class="lg-glass-card__stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_2'] ?? 'Categorias'); ?></span>
+                    <span class="lg-glass-card__stat-sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_2'] ?? 'Tipos de amostras monitoradas'); ?></span>
                 </div>
-                <div class="hp-stat-block">
-                    <div class="hp-stat-block__number" data-count="<?php echo $statsRecords; ?>">0</div>
-                    <div class="hp-stat-block__label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros Cientificos'); ?></div>
-                    <div class="hp-stat-block__sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_3'] ?? 'Dados verificados por pares'); ?></div>
-                    <div class="hp-stat-block__bar"></div>
+                <div class="lg-glass-card lg-glass-card--stat">
+                    <span class="lg-glass-card__num" data-count="<?php echo $statsRecords; ?>">0</span>
+                    <span class="lg-glass-card__stat-label"><?php echo htmlspecialchars($_homeBlocks['stats_label_3'] ?? 'Registros Cientificos'); ?></span>
+                    <span class="lg-glass-card__stat-sub"><?php echo htmlspecialchars($_homeBlocks['stats_desc_3'] ?? 'Dados verificados por pares'); ?></span>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ============ MAP FEATURE SECTION ============ -->
-<div class="hp-divider">
-    <div class="hp-divider__inner">
-        <span class="hp-divider__num">02</span>
-        <span class="hp-divider__line"></span>
-        <span class="hp-divider__label">Ferramenta</span>
-        <span class="hp-divider__line"></span>
-    </div>
-</div>
-<section class="hp-section hp-section--map fade-in">
-    <div class="hp-section__bg-glow"></div>
-    <div class="hp-container">
-        <div class="hp-map-feature">
-            <div class="hp-map-feature__info">
-                <span class="hp-tag"><?php echo htmlspecialchars($_homeBlocks['feature_tag'] ?? 'Ferramenta Principal'); ?></span>
-                <h2 class="hp-heading"><?php echo htmlspecialchars($_homeBlocks['feature_title'] ?? 'Mapa Interativo'); ?></h2>
-                <p class="hp-text">
-                    Visualize em tempo real a distribuicao de microplasticos nos rios, lagos e oceanos brasileiros.
-                </p>
-                <div class="hp-features-list">
-                    <div class="hp-features-list__item">
-                        <div class="hp-features-list__icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/></svg>
-                        </div>
-                        <div>
-                            <strong>Multiplas Visualizacoes</strong>
-                            <span>Markers, clusters e heatmap</span>
-                        </div>
+<!-- ============ MAP FEATURE ============ -->
+<section class="lg-section">
+    <div class="lg-container">
+        <div class="lg-eyebrow">Ferramenta Principal</div>
+        <div class="lg-map-feature">
+            <div class="lg-map-feature__info">
+                <h2 class="lg-h2"><?php echo htmlspecialchars($_homeBlocks['feature_title'] ?? 'Mapa Interativo'); ?></h2>
+                <p class="lg-p">Visualize em tempo real a distribuicao de microplasticos nos rios, lagos e oceanos brasileiros.</p>
+                <div class="lg-checklist">
+                    <div class="lg-checklist__item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Multiplas visualizacoes: markers, clusters e heatmap</span>
                     </div>
-                    <div class="hp-features-list__item">
-                        <div class="hp-features-list__icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        </div>
-                        <div>
-                            <strong>Dados Verificados</strong>
-                            <span>Revisados por pares</span>
-                        </div>
+                    <div class="lg-checklist__item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Dados cientificos revisados por pares</span>
                     </div>
-                    <div class="hp-features-list__item">
-                        <div class="hp-features-list__icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                        </div>
-                        <div>
-                            <strong>Filtros Avancados</strong>
-                            <span>Ambiente, ecossistema, concentracao</span>
-                        </div>
+                    <div class="lg-checklist__item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Filtros por ambiente, ecossistema e concentracao</span>
                     </div>
                 </div>
-                <a href="/mapa.php" class="hp-btn hp-btn--primary" style="margin-top: 1.5rem;">
+                <a href="/mapa.php" class="lg-btn lg-btn--primary" style="margin-top: 2rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
                     <span>Acessar Mapa</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
             </div>
-            <div class="hp-map-feature__preview">
-                <div class="hp-map-browser">
-                    <div class="hp-map-browser__bar">
-                        <div class="hp-map-browser__dots">
-                            <span style="background:#FF5F57"></span>
-                            <span style="background:#FFBD2E"></span>
-                            <span style="background:#28CA41"></span>
-                        </div>
-                        <div class="hp-map-browser__url">geoplasticobr.com/mapa</div>
+            <div class="lg-map-feature__preview">
+                <div class="lg-map-browser">
+                    <div class="lg-map-browser__bar">
+                        <div class="lg-map-browser__dots"><span></span><span></span><span></span></div>
+                        <div class="lg-map-browser__url">geoplasticobr.com/mapa</div>
                     </div>
-                    <div class="hp-map-browser__content">
+                    <div class="lg-map-browser__content">
                         <div id="previewMap" style="width:100%;height:100%;"></div>
                     </div>
                 </div>
@@ -214,82 +170,48 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- ============ CHARTS SECTION ============ -->
-<div class="hp-divider">
-    <div class="hp-divider__inner">
-        <span class="hp-divider__num">03</span>
-        <span class="hp-divider__line"></span>
-        <span class="hp-divider__label">Dados</span>
-        <span class="hp-divider__line"></span>
-    </div>
-</div>
-<section class="hp-section hp-section--charts fade-in" id="chartSection">
-    <div class="hp-container">
-        <div class="hp-section__header">
-            <span class="hp-tag">Dados</span>
-            <h2 class="hp-heading">Estatisticas do Mapeamento</h2>
-            <p class="hp-text" style="text-align:center;">Distribuicao de registros por ecossistema e niveis de concentracao.</p>
-        </div>
-        <div class="hp-charts">
-            <div class="hp-chart-card">
-                <h3 class="hp-chart-card__title">Registros por Ecossistema</h3>
+<!-- ============ CHARTS ============ -->
+<section class="lg-section" id="chartSection">
+    <div class="lg-container">
+        <div class="lg-eyebrow">Dados</div>
+        <h2 class="lg-h2" style="text-align:center; margin-bottom: 0.75rem;">Estatisticas do Mapeamento</h2>
+        <p class="lg-p" style="text-align:center; margin: 0 auto 3rem; max-width: 480px;">Distribuicao de registros por ecossistema e niveis de concentracao.</p>
+        <div class="lg-charts">
+            <div class="lg-glass-card lg-glass-card--chart">
+                <h3 class="lg-chart-title">Registros por Ecossistema</h3>
                 <canvas id="chartEcossistema"></canvas>
             </div>
-            <div class="hp-chart-card">
-                <h3 class="hp-chart-card__title">Niveis de Concentracao</h3>
+            <div class="lg-glass-card lg-glass-card--chart">
+                <h3 class="lg-chart-title">Niveis de Concentracao</h3>
                 <canvas id="chartConcentracao"></canvas>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ============ MISSION SECTION ============ -->
-<div class="hp-divider">
-    <div class="hp-divider__inner">
-        <span class="hp-divider__num">04</span>
-        <span class="hp-divider__line"></span>
-        <span class="hp-divider__label">Missao</span>
-        <span class="hp-divider__line"></span>
-    </div>
-</div>
-<section class="hp-section hp-section--mission fade-in">
-    <div class="hp-container">
-        <div class="hp-section__header">
-            <span class="hp-tag">Nossa Missao</span>
-            <h2 class="hp-heading"><?php echo htmlspecialchars($_homeBlocks['mission_title'] ?? 'Democratizar dados cientificos'); ?></h2>
-        </div>
-        <div class="hp-mission-cards">
-            <div class="hp-mission-card">
-                <div class="hp-mission-card__index">01</div>
-                <div class="hp-mission-card__icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
+<!-- ============ MISSION ============ -->
+<section class="lg-section">
+    <div class="lg-container">
+        <div class="lg-eyebrow">Nossa Missao</div>
+        <h2 class="lg-h2" style="text-align:center; margin-bottom: 3rem;"><?php echo htmlspecialchars($_homeBlocks['mission_title'] ?? 'Democratizar dados cientificos'); ?></h2>
+        <div class="lg-mission-grid">
+            <div class="lg-glass-card lg-glass-card--mission">
+                <div class="lg-mission-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <h3>Dados Verificados</h3>
                 <p>Pesquisas cientificas revisadas por pares garantindo confiabilidade e precisao.</p>
             </div>
-            <div class="hp-mission-card">
-                <div class="hp-mission-card__index">02</div>
-                <div class="hp-mission-card__icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="2" y1="12" x2="22" y2="12"/>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    </svg>
+            <div class="lg-glass-card lg-glass-card--mission">
+                <div class="lg-mission-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </div>
                 <h3>Acesso Aberto</h3>
                 <p>Plataforma gratuita para pesquisadores, estudantes e o publico em geral.</p>
             </div>
-            <div class="hp-mission-card">
-                <div class="hp-mission-card__index">03</div>
-                <div class="hp-mission-card__icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                        <line x1="9" y1="21" x2="9" y2="9"/>
-                        <line x1="15" y1="21" x2="15" y2="3"/>
-                    </svg>
+            <div class="lg-glass-card lg-glass-card--mission">
+                <div class="lg-mission-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
                 </div>
                 <h3>Visualizacao Interativa</h3>
                 <p>Mapa com multiplas camadas permitindo analise espacial detalhada.</p>
@@ -299,123 +221,141 @@ include 'includes/header.php';
 </section>
 
 <!-- ============ CTA FINAL ============ -->
-<section class="hp-cta fade-in">
-    <div class="hp-cta__glow"></div>
-    <div class="hp-container hp-cta__inner">
-        <h2 class="hp-cta__title"><?php echo htmlspecialchars($_homeBlocks['cta_title'] ?? 'Pronto para Explorar?'); ?></h2>
-        <p class="hp-cta__desc">
+<section class="lg-cta">
+    <div class="lg-container lg-cta__inner">
+        <h2 class="lg-cta__title"><?php echo htmlspecialchars($_homeBlocks['cta_title'] ?? 'Pronto para Explorar?'); ?></h2>
+        <p class="lg-cta__desc">
             <?php echo htmlspecialchars($_homeBlocks['cta_description'] ?? 'Descubra a distribuicao de microplasticos nos ecossistemas aquaticos brasileiros.'); ?>
         </p>
-        <div class="hp-cta__actions">
-            <a href="/mapa.php" class="hp-btn hp-btn--primary hp-btn--lg">
+        <div class="lg-cta__actions">
+            <a href="/mapa.php" class="lg-btn lg-btn--primary lg-btn--lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
                 <span>Acessar Mapa Agora</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </a>
-            <a href="/contribuir.php" class="hp-btn hp-btn--ghost">Contribuir com Dados</a>
+            <a href="/contribuir.php" class="lg-btn lg-btn--glass">Contribuir com Dados</a>
         </div>
     </div>
 </section>
 
 <!-- ============ STYLES ============ -->
 <style>
-/* === VARIABLES === */
+/* ================================================================
+   DESIGN TOKENS — DARK OCEAN + LIQUID GLASS
+   ================================================================ */
 :root {
-    --hp-bg: #050b14;
-    --hp-surface: rgba(5, 11, 20, 0.95);
-    --hp-card: rgba(8, 16, 30, 0.8);
-    --hp-border: rgba(34, 211, 238, 0.08);
-    --hp-border-strong: rgba(34, 211, 238, 0.2);
-    --hp-cyan: #22D3EE;
-    --hp-cyan-bright: #67E8F9;
-    --hp-cyan-dim: rgba(34, 211, 238, 0.1);
-    --hp-cyan-glow: rgba(34, 211, 238, 0.35);
-    --hp-teal: #14B8A6;
-    --hp-white: #f0f9ff;
-    --hp-gray: rgba(148, 163, 184, 0.75);
-    --hp-muted: rgba(148, 163, 184, 0.45);
-    --hp-font: 'Instrument Sans', 'Plus Jakarta Sans', sans-serif;
-    --hp-font-display: 'Bebas Neue', 'Impact', sans-serif;
-    --hp-ease: cubic-bezier(0.16, 1, 0.3, 1);
-    --hp-radius: 16px;
+    --lg-bg: #020a18;
+    --lg-bg-surface: rgba(0, 20, 40, 0.4);
+    --lg-glass-bg: rgba(255, 255, 255, 0.04);
+    --lg-glass-bg-hover: rgba(255, 255, 255, 0.07);
+    --lg-glass-border: rgba(0, 212, 255, 0.12);
+    --lg-glass-border-hover: rgba(0, 212, 255, 0.25);
+    --lg-glass-blur: 25px;
+    --lg-accent: #00d4ff;
+    --lg-accent-teal: #0d9488;
+    --lg-accent-glow: rgba(0, 212, 255, 0.3);
+    --lg-text: #e8f4f8;
+    --lg-text-secondary: rgba(200, 220, 230, 0.6);
+    --lg-text-muted: rgba(200, 220, 230, 0.35);
+    --lg-font: 'Inter', 'Outfit', sans-serif;
+    --lg-font-display: 'Inter', 'Outfit', sans-serif;
+    --lg-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --lg-radius: 24px;
 }
 
-/* === OVERRIDE BODY GRADIENT === */
+/* === RESET === */
 body {
-    background: #050b14 !important;
+    background: var(--lg-bg) !important;
+    color: var(--lg-text) !important;
     background-image: none !important;
+    overflow-x: hidden;
 }
 .light-rays { display: none !important; }
 
-/* === HERO === */
-.hp-hero {
+/* ================================================================
+   FLOATING ORBS — Bioluminescent Background
+   ================================================================ */
+.lg-orbs {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.lg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+}
+
+.lg-orb--1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+    top: 10%;
+    left: -10%;
+}
+.lg-orb--2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(13, 148, 136, 0.12) 0%, transparent 70%);
+    top: 40%;
+    right: -5%;
+}
+.lg-orb--3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+    bottom: 20%;
+    left: 20%;
+}
+.lg-orb--4 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(13, 148, 136, 0.1) 0%, transparent 70%);
+    top: 70%;
+    right: 30%;
+}
+
+/* ================================================================
+   HERO SECTION
+   ================================================================ */
+.lg-hero {
     position: relative;
     width: 100%;
     min-height: 100vh;
     display: flex;
     align-items: stretch;
     overflow: hidden;
-    background: var(--hp-bg);
+    z-index: 1;
 }
 
-.hp-hero__video-wrap {
+.lg-hero__bg {
     position: absolute;
     inset: 0;
 }
 
-.hp-hero__video {
+.lg-hero__video {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.55) saturate(0.8) contrast(1.1);
+    filter: brightness(0.3) saturate(0.6) hue-rotate(-10deg);
 }
 
-.hp-hero__overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg,
-        rgba(3, 10, 18, 0.85) 0%,
-        rgba(3, 10, 18, 0.4) 40%,
-        rgba(3, 10, 18, 0.2) 60%,
-        rgba(3, 10, 18, 0.7) 100%
-    );
-}
-
-.hp-hero__color-wash {
+.lg-hero__overlay {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(ellipse 40% 60% at 0% 100%, rgba(34, 211, 238, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse 30% 40% at 85% 15%, rgba(20, 184, 166, 0.04) 0%, transparent 50%);
-    mix-blend-mode: screen;
+        linear-gradient(180deg, rgba(2, 10, 24, 0.4) 0%, rgba(2, 10, 24, 0.2) 40%, rgba(2, 10, 24, 0.8) 100%),
+        radial-gradient(ellipse 80% 50% at 30% 50%, rgba(0, 212, 255, 0.06) 0%, transparent 60%);
 }
 
-.hp-hero__vignette {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 60%, #050b14 100%);
-}
-
-/* Decorative grid */
-.hp-hero__grid-lines {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: space-evenly;
-    pointer-events: none;
-    z-index: 1;
-}
-.hp-hero__grid-lines span {
-    width: 1px;
-    height: 100%;
-    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.03) 70%, transparent);
-}
-
-/* Hero inner layout */
-.hp-hero__inner {
+.lg-hero__inner {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 1400px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 140px 48px 80px;
     display: flex;
@@ -425,734 +365,610 @@ body {
     min-height: 100vh;
 }
 
-/* Hero content - LEFT side */
-.hp-hero__content {
+/* Hero content */
+.lg-hero__content {
     flex: 1;
-    max-width: 680px;
+    max-width: 620px;
 }
 
-.hp-hero__badge {
+.lg-hero__badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 16px;
-    background: var(--hp-cyan-dim);
-    border: 1px solid var(--hp-border-strong);
+    padding: 6px 18px;
+    background: rgba(0, 212, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 212, 255, 0.15);
     border-radius: 50px;
-    font-family: var(--hp-font);
-    font-size: 0.72rem;
+    font-family: var(--lg-font);
+    font-size: 0.7rem;
     font-weight: 600;
-    color: var(--hp-cyan);
+    color: var(--lg-accent);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 28px;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.hp-hero__badge-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--hp-cyan);
-    animation: dotPulse 2s ease-in-out infinite;
-}
-
-.hp-hero__title {
-    margin-bottom: 24px;
-}
-
-.hp-hero__title-line {
-    display: block;
-    font-family: var(--hp-font-display);
-    font-weight: 400;
-    font-size: clamp(3.5rem, 8vw, 7rem);
-    line-height: 0.95;
-    letter-spacing: 0.02em;
-    color: var(--hp-white);
-    opacity: 0;
-    transform: translateY(40px);
-}
-
-.hp-hero__title-line--accent {
-    background: linear-gradient(90deg, var(--hp-cyan), var(--hp-cyan-bright), var(--hp-teal));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.25));
-}
-
-.hp-hero__desc {
-    font-family: var(--hp-font);
-    font-size: 1.05rem;
-    color: var(--hp-gray);
-    line-height: 1.7;
-    max-width: 480px;
+    letter-spacing: 0.14em;
     margin-bottom: 32px;
     opacity: 0;
     transform: translateY(20px);
 }
 
-.hp-hero__actions {
+.lg-hero__badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lg-accent);
+    box-shadow: 0 0 8px var(--lg-accent-glow);
+    animation: lgDotPulse 2s ease-in-out infinite;
+}
+
+.lg-hero__title {
+    font-family: var(--lg-font-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 1.05;
+    color: var(--lg-text);
+    margin-bottom: 24px;
+    letter-spacing: -0.04em;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.lg-hero__title--glow {
+    background: linear-gradient(135deg, #00d4ff 0%, #0d9488 50%, #00d4ff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.lg-hero__desc {
+    font-family: var(--lg-font);
+    font-size: 1.05rem;
+    color: var(--lg-text-secondary);
+    line-height: 1.75;
+    max-width: 460px;
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.lg-hero__actions {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     flex-wrap: wrap;
     opacity: 0;
     transform: translateY(20px);
 }
 
-/* Buttons */
-.hp-btn {
+/* ================================================================
+   BUTTONS — Liquid Glass Style
+   ================================================================ */
+.lg-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 28px;
-    font-family: var(--hp-font);
-    font-weight: 700;
+    padding: 13px 28px;
+    font-family: var(--lg-font);
+    font-weight: 600;
     font-size: 0.88rem;
     text-decoration: none;
-    border-radius: 50px;
-    transition: all 0.4s var(--hp-ease);
+    border-radius: 14px;
+    transition: all 0.4s var(--lg-ease);
     cursor: pointer;
     border: none;
+    position: relative;
+    overflow: hidden;
 }
 
-.hp-btn--primary {
-    background: var(--hp-cyan);
-    color: var(--hp-bg);
+.lg-btn--primary {
+    background: linear-gradient(135deg, var(--lg-accent), var(--lg-accent-teal));
+    color: #020a18;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25), 0 0 40px rgba(0, 212, 255, 0.1);
 }
-.hp-btn--primary:hover {
+.lg-btn--primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px var(--hp-cyan-glow), 0 0 80px rgba(34, 211, 238, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.15);
 }
 
-.hp-btn--lg { padding: 15px 36px; font-size: 0.95rem; }
-
-.hp-btn--ghost {
-    background: transparent;
-    color: var(--hp-gray);
-    border: 1px solid var(--hp-border);
+.lg-btn--glass {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--lg-text);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
-.hp-btn--ghost:hover {
-    border-color: var(--hp-border-strong);
-    color: var(--hp-white);
-    background: var(--hp-cyan-dim);
+.lg-btn--glass:hover {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.3);
+    color: #ffffff;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
 }
 
-/* Floating card - RIGHT side */
-.hp-hero__float-card {
-    width: 340px;
+.lg-btn--lg { padding: 16px 36px; font-size: 0.95rem; }
+
+/* ================================================================
+   GLASS CARD — Universal Liquid Glass Component
+   ================================================================ */
+.lg-glass-card {
+    background: var(--lg-glass-bg);
+    border: 1px solid var(--lg-glass-border);
+    border-radius: var(--lg-radius);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(var(--lg-glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--lg-glass-blur)) saturate(150%);
+    transition: all 0.5s var(--lg-ease);
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.lg-glass-card:hover {
+    background: var(--lg-glass-bg-hover);
+    border-color: var(--lg-glass-border-hover);
+    transform: translateY(-4px);
+    box-shadow:
+        0 32px 100px rgba(0, 0, 0, 0.4),
+        0 12px 32px rgba(0, 0, 0, 0.25),
+        0 0 60px rgba(0, 212, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Glass shine effect */
+.lg-glass-card__shine,
+.lg-glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.03) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lg-glass-card > *:not(.lg-glass-card__shine) {
+    position: relative;
+    z-index: 2;
+}
+
+/* Hero glass card */
+.lg-glass-card--hero {
+    width: 360px;
     flex-shrink: 0;
-    background: rgba(6, 18, 34, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--hp-border-strong);
-    border-radius: 20px;
-    padding: 24px;
     opacity: 0;
-    transform: translateY(30px) translateX(10px);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(34, 211, 238, 0.2);
+    transform: translateY(30px);
 }
 
-.hp-hero__float-card-header {
+.lg-glass-card__header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: var(--hp-cyan);
-    font-family: var(--hp-font);
-    font-size: 0.82rem;
+    gap: 8px;
+    color: var(--lg-accent);
+    font-family: var(--lg-font);
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--hp-border);
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.08);
     margin-bottom: 20px;
 }
 
-.hp-hero__float-stats {
+.lg-glass-card__stats {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
-.hp-hero__float-stat {
-    flex: 1;
-    text-align: center;
-}
+.lg-glass-card__stat { flex: 1; text-align: center; }
 
-.hp-hero__float-stat-num {
+.lg-glass-card__num {
     display: block;
-    font-family: var(--hp-font-display);
+    font-family: var(--lg-font-display);
+    font-weight: 800;
     font-size: 2.2rem;
-    color: var(--hp-white);
+    color: var(--lg-text);
     line-height: 1;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.04em;
 }
 
-.hp-hero__float-stat-label {
+.lg-glass-card__label {
     display: block;
-    font-family: var(--hp-font);
-    font-size: 0.68rem;
-    color: var(--hp-muted);
+    font-family: var(--lg-font);
+    font-size: 0.65rem;
+    color: var(--lg-text-muted);
     margin-top: 4px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
-.hp-hero__float-divider {
+.lg-glass-card__divider {
     width: 1px;
-    height: 40px;
-    background: var(--hp-border);
+    height: 36px;
+    background: rgba(0, 212, 255, 0.1);
 }
 
-.hp-hero__float-cta {
+.lg-glass-card__cta {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     width: 100%;
     padding: 12px;
-    background: var(--hp-cyan-dim);
-    border: 1px solid var(--hp-border-strong);
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid rgba(0, 212, 255, 0.12);
     border-radius: 12px;
-    color: var(--hp-cyan);
-    font-family: var(--hp-font);
-    font-size: 0.82rem;
+    color: var(--lg-accent);
+    font-family: var(--lg-font);
+    font-size: 0.8rem;
     font-weight: 600;
     text-decoration: none;
-    transition: all 0.3s var(--hp-ease);
+    transition: all 0.35s var(--lg-ease);
 }
-.hp-hero__float-cta:hover {
-    background: rgba(34, 211, 238, 0.18);
-    transform: translateY(-1px);
+.lg-glass-card__cta:hover {
+    background: rgba(0, 212, 255, 0.12);
+    border-color: rgba(0, 212, 255, 0.25);
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.1);
 }
 
-/* Hero scroll */
-.hp-hero__scroll {
+/* Stat card variant */
+.lg-glass-card--stat {
+    padding: 24px 28px;
+}
+.lg-glass-card__stat-label {
+    display: block;
+    font-family: var(--lg-font);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--lg-text);
+    margin-top: 6px;
+}
+.lg-glass-card__stat-sub {
+    display: block;
+    font-family: var(--lg-font);
+    font-size: 0.78rem;
+    color: var(--lg-text-muted);
+    margin-top: 2px;
+}
+
+/* Scroll indicator */
+.lg-hero__scroll {
     position: absolute;
     bottom: 32px;
-    left: 48px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: var(--hp-font);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.25em;
-    color: var(--hp-muted);
-    text-transform: uppercase;
 }
 
-.hp-hero__scroll-line {
-    width: 48px;
-    height: 1px;
-    background: linear-gradient(90deg, var(--hp-cyan-glow), transparent);
-    animation: scrollLineAnim 2s ease-in-out infinite;
+.lg-hero__scroll-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, var(--lg-accent), transparent);
+    animation: lgScrollPulse 2s ease-in-out infinite;
 }
 
-/* === SECTION DIVIDERS === */
-.hp-divider {
-    padding: 0 48px;
-    max-width: 1280px;
-    margin: 0 auto;
-}
-
-.hp-divider__inner {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 0;
-}
-
-.hp-divider__num {
-    font-family: var(--hp-font-display);
-    font-size: 1.1rem;
-    color: var(--hp-cyan);
-    letter-spacing: 0.05em;
-    flex-shrink: 0;
-    opacity: 0.7;
-}
-
-.hp-divider__line {
-    flex: 1;
-    height: 1px;
-    background: rgba(148, 163, 184, 0.1);
-}
-
-.hp-divider__label {
-    font-family: var(--hp-font);
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--hp-muted);
-    flex-shrink: 0;
-}
-
-/* === GLOBAL SECTION STYLES === */
-.hp-section {
+/* ================================================================
+   SECTIONS
+   ================================================================ */
+.lg-section {
     position: relative;
-    padding: clamp(60px, 8vw, 100px) 0;
+    padding: clamp(80px, 10vw, 120px) 0;
+    z-index: 1;
 }
 
-.hp-container {
-    max-width: 1280px;
+.lg-container {
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 48px;
 }
 
-.hp-section__header {
-    text-align: center;
-    margin-bottom: clamp(48px, 6vw, 72px);
-}
-
-.hp-section__bg-glow {
-    display: none;
-}
-
-.hp-section--charts {
-    background: rgba(8, 14, 24, 0.95);
-    border-top: 1px solid rgba(148, 163, 184, 0.06);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
-}
-
-.hp-tag {
+.lg-eyebrow {
     display: inline-block;
-    padding: 5px 14px;
-    background: var(--hp-cyan-dim);
-    border: 1px solid var(--hp-border-strong);
-    border-radius: 50px;
-    font-family: var(--hp-font);
-    font-size: 0.68rem;
+    font-family: var(--lg-font);
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--hp-cyan);
-    margin-bottom: 20px;
+    letter-spacing: 0.18em;
+    color: var(--lg-accent);
+    margin-bottom: 16px;
+    padding: 5px 14px;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.hp-heading {
-    font-family: var(--hp-font-display);
-    font-weight: 400;
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    color: var(--hp-white);
-    letter-spacing: 0.02em;
-    margin-bottom: 20px;
+.lg-h2 {
+    font-family: var(--lg-font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    color: var(--lg-text);
+    letter-spacing: -0.035em;
+    margin-bottom: 16px;
     line-height: 1.1;
 }
 
-.hp-text {
-    font-family: var(--hp-font);
+.lg-p {
+    font-family: var(--lg-font);
     font-size: 1rem;
-    color: var(--hp-gray);
+    color: var(--lg-text-secondary);
     line-height: 1.8;
-    max-width: 560px;
+    max-width: 540px;
 }
 
-/* === PROBLEM SECTION === */
-.hp-problem {
+/* ================================================================
+   PROBLEM SECTION
+   ================================================================ */
+.lg-problem {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 64px;
     align-items: start;
+    margin-top: 8px;
 }
 
-.hp-problem__text { padding-top: 16px; }
-
-.hp-problem__stats {
+.lg-problem__stats {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
 }
 
-.hp-stat-block {
-    position: relative;
-    padding: 28px 32px;
-    background: var(--hp-card);
-    border: 1px solid var(--hp-border);
-    border-radius: var(--hp-radius);
-    transition: all 0.4s var(--hp-ease);
-    overflow: hidden;
-}
-
-.hp-stat-block:hover {
-    border-color: var(--hp-border-strong);
-    transform: translateX(6px);
-}
-
-.hp-stat-block__bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(to bottom, var(--hp-cyan), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-.hp-stat-block:hover .hp-stat-block__bar { opacity: 1; }
-
-.hp-stat-block__number {
-    font-family: var(--hp-font-display);
-    font-size: 2.8rem;
-    color: var(--hp-white);
-    line-height: 1;
-    display: inline;
-    letter-spacing: 0.02em;
-}
-
-.hp-stat-block__plus {
-    font-family: var(--hp-font-display);
-    font-size: 2rem;
-    color: var(--hp-cyan);
-    display: inline;
-    margin-left: 2px;
-}
-
-.hp-stat-block__label {
-    font-family: var(--hp-font);
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--hp-cyan);
-    margin-top: 6px;
-}
-
-.hp-stat-block__sub {
-    font-family: var(--hp-font);
-    font-size: 0.78rem;
-    color: var(--hp-muted);
-    margin-top: 2px;
-}
-
-/* === MAP FEATURE === */
-.hp-map-feature {
+/* ================================================================
+   MAP FEATURE
+   ================================================================ */
+.lg-map-feature {
     display: grid;
-    grid-template-columns: 1fr 1.15fr;
+    grid-template-columns: 1fr 1.2fr;
     gap: 56px;
     align-items: center;
+    margin-top: 8px;
 }
 
-.hp-features-list {
+.lg-checklist {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     margin-top: 24px;
 }
 
-.hp-features-list__item {
+.lg-checklist__item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
-    background: var(--hp-card);
-    border: 1px solid var(--hp-border);
-    border-radius: 12px;
-    transition: all 0.3s var(--hp-ease);
+    gap: 12px;
+    color: var(--lg-accent);
 }
-.hp-features-list__item:hover {
-    border-color: var(--hp-border-strong);
-    transform: translateX(4px);
+.lg-checklist__item span {
+    font-family: var(--lg-font);
+    font-size: 0.9rem;
+    color: var(--lg-text-secondary);
 }
 
-.hp-features-list__icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: var(--hp-cyan-dim);
-    color: var(--hp-cyan);
-    flex-shrink: 0;
-}
-
-.hp-features-list__item strong {
-    display: block;
-    font-family: var(--hp-font);
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--hp-white);
-}
-.hp-features-list__item span {
-    font-family: var(--hp-font);
-    font-size: 0.75rem;
-    color: var(--hp-muted);
-}
-
-/* Map browser preview */
-.hp-map-browser {
-    border-radius: 18px;
+/* Map browser mockup */
+.lg-map-browser {
+    border-radius: 20px;
     overflow: hidden;
-    border: 1px solid var(--hp-border);
-    background: var(--hp-card);
+    border: 1px solid var(--lg-glass-border);
+    background: var(--lg-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     box-shadow:
-        0 30px 80px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(34, 211, 238, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
-    transition: all 0.5s var(--hp-ease);
+        0 24px 80px rgba(0, 0, 0, 0.4),
+        0 0 40px rgba(0, 212, 255, 0.03);
+    transition: all 0.5s var(--lg-ease);
 }
-.hp-map-browser:hover {
+.lg-map-browser:hover {
     transform: translateY(-4px);
+    border-color: var(--lg-glass-border-hover);
     box-shadow:
-        0 40px 100px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(34, 211, 238, 0.12),
-        0 0 60px rgba(34, 211, 238, 0.06);
+        0 32px 100px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(0, 212, 255, 0.06);
 }
 
-.hp-map-browser__bar {
+.lg-map-browser__bar {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: rgba(8, 20, 38, 0.9);
-    border-bottom: 1px solid var(--hp-border);
+    background: rgba(0, 20, 40, 0.6);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.06);
 }
 
-.hp-map-browser__dots {
-    display: flex;
-    gap: 6px;
-}
-.hp-map-browser__dots span {
+.lg-map-browser__dots { display: flex; gap: 6px; }
+.lg-map-browser__dots span {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    opacity: 0.8;
+    opacity: 0.7;
 }
+.lg-map-browser__dots span:nth-child(1) { background: #FF5F57; }
+.lg-map-browser__dots span:nth-child(2) { background: #FFBD2E; }
+.lg-map-browser__dots span:nth-child(3) { background: #28CA41; }
 
-.hp-map-browser__url {
+.lg-map-browser__url {
     flex: 1;
     text-align: center;
-    font-family: var(--hp-font);
+    font-family: var(--lg-font);
     font-size: 0.72rem;
-    color: var(--hp-muted);
-    background: rgba(148, 163, 184, 0.06);
+    color: var(--lg-text-muted);
+    background: rgba(0, 212, 255, 0.04);
+    border: 1px solid rgba(0, 212, 255, 0.06);
     padding: 5px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
-.hp-map-browser__content {
-    aspect-ratio: 16/10;
-}
+.lg-map-browser__content { aspect-ratio: 16/10; }
 
-/* === CHARTS === */
-.hp-charts {
+/* ================================================================
+   CHARTS
+   ================================================================ */
+.lg-charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-.hp-chart-card {
-    background: var(--hp-card);
-    border: 1px solid var(--hp-border);
-    border-radius: var(--hp-radius);
-    padding: 28px;
-    transition: border-color 0.4s;
-}
-.hp-chart-card:hover { border-color: var(--hp-border-strong); }
+.lg-glass-card--chart { padding: 28px; }
 
-.hp-chart-card__title {
-    font-family: var(--hp-font);
-    font-size: 0.9rem;
+.lg-chart-title {
+    font-family: var(--lg-font);
+    font-size: 0.88rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--lg-text);
     margin-bottom: 20px;
     text-align: center;
 }
 
-/* === MISSION CARDS === */
-.hp-mission-cards {
+/* ================================================================
+   MISSION
+   ================================================================ */
+.lg-mission-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
-.hp-mission-card {
-    position: relative;
-    padding: 32px;
-    background: var(--hp-card);
-    border: 1px solid var(--hp-border);
-    border-radius: var(--hp-radius);
-    transition: all 0.5s var(--hp-ease);
-    overflow: hidden;
-}
-.hp-mission-card:hover {
-    border-color: var(--hp-border-strong);
-    transform: translateY(-6px);
-}
+.lg-glass-card--mission { padding: 32px; }
 
-.hp-mission-card__index {
-    position: absolute;
-    top: 20px;
-    right: 24px;
-    font-family: var(--hp-font-display);
-    font-size: 2.5rem;
-    color: rgba(34, 211, 238, 0.06);
-    line-height: 1;
-    letter-spacing: 0.02em;
-}
-
-.hp-mission-card__icon {
-    width: 50px;
-    height: 50px;
+.lg-mission-icon {
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 14px;
-    background: var(--hp-cyan-dim);
-    border: 1px solid rgba(34, 211, 238, 0.1);
-    color: var(--hp-cyan);
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    color: var(--lg-accent);
     margin-bottom: 20px;
-    transition: all 0.4s var(--hp-ease);
-}
-.hp-mission-card:hover .hp-mission-card__icon {
-    background: rgba(34, 211, 238, 0.18);
-    box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
 }
 
-.hp-mission-card h3 {
-    font-family: var(--hp-font);
-    font-size: 1.1rem;
+.lg-glass-card--mission h3 {
+    font-family: var(--lg-font);
+    font-size: 1.05rem;
     font-weight: 700;
-    color: var(--hp-white);
-    margin-bottom: 10px;
+    color: var(--lg-text);
+    margin-bottom: 8px;
 }
 
-.hp-mission-card p {
-    font-family: var(--hp-font);
+.lg-glass-card--mission p {
+    font-family: var(--lg-font);
     font-size: 0.88rem;
-    color: var(--hp-muted);
+    color: var(--lg-text-muted);
     line-height: 1.7;
 }
 
-/* === CTA === */
-.hp-cta {
+/* ================================================================
+   CTA
+   ================================================================ */
+.lg-cta {
     position: relative;
-    padding: clamp(80px, 12vw, 140px) 0;
+    padding: clamp(80px, 10vw, 120px) 0;
+    z-index: 1;
     overflow: hidden;
 }
 
-.hp-cta__glow {
-    display: none;
+.lg-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 60% 50% at 30% 60%, rgba(0, 212, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 70% 40%, rgba(13, 148, 136, 0.06) 0%, transparent 60%);
+    pointer-events: none;
 }
 
-.hp-cta__inner { text-align: center; position: relative; z-index: 2; }
+.lg-cta__inner { text-align: center; position: relative; z-index: 2; }
 
-.hp-cta__title {
-    font-family: var(--hp-font-display);
-    font-size: clamp(2.2rem, 5vw, 3.8rem);
-    color: var(--hp-white);
+.lg-cta__title {
+    font-family: var(--lg-font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    color: var(--lg-text);
     margin-bottom: 16px;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.035em;
 }
 
-.hp-cta__desc {
-    font-family: var(--hp-font);
+.lg-cta__desc {
+    font-family: var(--lg-font);
     font-size: 1.05rem;
-    color: var(--hp-muted);
-    margin: 0 auto 36px;
-    max-width: 460px;
+    color: var(--lg-text-secondary);
+    margin: 0 auto 32px;
+    max-width: 440px;
     line-height: 1.7;
 }
 
-.hp-cta__actions {
+.lg-cta__actions {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
-/* === ANIMATIONS === */
-.fade-in {
+/* ================================================================
+   ANIMATIONS
+   ================================================================ */
+.lg-fade-in {
     opacity: 0;
-    transform: translateY(50px);
-    transition: opacity 1s var(--hp-ease), transform 1s var(--hp-ease);
-}
-.fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateY(40px);
 }
 
-/* Hero stagger */
-.hp-hero.anim-ready .hp-hero__badge {
-    animation: heroSlideUp 0.8s var(--hp-ease) 0.1s forwards;
-}
-.hp-hero.anim-ready .hp-hero__title-line:nth-child(1) {
-    animation: heroSlideUp 0.9s var(--hp-ease) 0.25s forwards;
-}
-.hp-hero.anim-ready .hp-hero__title-line:nth-child(2) {
-    animation: heroSlideUp 0.9s var(--hp-ease) 0.4s forwards;
-}
-.hp-hero.anim-ready .hp-hero__title-line:nth-child(3) {
-    animation: heroSlideUp 0.9s var(--hp-ease) 0.55s forwards;
-}
-.hp-hero.anim-ready .hp-hero__desc {
-    animation: heroSlideUp 0.9s var(--hp-ease) 0.7s forwards;
-}
-.hp-hero.anim-ready .hp-hero__actions {
-    animation: heroSlideUp 1s var(--hp-ease) 0.9s forwards;
-}
-.hp-hero.anim-ready .hp-hero__float-card {
-    animation: heroFloatIn 1.2s var(--hp-ease) 0.6s forwards;
+@keyframes lgDotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px var(--lg-accent-glow); }
+    50% { opacity: 0.4; transform: scale(0.6); box-shadow: 0 0 4px var(--lg-accent-glow); }
 }
 
-@keyframes heroSlideUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes lgScrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
 }
 
-@keyframes heroFloatIn {
-    from { opacity: 0; transform: translateY(30px) translateX(10px); }
-    to { opacity: 1; transform: translateY(0) translateX(0); }
-}
-
-@keyframes dotPulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-}
-
-@keyframes scrollLineAnim {
-    0%, 100% { opacity: 0.3; transform: scaleX(1); }
-    50% { opacity: 0.8; transform: scaleX(1.15); }
-}
-
-/* === RESPONSIVE === */
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
 @media (max-width: 1024px) {
-    .hp-hero__inner {
+    .lg-hero__inner {
         flex-direction: column;
         justify-content: center;
         padding: 120px 32px 60px;
         gap: 40px;
     }
-    .hp-hero__content { max-width: 100%; text-align: center; }
-    .hp-hero__desc { margin-left: auto; margin-right: auto; }
-    .hp-hero__actions { justify-content: center; }
-    .hp-hero__title-line { text-align: center; }
-    .hp-hero__float-card { width: 100%; max-width: 400px; align-self: center; }
-    .hp-hero__scroll { left: 32px; }
-    .hp-problem { grid-template-columns: 1fr; gap: 40px; }
-    .hp-map-feature { grid-template-columns: 1fr; gap: 40px; }
-    .hp-map-feature__preview { order: -1; }
+    .lg-hero__content { max-width: 100%; text-align: center; }
+    .lg-hero__desc { margin-left: auto; margin-right: auto; }
+    .lg-hero__actions { justify-content: center; }
+    .lg-glass-card--hero { width: 100%; max-width: 400px; align-self: center; }
+    .lg-problem { grid-template-columns: 1fr; gap: 40px; }
+    .lg-map-feature { grid-template-columns: 1fr; gap: 40px; }
+    .lg-map-feature__preview { order: -1; }
 }
 
 @media (max-width: 768px) {
-    .hp-hero__inner { padding: 100px 20px 50px; }
-    .hp-hero__title-line { font-size: clamp(2.5rem, 12vw, 4rem); }
-    .hp-container { padding: 0 20px; }
-    .hp-divider { padding: 0 20px; }
-    .hp-hero__scroll { left: 20px; }
-    .hp-charts { grid-template-columns: 1fr; }
-    .hp-mission-cards { grid-template-columns: 1fr; }
-    .hp-hero__float-card { max-width: 100%; }
-    .hp-hero__grid-lines { display: none; }
-    .hp-divider__label { display: none; }
+    .lg-hero__inner { padding: 100px 20px 50px; }
+    .lg-hero__title { font-size: clamp(2.2rem, 9vw, 3.2rem); }
+    .lg-container { padding: 0 20px; }
+    .lg-charts { grid-template-columns: 1fr; }
+    .lg-mission-grid { grid-template-columns: 1fr; }
+    .lg-glass-card--hero { max-width: 100%; width: 100%; }
+    .lg-orb { display: none; }
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 </style>
-
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -1163,45 +979,194 @@ body {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // === Hero stagger animation ===
-    requestAnimationFrame(function() {
-        document.querySelector('.hp-hero').classList.add('anim-ready');
+
+    // ================================================================
+    // GSAP ANIMATIONS
+    // ================================================================
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero entrance animations
+    var heroTl = gsap.timeline({ delay: 0.2 });
+    heroTl
+        .to('.lg-hero__badge', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
+        .to('.lg-hero__title', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4')
+        .to('.lg-hero__desc', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+        .to('.lg-hero__actions', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+        .to('.lg-glass-card--hero', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.6');
+
+    // Title gradient animation
+    gsap.to('.lg-hero__title--glow', {
+        backgroundPosition: '200% center',
+        duration: 4,
+        ease: 'none',
+        repeat: -1
     });
 
-    // === Scroll fade-in + counter animation ===
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                entry.target.querySelectorAll('[data-count]').forEach(animateCounter);
+    // Floating orbs animation
+    gsap.utils.toArray('.lg-orb').forEach(function(orb, i) {
+        var duration = 15 + i * 5;
+        gsap.to(orb, {
+            x: 'random(-100, 100)',
+            y: 'random(-80, 80)',
+            duration: duration,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            delay: i * 2
+        });
+        gsap.to(orb, {
+            opacity: 0.2 + Math.random() * 0.3,
+            duration: duration * 0.6,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            delay: i
+        });
+    });
+
+    // Mouse tracking on hero glass card
+    var heroCard = document.getElementById('heroGlassCard');
+    if (heroCard) {
+        document.addEventListener('mousemove', function(e) {
+            var rect = heroCard.getBoundingClientRect();
+            var centerX = rect.left + rect.width / 2;
+            var centerY = rect.top + rect.height / 2;
+            var deltaX = (e.clientX - centerX) / window.innerWidth;
+            var deltaY = (e.clientY - centerY) / window.innerHeight;
+
+            gsap.to(heroCard, {
+                rotateY: deltaX * 8,
+                rotateX: -deltaY * 6,
+                duration: 0.8,
+                ease: 'power2.out',
+                transformPerspective: 1000
+            });
+
+            // Move shine highlight
+            var shine = heroCard.querySelector('.lg-glass-card__shine');
+            if (shine) {
+                gsap.to(shine, {
+                    background: 'linear-gradient(' +
+                        (135 + deltaX * 30) + 'deg, ' +
+                        'rgba(255,255,255,' + (0.08 + Math.abs(deltaX) * 0.06) + ') 0%, ' +
+                        'rgba(255,255,255,0) 40%, ' +
+                        'rgba(0,212,255,' + (0.03 + Math.abs(deltaY) * 0.04) + ') 100%)',
+                    duration: 0.5,
+                    ease: 'power2.out'
+                });
             }
         });
-    }, { threshold: 0.12 });
 
-    document.querySelectorAll('.fade-in').forEach(function(el) { observer.observe(el); });
-
-    // Also animate hero float card counters
-    setTimeout(function() {
-        document.querySelectorAll('.hp-hero__float-stat-num[data-count]').forEach(animateCounter);
-    }, 1200);
-
-    function animateCounter(el) {
-        var target = parseInt(el.getAttribute('data-count'), 10);
-        if (isNaN(target) || el.dataset.animated) return;
-        el.dataset.animated = '1';
-        var duration = 1600;
-        var start = performance.now();
-        function step(now) {
-            var p = Math.min((now - start) / duration, 1);
-            var eased = 1 - Math.pow(1 - p, 4);
-            el.textContent = Math.round(target * eased);
-            if (p < 1) requestAnimationFrame(step);
-            else el.textContent = target;
-        }
-        requestAnimationFrame(step);
+        // Reset on mouse leave
+        document.addEventListener('mouseleave', function() {
+            gsap.to(heroCard, {
+                rotateY: 0,
+                rotateX: 0,
+                duration: 1,
+                ease: 'power3.out'
+            });
+        });
     }
 
-    // === Preview Map ===
+    // ScrollTrigger for sections
+    gsap.utils.toArray('.lg-section, .lg-cta').forEach(function(section) {
+        var elements = section.querySelectorAll('.lg-glass-card, .lg-h2, .lg-p, .lg-eyebrow, .lg-checklist__item, .lg-map-browser, .lg-chart-title');
+        gsap.from(elements, {
+            scrollTrigger: {
+                trigger: section,
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+            },
+            opacity: 0,
+            y: 40,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'power3.out'
+        });
+    });
+
+    // CTA section
+    gsap.from('.lg-cta__title, .lg-cta__desc, .lg-cta__actions', {
+        scrollTrigger: {
+            trigger: '.lg-cta',
+            start: 'top 80%'
+        },
+        opacity: 0,
+        y: 40,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out'
+    });
+
+    // Glass card hover glow with GSAP
+    document.querySelectorAll('.lg-glass-card').forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            gsap.to(card, {
+                boxShadow: '0 32px 100px rgba(0,0,0,0.4), 0 0 80px rgba(0,212,255,0.08), inset 0 1px 0 rgba(255,255,255,0.1)',
+                duration: 0.4,
+                ease: 'power2.out'
+            });
+        });
+        card.addEventListener('mouseleave', function() {
+            gsap.to(card, {
+                boxShadow: '0 24px 80px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(255,255,255,0.02)',
+                duration: 0.5,
+                ease: 'power2.out'
+            });
+        });
+    });
+
+    // ================================================================
+    // COUNTER ANIMATIONS (GSAP)
+    // ================================================================
+    function animateCounters(container) {
+        container.querySelectorAll('[data-count]').forEach(function(el) {
+            var target = parseInt(el.getAttribute('data-count'), 10);
+            if (isNaN(target) || el.dataset.animated) return;
+            el.dataset.animated = '1';
+            gsap.fromTo(el, { innerText: 0 }, {
+                innerText: target,
+                duration: 1.8,
+                ease: 'power2.out',
+                snap: { innerText: 1 },
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 90%'
+                }
+            });
+        });
+    }
+
+    // Hero counters (immediate after animation)
+    setTimeout(function() {
+        var heroCard = document.querySelector('.lg-glass-card--hero');
+        if (heroCard) {
+            heroCard.querySelectorAll('[data-count]').forEach(function(el) {
+                var target = parseInt(el.getAttribute('data-count'), 10);
+                if (isNaN(target) || el.dataset.animated) return;
+                el.dataset.animated = '1';
+                gsap.fromTo(el, { innerText: 0 }, {
+                    innerText: target,
+                    duration: 1.8,
+                    ease: 'power2.out',
+                    snap: { innerText: 1 }
+                });
+            });
+        }
+    }, 1200);
+
+    // Section counters with ScrollTrigger
+    document.querySelectorAll('.lg-section').forEach(function(section) {
+        ScrollTrigger.create({
+            trigger: section,
+            start: 'top 80%',
+            onEnter: function() { animateCounters(section); }
+        });
+    });
+
+    // ================================================================
+    // PREVIEW MAP
+    // ================================================================
     var pm = document.getElementById('previewMap');
     if (pm) {
         var previewMap = L.map(pm, {
@@ -1221,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function(res) {
                 if (res.success && res.data) {
                     var thresholds = res.thresholds && res.thresholds.length > 0 ? res.thresholds[0].thresholds : null;
-                    function getPreviewColor(val) {
+                    function getColor(val) {
                         if (thresholds) {
                             for (var i = 0; i < thresholds.length; i++) {
                                 var t = thresholds[i];
@@ -1231,16 +1196,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             return '#6b7280';
                         }
-                        return val < 1000 ? '#00CC88' : val < 3000 ? '#FFD700' : val < 5000 ? '#FFA500' : val < 8000 ? '#FF6600' : '#CC0000';
+                        return val < 1000 ? '#0d9488' : val < 3000 ? '#f59e0b' : val < 5000 ? '#f97316' : val < 8000 ? '#ef4444' : '#991b1b';
                     }
                     res.data.forEach(function(d) {
                         if (d.latitude && d.longitude) {
-                            var color = getPreviewColor(d.concentration_value);
                             L.circleMarker([d.latitude, d.longitude], {
                                 radius: 5,
-                                fillColor: color,
-                                color: color,
-                                fillOpacity: 0.75,
+                                fillColor: getColor(d.concentration_value),
+                                color: getColor(d.concentration_value),
+                                fillOpacity: 0.8,
                                 weight: 0
                             }).addTo(previewMap);
                         }
@@ -1249,14 +1213,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // === Charts ===
+    // ================================================================
+    // CHARTS (Dark Theme)
+    // ================================================================
+    var chartTextColor = 'rgba(200, 220, 230, 0.5)';
+    var chartGridColor = 'rgba(0, 212, 255, 0.04)';
     fetch('/api/get_microplastics.php')
         .then(function(r) { return r.json(); })
         .then(function(res) {
             if (!res.success || !res.data) return;
             var data = res.data;
 
-            // Ecossistema
             var ecoCounts = {};
             data.forEach(function(d) {
                 var eco = d.ecossistema || 'Outro';
@@ -1273,7 +1240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         labels: ecoLabels,
                         datasets: [{
                             data: ecoValues,
-                            backgroundColor: ['#22D3EE', '#06B6D4', '#0891B2', '#0E7490', '#67E8F9', '#A5F3FC', '#7C3AED', '#A78BFA', '#34D399', '#FCD34D', '#FB923C'],
+                            backgroundColor: ['#00d4ff','#0d9488','#0891b2','#059669','#6366f1','#8b5cf6','#f59e0b','#ef4444','#ec4899','#64748b','#a3a3a3'],
                             borderWidth: 0
                         }]
                     },
@@ -1283,14 +1250,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         plugins: {
                             legend: {
                                 position: 'bottom',
-                                labels: { color: 'rgba(148,163,184,0.7)', font: { family: 'Instrument Sans, Plus Jakarta Sans, sans-serif', size: 11 }, padding: 14, usePointStyle: true, pointStyleWidth: 8 }
+                                labels: { color: chartTextColor, font: { family: 'Inter, Outfit, sans-serif', size: 11 }, padding: 14, usePointStyle: true, pointStyleWidth: 8 }
                             }
                         }
                     }
                 });
             }
 
-            // Concentracao
             var levels = { 'Baixa': 0, 'Media': 0, 'Elevada': 0, 'Alta': 0, 'Critica': 0 };
             data.forEach(function(d) {
                 var v = d.concentration_value || 0;
@@ -1309,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         labels: Object.keys(levels),
                         datasets: [{
                             data: Object.values(levels),
-                            backgroundColor: ['#00CC88', '#FFD700', '#FFA500', '#FF6600', '#CC0000'],
+                            backgroundColor: ['#0d9488', '#f59e0b', '#f97316', '#ef4444', '#991b1b'],
                             borderRadius: 8,
                             borderSkipped: false
                         }]
@@ -1320,11 +1286,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { color: 'rgba(148,163,184,0.4)', font: { family: 'Instrument Sans, Plus Jakarta Sans' } },
-                                grid: { color: 'rgba(148,163,184,0.05)' }
+                                ticks: { color: chartTextColor, font: { family: 'Inter, Outfit' } },
+                                grid: { color: chartGridColor }
                             },
                             x: {
-                                ticks: { color: 'rgba(148,163,184,0.5)', font: { family: 'Instrument Sans, Plus Jakarta Sans', size: 11 } },
+                                ticks: { color: chartTextColor, font: { family: 'Inter, Outfit', size: 11 } },
                                 grid: { display: false }
                             }
                         }

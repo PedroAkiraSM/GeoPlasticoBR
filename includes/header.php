@@ -34,150 +34,230 @@ $_versionLabel = getSetting('version_label', 'Beta');
     <link href="/assets/css/output.css?v=<?php echo time(); ?>" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- GSAP -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 </head>
-<body>
+<body style="background: #020a18; color: #e8f4f8; margin: 0;">
+
+    <!-- SVG Filters for Liquid Glass -->
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <!-- Liquid Glass Refraction Filter -->
+            <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015 0.015" numOctaves="3" seed="2" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+                <feGaussianBlur in="displaced" stdDeviation="0.5" result="blurred"/>
+                <feSpecularLighting in="noise" surfaceScale="2" specularConstant="0.8" specularExponent="25" result="specular">
+                    <fePointLight x="200" y="100" z="300" />
+                </feSpecularLighting>
+                <feComposite in="specular" in2="SourceGraphic" operator="in" result="specMask"/>
+                <feMerge>
+                    <feMergeNode in="blurred"/>
+                    <feMergeNode in="specMask"/>
+                </feMerge>
+            </filter>
+
+            <!-- Subtle Glass Filter for Navbar -->
+            <filter id="liquid-glass-subtle" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="5" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+                <feGaussianBlur in="displaced" stdDeviation="0.3" result="blurred"/>
+                <feSpecularLighting in="noise" surfaceScale="1" specularConstant="0.5" specularExponent="30" result="specular">
+                    <fePointLight x="400" y="50" z="200" />
+                </feSpecularLighting>
+                <feComposite in="specular" in2="SourceGraphic" operator="in" result="specMask"/>
+                <feMerge>
+                    <feMergeNode in="blurred"/>
+                    <feMergeNode in="specMask"/>
+                </feMerge>
+            </filter>
+
+            <!-- Card Glass Filter -->
+            <filter id="liquid-glass-card" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="3" seed="8" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+                <feGaussianBlur in="displaced" stdDeviation="0.4" result="blurred"/>
+                <feSpecularLighting in="noise" surfaceScale="1.5" specularConstant="0.6" specularExponent="20" result="specular">
+                    <fePointLight x="150" y="80" z="250" />
+                </feSpecularLighting>
+                <feComposite in="specular" in2="SourceGraphic" operator="in" result="specMask"/>
+                <feMerge>
+                    <feMergeNode in="blurred"/>
+                    <feMergeNode in="specMask"/>
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
+
     <?php if (empty($heroPage)): ?>
     <div class="light-rays"></div>
     <?php endif; ?>
 
     <!-- Navigation Bar -->
     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
-    <nav id="mainNav" class="site-nav <?php echo !empty($heroPage) ? 'nav-transparent' : ''; ?>">
-        <div class="nav-inner">
-            <a href="/" class="nav-brand"><?php if ($_logoPath): ?><img src="/<?php echo htmlspecialchars($_logoPath); ?>" alt="<?php echo htmlspecialchars($_siteName); ?>" class="nav-logo"><?php else: ?><?php echo htmlspecialchars($_siteName); ?><?php endif; ?> <?php if ($_versionLabel && $_versionLabel !== 'Estavel'): ?><span class="beta-badge"><?php echo htmlspecialchars($_versionLabel); ?></span><?php endif; ?></a>
-            <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+    <nav id="mainNav" class="lg-nav <?php echo !empty($heroPage) ? 'lg-nav--transparent' : ''; ?>">
+        <div class="lg-nav__inner">
+            <a href="/" class="lg-nav__brand"><?php if ($_logoPath): ?><img src="/<?php echo htmlspecialchars($_logoPath); ?>" alt="<?php echo htmlspecialchars($_siteName); ?>" class="lg-nav__logo"><?php else: ?><?php echo htmlspecialchars($_siteName); ?><?php endif; ?> <?php if ($_versionLabel && $_versionLabel !== 'Estavel'): ?><span class="lg-nav__badge"><?php echo htmlspecialchars($_versionLabel); ?></span><?php endif; ?></a>
+            <button class="lg-nav__hamburger" id="navHamburger" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
-            <div class="nav-links" id="navLinks">
+            <div class="lg-nav__links" id="navLinks">
                 <a href="/">Inicio</a>
                 <a href="/mapa.php">Mapa</a>
                 <a href="/sobre.php">Sobre</a>
-                <a href="/contribuir.php" class="nav-link-special">Contribuir</a>
+                <a href="/contribuir.php" class="lg-nav__link--accent">Contribuir</a>
                 <?php if (function_exists('isAdmin') && isAdmin()): ?>
-                <a href="/gerenciar.php" class="nav-link-special">Gerenciar</a>
-                <a href="/admin.php" class="nav-link-admin">Admin</a>
+                <a href="/gerenciar.php" class="lg-nav__link--accent">Gerenciar</a>
+                <a href="/admin.php" class="lg-nav__link--admin">Admin</a>
                 <?php elseif (function_exists('isScientist') && isScientist()): ?>
-                <a href="/gerenciar.php" class="nav-link-special">Gerenciar</a>
+                <a href="/gerenciar.php" class="lg-nav__link--accent">Gerenciar</a>
                 <?php endif; ?>
-                <span class="nav-user"><?php echo htmlspecialchars($_SESSION['user_nome'] ?? ''); ?></span>
-                <a href="/login.php?logout=1" class="nav-link-logout">Sair</a>
+                <span class="lg-nav__user"><?php echo htmlspecialchars($_SESSION['user_nome'] ?? ''); ?></span>
+                <a href="/login.php?logout=1" class="lg-nav__link--logout">Sair</a>
             </div>
         </div>
     </nav>
     <?php if (empty($heroPage)): ?>
-    <div style="height:56px;"></div>
+    <div style="height:64px;"></div>
     <?php endif; ?>
     <?php endif; ?>
 
     <style>
-    .site-nav {
+    /* ================================================================
+       LIQUID GLASS NAVBAR
+       ================================================================ */
+    .lg-nav {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 9999;
-        background: rgba(8, 15, 30, 0.92);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        padding: 0 30px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        transition: all 0.4s ease;
+        background: rgba(2, 10, 24, 0.6);
+        backdrop-filter: blur(30px) saturate(180%);
+        -webkit-backdrop-filter: blur(30px) saturate(180%);
+        border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+        padding: 0 32px;
+        font-family: 'Inter', 'Outfit', sans-serif;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .site-nav.nav-transparent {
+    .lg-nav--transparent {
         background: transparent;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         border-bottom-color: transparent;
     }
 
-    .site-nav.nav-scrolled {
-        background: rgba(8, 15, 30, 0.95);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom-color: rgba(148, 163, 184, 0.1);
+    .lg-nav--scrolled {
+        background: rgba(2, 10, 24, 0.85);
+        backdrop-filter: blur(40px) saturate(200%);
+        -webkit-backdrop-filter: blur(40px) saturate(200%);
+        border-bottom-color: rgba(0, 212, 255, 0.12);
+        box-shadow:
+            0 4px 30px rgba(0, 0, 0, 0.3),
+            0 0 60px rgba(0, 212, 255, 0.03);
     }
 
-    .nav-inner {
-        max-width: 1400px;
+    .lg-nav__inner {
+        max-width: 1300px;
         margin: 0 auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 56px;
+        height: 64px;
     }
 
-    .nav-brand {
-        font-family: 'Plus Jakarta Sans', sans-serif;
+    .lg-nav__brand {
+        font-family: 'Inter', sans-serif;
         font-weight: 800;
-        font-size: 1.15rem;
-        color: #ffffff;
+        font-size: 1.2rem;
+        color: #e8f4f8;
         text-decoration: none;
-        letter-spacing: -0.02em;
-        transition: opacity 0.3s;
+        letter-spacing: -0.03em;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
+    .lg-nav__brand:hover { color: #00d4ff; }
 
-    .nav-brand:hover { opacity: 0.8; }
-    .nav-logo { height: 28px; vertical-align: middle; margin-right: 4px; }
+    .lg-nav__logo { height: 30px; vertical-align: middle; margin-right: 6px; }
 
-    .beta-badge {
+    .lg-nav__badge {
         display: inline-block;
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        background: linear-gradient(135deg, #00acc1, #00CC88);
-        color: #fff;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-left: 6px;
+        letter-spacing: 0.1em;
+        background: linear-gradient(135deg, #00d4ff, #0d9488);
+        color: #020a18;
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-left: 8px;
         vertical-align: super;
         line-height: 1;
     }
 
-    .nav-links {
+    .lg-nav__links {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 24px;
     }
 
-    .nav-links a {
-        color: rgba(255, 255, 255, 0.7);
+    .lg-nav__links a {
+        color: rgba(232, 244, 248, 0.55);
         text-decoration: none;
         font-size: 0.85rem;
         font-weight: 500;
-        transition: color 0.2s;
+        transition: color 0.25s, text-shadow 0.25s;
+        position: relative;
     }
+    .lg-nav__links a:hover {
+        color: #e8f4f8;
+        text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+    .lg-nav__links a::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        width: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+        transition: all 0.3s;
+        transform: translateX(-50%);
+    }
+    .lg-nav__links a:hover::after { width: 100%; }
 
-    .nav-links a:hover { color: #ffffff; }
+    .lg-nav__link--accent {
+        color: #00d4ff !important;
+        font-weight: 600 !important;
+    }
+    .lg-nav__link--accent:hover { text-shadow: 0 0 24px rgba(0, 212, 255, 0.5) !important; }
 
-    .nav-link-special {
-        color: #60A5FA !important;
+    .lg-nav__link--admin {
+        color: #fbbf24 !important;
         font-weight: 600 !important;
     }
 
-    .nav-link-admin {
-        color: #FBBF24 !important;
-        font-weight: 600 !important;
+    .lg-nav__link--logout {
+        color: rgba(255, 120, 120, 0.6) !important;
+    }
+    .lg-nav__link--logout:hover {
+        color: #ff7878 !important;
+        text-shadow: 0 0 16px rgba(255, 120, 120, 0.3) !important;
     }
 
-    .nav-link-logout {
-        color: rgba(255, 138, 138, 0.7) !important;
-    }
-
-    .nav-link-logout:hover {
-        color: #ff8a8a !important;
-    }
-
-    .nav-user {
-        color: rgba(255, 255, 255, 0.4);
+    .lg-nav__user {
+        color: rgba(232, 244, 248, 0.3);
         font-size: 0.8rem;
     }
 
-    /* Hamburger button */
-    .nav-hamburger {
+    /* Hamburger */
+    .lg-nav__hamburger {
         display: none;
         flex-direction: column;
         justify-content: center;
@@ -188,45 +268,45 @@ $_versionLabel = getSetting('version_label', 'Beta');
         padding: 4px;
         z-index: 10001;
     }
-    .nav-hamburger span {
+    .lg-nav__hamburger span {
         display: block;
         width: 22px;
         height: 2px;
-        background: #ffffff;
+        background: #e8f4f8;
         border-radius: 2px;
         transition: all 0.3s ease;
     }
-    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .lg-nav__hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .lg-nav__hamburger.open span:nth-child(2) { opacity: 0; }
+    .lg-nav__hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
     @media (max-width: 768px) {
-        .site-nav { padding: 0 16px; }
-        .nav-hamburger { display: flex; }
-        .nav-links {
+        .lg-nav { padding: 0 16px; }
+        .lg-nav__hamburger { display: flex; }
+        .lg-nav__links {
             display: none;
             position: fixed;
-            top: 56px;
+            top: 64px;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(8, 15, 30, 0.98);
-            backdrop-filter: blur(20px);
+            background: rgba(2, 10, 24, 0.97);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 28px;
             z-index: 10000;
         }
-        .nav-links.open { display: flex; }
-        .nav-links a { font-size: 1.1rem; }
-        .nav-user { display: block; color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+        .lg-nav__links.open { display: flex; }
+        .lg-nav__links a { font-size: 1.1rem; }
+        .lg-nav__user { display: block; font-size: 0.85rem; }
     }
     </style>
 
     <script>
     (function() {
-        // Hamburger menu
         var btn = document.getElementById('navHamburger');
         var links = document.getElementById('navLinks');
         if (btn && links) {
@@ -243,14 +323,13 @@ $_versionLabel = getSetting('version_label', 'Beta');
         }
 
         <?php if (!empty($heroPage)): ?>
-        // Scroll effect
         var nav = document.getElementById('mainNav');
         if (nav) {
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 80) {
-                    nav.classList.add('nav-scrolled');
+                    nav.classList.add('lg-nav--scrolled');
                 } else {
-                    nav.classList.remove('nav-scrolled');
+                    nav.classList.remove('lg-nav--scrolled');
                 }
             });
         }
