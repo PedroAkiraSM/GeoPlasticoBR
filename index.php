@@ -24,20 +24,17 @@ $heroPage = true;
 include 'includes/header.php';
 ?>
 
-<!-- ============ FLOATING ORBS (Soft Background Accents) ============ -->
-<div class="lg-orbs" aria-hidden="true">
-    <div class="lg-orb lg-orb--1"></div>
-    <div class="lg-orb lg-orb--2"></div>
-    <div class="lg-orb lg-orb--3"></div>
-    <div class="lg-orb lg-orb--4"></div>
+<!-- ============ SCROLL-DRIVEN BACKGROUND VIDEO ============ -->
+<div class="lg-bg-video" aria-hidden="true">
+    <video muted playsinline preload="auto" id="scrollVideo">
+        <source src="/videos/Ocean_descent_marine_202603192005.mp4" type="video/mp4">
+    </video>
+    <div class="lg-bg-video__overlay"></div>
 </div>
 
 <!-- ============ HERO SECTION ============ -->
 <section class="lg-hero">
     <div class="lg-hero__bg">
-        <video autoplay muted loop playsinline preload="metadata" class="lg-hero__video" id="heroVideo">
-            <source src="/videos/hero-bg.mp4" type="video/mp4">
-        </video>
         <div class="lg-hero__overlay"></div>
     </div>
 
@@ -239,41 +236,47 @@ include 'includes/header.php';
    DESIGN TOKENS — LIGHT OCEAN + LIQUID GLASS
    ================================================================ */
 :root {
-    --lg-bg: #f4f9fb;
-    --lg-bg-tinted: #eaf3f7;
-    --lg-glass-bg: rgba(255, 255, 255, 0.65);
-    --lg-glass-bg-hover: rgba(255, 255, 255, 0.8);
-    --lg-glass-border: rgba(0, 80, 120, 0.1);
-    --lg-glass-border-hover: rgba(8, 145, 178, 0.25);
-    --lg-glass-blur: 25px;
-    --lg-accent: #0891b2;
-    --lg-accent-teal: #0d9488;
-    --lg-accent-light: #e6f7fa;
-    --lg-text: #0f2b3c;
-    --lg-text-secondary: #5a7a8a;
-    --lg-text-muted: #8aa0ab;
+    --lg-bg: transparent;
+    --lg-accent: #22d3ee;
+    --lg-accent-teal: #2dd4bf;
+    --lg-accent-light: rgba(34, 211, 238, 0.12);
+    --lg-text: #ffffff;
+    --lg-text-secondary: rgba(255, 255, 255, 0.7);
+    --lg-text-muted: rgba(255, 255, 255, 0.5);
     --lg-font: 'Inter', 'Outfit', sans-serif;
     --lg-ease: cubic-bezier(0.16, 1, 0.3, 1);
     --lg-radius: 24px;
 }
 
-/* === Typography overrides for Liquid Glass sections === */
-.lg-hero h1, .lg-hero h2, .lg-hero h3,
-.lg-section h1, .lg-section h2, .lg-section h3,
-.lg-cta h1, .lg-cta h2, .lg-cta h3,
-.lg-h2 {
+/* === Scroll-driven background video === */
+.lg-bg-video {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+.lg-bg-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.lg-bg-video__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 10, 20, 0.3);
+    pointer-events: none;
+}
+
+/* === Typography — all white for dark video background === */
+.lg-h2, h1, h2, h3 {
     color: var(--lg-text);
     font-family: var(--lg-font);
 }
-.lg-hero h1, .lg-hero .lg-h2 { color: #ffffff; }
-.lg-cta h1, .lg-cta .lg-cta__title { color: #ffffff; }
 
-.lg-section p, .lg-p {
+.lg-p, .lg-section p {
     color: var(--lg-text-secondary);
     font-family: var(--lg-font);
 }
-.lg-hero p, .lg-hero .lg-hero__desc { color: rgba(255, 255, 255, 0.65); }
-.lg-cta p, .lg-cta .lg-cta__desc { color: rgba(255, 255, 255, 0.6); }
 
 .lg-glass--mission h3 {
     color: var(--lg-text);
@@ -285,43 +288,8 @@ include 'includes/header.php';
     font-size: 0.88rem;
 }
 
-/* ================================================================
-   FLOATING ORBS — Soft light accents behind glass
-   ================================================================ */
-.lg-orbs {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.lg-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-}
-
-.lg-orb--1 {
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, rgba(8, 145, 178, 0.35) 0%, rgba(56, 189, 248, 0.15) 40%, transparent 70%);
-    top: 10%; left: -10%;
-}
-.lg-orb--2 {
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(13, 148, 136, 0.30) 0%, rgba(45, 212, 191, 0.12) 40%, transparent 70%);
-    top: 40%; right: -8%;
-}
-.lg-orb--3 {
-    width: 550px; height: 550px;
-    background: radial-gradient(circle, rgba(8, 145, 178, 0.25) 0%, rgba(14, 165, 233, 0.10) 40%, transparent 70%);
-    bottom: 10%; left: 20%;
-}
-.lg-orb--4 {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.20) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
-    top: 65%; right: 20%;
-}
+/* Orbs hidden — video background replaces them */
+.lg-orbs { display: none; }
 
 /* ================================================================
    HERO SECTION (Dark — contrasts with light body)
@@ -336,20 +304,7 @@ include 'includes/header.php';
     z-index: 1;
 }
 
-.lg-hero__bg { position: absolute; inset: 0; }
-
-.lg-hero__video {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    filter: brightness(0.35) saturate(0.7);
-}
-
-.lg-hero__overlay {
-    position: absolute; inset: 0;
-    background:
-        linear-gradient(180deg, rgba(0, 20, 40, 0.5) 0%, rgba(0, 20, 40, 0.3) 50%, rgba(0, 20, 40, 0.7) 100%),
-        radial-gradient(ellipse 60% 50% at 30% 50%, rgba(8, 145, 178, 0.08) 0%, transparent 60%);
-}
+.lg-hero__bg { display: none; }
 
 .lg-hero__inner {
     position: relative; z-index: 10;
@@ -472,7 +427,7 @@ include 'includes/header.php';
     overflow: hidden;
 }
 
-/* Inner glow border + glass tint */
+/* Inner glow border + glass tint (dark theme) */
 .lg-glass::before {
     content: '';
     position: absolute;
@@ -480,11 +435,12 @@ include 'includes/header.php';
     z-index: 1;
     border-radius: var(--lg-radius);
     box-shadow:
-        inset 2px 2px 0px -1px rgba(255, 255, 255, 0.7),
-        inset 0 0 3px 1px rgba(255, 255, 255, 0.6),
-        0 8px 32px rgba(0, 0, 0, 0.06),
-        0 2px 8px rgba(0, 0, 0, 0.03);
-    background: rgba(255, 255, 255, 0.12);
+        inset 1px 1px 0px rgba(255, 255, 255, 0.15),
+        inset -1px -1px 0px rgba(255, 255, 255, 0.05),
+        inset 0 0 3px 1px rgba(255, 255, 255, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.06);
     pointer-events: none;
 }
 
@@ -505,11 +461,12 @@ include 'includes/header.php';
 
 .lg-glass:hover::before {
     box-shadow:
-        inset 2px 2px 0px -1px rgba(255, 255, 255, 0.9),
-        inset 0 0 4px 2px rgba(255, 255, 255, 0.7),
-        0 16px 48px rgba(0, 0, 0, 0.08),
-        0 4px 12px rgba(0, 0, 0, 0.04);
-    background: rgba(255, 255, 255, 0.18);
+        inset 1px 1px 0px rgba(255, 255, 255, 0.25),
+        inset -1px -1px 0px rgba(255, 255, 255, 0.08),
+        inset 0 0 5px 2px rgba(255, 255, 255, 0.15),
+        0 16px 48px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 212, 255, 0.08);
+    background: rgba(255, 255, 255, 0.10);
 }
 
 .lg-glass:hover {
@@ -518,30 +475,6 @@ include 'includes/header.php';
 
 .lg-glass > *:not(.lg-glass__shine) { position: relative; z-index: 2; }
 
-/* Colored blob behind each glass card for refraction */
-.lg-glass--stat { overflow: visible; }
-.lg-glass--stat::before { overflow: hidden; }
-
-/* Section-level colored blobs for glass refraction */
-.lg-section::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background:
-        radial-gradient(circle 250px at 70% 30%, rgba(8, 145, 178, 0.25) 0%, transparent 70%),
-        radial-gradient(circle 200px at 30% 70%, rgba(13, 148, 136, 0.20) 0%, transparent 70%),
-        radial-gradient(circle 180px at 85% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 70%),
-        radial-gradient(circle 220px at 15% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
-}
-.lg-section--tinted::before {
-    background:
-        radial-gradient(circle 280px at 25% 40%, rgba(8, 145, 178, 0.28) 0%, transparent 65%),
-        radial-gradient(circle 230px at 80% 60%, rgba(13, 148, 136, 0.22) 0%, transparent 65%),
-        radial-gradient(circle 200px at 60% 15%, rgba(139, 92, 246, 0.10) 0%, transparent 70%),
-        radial-gradient(circle 250px at 45% 85%, rgba(56, 189, 248, 0.18) 0%, transparent 65%);
-}
 
 /* Hero glass card (dark context — opacity controlled by GSAP) */
 .lg-glass--hero {
@@ -632,18 +565,10 @@ include 'includes/header.php';
     position: relative;
     padding: clamp(80px, 10vw, 120px) 0;
     z-index: 1;
-    background:
-        radial-gradient(ellipse 60% 50% at 10% 80%, rgba(8, 145, 178, 0.18) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 60% at 90% 20%, rgba(13, 148, 136, 0.15) 0%, transparent 55%),
-        radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
-        linear-gradient(180deg, #eaf4f8 0%, #ddeaf1 100%);
+    background: transparent;
 }
 .lg-section--tinted {
-    background:
-        radial-gradient(ellipse 55% 50% at 75% 70%, rgba(8, 145, 178, 0.22) 0%, transparent 55%),
-        radial-gradient(ellipse 45% 55% at 15% 30%, rgba(13, 148, 136, 0.18) 0%, transparent 50%),
-        radial-gradient(circle at 40% 10%, rgba(56, 189, 248, 0.10) 0%, transparent 40%),
-        linear-gradient(180deg, #dde9f1 0%, #d0e2ec 100%);
+    background: transparent;
 }
 
 .lg-container { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
@@ -654,9 +579,10 @@ include 'includes/header.php';
     text-transform: uppercase; letter-spacing: 0.18em;
     color: var(--lg-accent);
     margin-bottom: 16px; padding: 5px 14px;
-    background: var(--lg-accent-light);
-    border: 1px solid rgba(8, 145, 178, 0.12);
+    background: rgba(34, 211, 238, 0.1);
+    border: 1px solid rgba(34, 211, 238, 0.2);
     border-radius: 8px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 
 .lg-h2 {
@@ -685,21 +611,21 @@ include 'includes/header.php';
 /* Map browser */
 .lg-map-browser {
     border-radius: 20px; overflow: hidden;
-    border: 1px solid var(--lg-glass-border);
-    background: var(--lg-glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0,0,0,0.15);
     transition: all 0.5s var(--lg-ease);
 }
 .lg-map-browser:hover {
     transform: translateY(-4px);
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.4);
 }
 .lg-map-browser__bar {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 16px;
-    background: rgba(245, 247, 249, 0.8);
-    border-bottom: 1px solid var(--lg-glass-border);
+    background: rgba(0, 20, 40, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .lg-map-browser__dots { display: flex; gap: 6px; }
 .lg-map-browser__dots span { width: 10px; height: 10px; border-radius: 50%; opacity: 0.8; }
@@ -708,7 +634,7 @@ include 'includes/header.php';
 .lg-map-browser__dots span:nth-child(3) { background: #28CA41; }
 .lg-map-browser__url {
     flex: 1; text-align: center; font-size: 0.72rem;
-    color: var(--lg-text-muted); background: #eef1f4;
+    color: var(--lg-text-muted); background: rgba(255, 255, 255, 0.08);
     padding: 5px 16px; border-radius: 6px;
 }
 .lg-map-browser__content { aspect-ratio: 16/10; }
@@ -741,14 +667,7 @@ include 'includes/header.php';
     position: relative;
     padding: clamp(80px, 10vw, 120px) 0;
     z-index: 1; overflow: hidden;
-    background: linear-gradient(135deg, #0a3d5c 0%, #0d5e6e 40%, #0a4a5c 100%);
-}
-.lg-cta::before {
-    content: ''; position: absolute; inset: 0;
-    background:
-        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(94, 234, 212, 0.1) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 50% at 80% 20%, rgba(8, 145, 178, 0.15) 0%, transparent 60%);
-    pointer-events: none;
+    background: transparent;
 }
 .lg-cta__inner { text-align: center; position: relative; z-index: 2; }
 .lg-cta__title {
@@ -818,6 +737,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // GSAP ANIMATIONS
     // ================================================================
     gsap.registerPlugin(ScrollTrigger);
+
+    // ============ SCROLL-DRIVEN VIDEO ============
+    var scrollVid = document.getElementById('scrollVideo');
+    if (scrollVid) {
+        scrollVid.currentTime = 0;
+        // Wait for video metadata to load
+        function initScrollVideo() {
+            var dur = scrollVid.duration;
+            if (!dur || isNaN(dur)) return;
+            ScrollTrigger.create({
+                trigger: document.documentElement,
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.5,
+                onUpdate: function(self) {
+                    scrollVid.currentTime = self.progress * dur;
+                }
+            });
+        }
+        if (scrollVid.readyState >= 1) {
+            initScrollVideo();
+        } else {
+            scrollVid.addEventListener('loadedmetadata', initScrollVideo);
+        }
+    }
 
     // Hero entrance
     var heroTl = gsap.timeline({ delay: 0.2 });
