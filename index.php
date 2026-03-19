@@ -303,24 +303,24 @@ include 'includes/header.php';
 }
 
 .lg-orb--1 {
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(8, 145, 178, 0.12) 0%, transparent 70%);
-    top: -5%; left: -10%;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(8, 145, 178, 0.35) 0%, rgba(56, 189, 248, 0.15) 40%, transparent 70%);
+    top: 10%; left: -10%;
 }
 .lg-orb--2 {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(13, 148, 136, 0.1) 0%, transparent 70%);
-    top: 35%; right: -8%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(13, 148, 136, 0.30) 0%, rgba(45, 212, 191, 0.12) 40%, transparent 70%);
+    top: 40%; right: -8%;
 }
 .lg-orb--3 {
-    width: 450px; height: 450px;
-    background: radial-gradient(circle, rgba(8, 145, 178, 0.08) 0%, transparent 70%);
-    bottom: 15%; left: 15%;
+    width: 550px; height: 550px;
+    background: radial-gradient(circle, rgba(8, 145, 178, 0.25) 0%, rgba(14, 165, 233, 0.10) 40%, transparent 70%);
+    bottom: 10%; left: 20%;
 }
 .lg-orb--4 {
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
-    top: 60%; right: 25%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.20) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+    top: 65%; right: 20%;
 }
 
 /* ================================================================
@@ -468,23 +468,22 @@ include 'includes/header.php';
     padding: 28px;
     background: transparent;
     transition: all 0.5s var(--lg-ease);
+    isolation: isolate;
 }
 
-/* Inner glow border (like the CodePen reference) */
+/* Inner glow border + glass tint */
 .lg-glass::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 1;
-    overflow: hidden;
     border-radius: var(--lg-radius);
     box-shadow:
-        inset 1px 1px 0px rgba(255, 255, 255, 0.6),
-        inset -1px -1px 0px rgba(255, 255, 255, 0.2),
-        inset 0 0 4px 1px rgba(255, 255, 255, 0.5),
+        inset 2px 2px 0px -1px rgba(255, 255, 255, 0.7),
+        inset 0 0 3px 1px rgba(255, 255, 255, 0.6),
         0 8px 32px rgba(0, 0, 0, 0.06),
         0 2px 8px rgba(0, 0, 0, 0.03);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
     pointer-events: none;
 }
 
@@ -495,8 +494,8 @@ include 'includes/header.php';
     z-index: -1;
     inset: 0;
     border-radius: var(--lg-radius);
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
     filter: url(#liquid-glass-subtle);
     -webkit-filter: url(#liquid-glass-subtle);
     overflow: hidden;
@@ -505,12 +504,11 @@ include 'includes/header.php';
 
 .lg-glass:hover::before {
     box-shadow:
-        inset 1px 1px 0px rgba(255, 255, 255, 0.8),
-        inset -1px -1px 0px rgba(255, 255, 255, 0.3),
-        inset 0 0 6px 2px rgba(255, 255, 255, 0.6),
+        inset 2px 2px 0px -1px rgba(255, 255, 255, 0.9),
+        inset 0 0 4px 2px rgba(255, 255, 255, 0.7),
         0 16px 48px rgba(0, 0, 0, 0.08),
         0 4px 12px rgba(0, 0, 0, 0.04);
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.18);
 }
 
 .lg-glass:hover {
@@ -518,6 +516,31 @@ include 'includes/header.php';
 }
 
 .lg-glass > *:not(.lg-glass__shine) { position: relative; z-index: 2; }
+
+/* Colored blob behind each glass card for refraction */
+.lg-glass--stat { overflow: visible; }
+.lg-glass--stat::before { overflow: hidden; }
+
+/* Section-level colored blobs for glass refraction */
+.lg-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle 250px at 70% 30%, rgba(8, 145, 178, 0.25) 0%, transparent 70%),
+        radial-gradient(circle 200px at 30% 70%, rgba(13, 148, 136, 0.20) 0%, transparent 70%),
+        radial-gradient(circle 180px at 85% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 70%),
+        radial-gradient(circle 220px at 15% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+}
+.lg-section--tinted::before {
+    background:
+        radial-gradient(circle 280px at 25% 40%, rgba(8, 145, 178, 0.28) 0%, transparent 65%),
+        radial-gradient(circle 230px at 80% 60%, rgba(13, 148, 136, 0.22) 0%, transparent 65%),
+        radial-gradient(circle 200px at 60% 15%, rgba(139, 92, 246, 0.10) 0%, transparent 70%),
+        radial-gradient(circle 250px at 45% 85%, rgba(56, 189, 248, 0.18) 0%, transparent 65%);
+}
 
 /* Hero glass card (dark context — opacity controlled by GSAP) */
 .lg-glass--hero {
@@ -609,17 +632,17 @@ include 'includes/header.php';
     padding: clamp(80px, 10vw, 120px) 0;
     z-index: 1;
     background:
-        radial-gradient(ellipse 80% 50% at 10% 90%, rgba(8, 145, 178, 0.10) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 70% at 85% 15%, rgba(13, 148, 136, 0.08) 0%, transparent 65%),
-        radial-gradient(circle at 50% 50%, rgba(99, 179, 237, 0.04) 0%, transparent 50%),
-        linear-gradient(180deg, #f0f7fb 0%, #e8f1f6 100%);
+        radial-gradient(ellipse 60% 50% at 10% 80%, rgba(8, 145, 178, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 90% 20%, rgba(13, 148, 136, 0.15) 0%, transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, #eaf4f8 0%, #ddeaf1 100%);
 }
 .lg-section--tinted {
     background:
-        radial-gradient(ellipse 70% 50% at 75% 80%, rgba(8, 145, 178, 0.14) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 60% at 15% 25%, rgba(13, 148, 136, 0.12) 0%, transparent 55%),
-        radial-gradient(circle at 40% 10%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
-        linear-gradient(180deg, #e4eff5 0%, #dae8ef 100%);
+        radial-gradient(ellipse 55% 50% at 75% 70%, rgba(8, 145, 178, 0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 55% at 15% 30%, rgba(13, 148, 136, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 40% 10%, rgba(56, 189, 248, 0.10) 0%, transparent 40%),
+        linear-gradient(180deg, #dde9f1 0%, #d0e2ec 100%);
 }
 
 .lg-container { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
