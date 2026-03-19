@@ -40,12 +40,11 @@ $_versionLabel = getSetting('version_label', 'Beta');
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 </head>
-<body style="background: #020a18; color: #e8f4f8; margin: 0;">
+<body>
 
     <!-- SVG Filters for Liquid Glass -->
     <svg width="0" height="0" style="position:absolute">
         <defs>
-            <!-- Liquid Glass Refraction Filter -->
             <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
                 <feTurbulence type="fractalNoise" baseFrequency="0.015 0.015" numOctaves="3" seed="2" result="noise"/>
                 <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
@@ -59,29 +58,12 @@ $_versionLabel = getSetting('version_label', 'Beta');
                     <feMergeNode in="specMask"/>
                 </feMerge>
             </filter>
-
-            <!-- Subtle Glass Filter for Navbar -->
             <filter id="liquid-glass-subtle" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
                 <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="5" result="noise"/>
                 <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
                 <feGaussianBlur in="displaced" stdDeviation="0.3" result="blurred"/>
                 <feSpecularLighting in="noise" surfaceScale="1" specularConstant="0.5" specularExponent="30" result="specular">
                     <fePointLight x="400" y="50" z="200" />
-                </feSpecularLighting>
-                <feComposite in="specular" in2="SourceGraphic" operator="in" result="specMask"/>
-                <feMerge>
-                    <feMergeNode in="blurred"/>
-                    <feMergeNode in="specMask"/>
-                </feMerge>
-            </filter>
-
-            <!-- Card Glass Filter -->
-            <filter id="liquid-glass-card" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
-                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="3" seed="8" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
-                <feGaussianBlur in="displaced" stdDeviation="0.4" result="blurred"/>
-                <feSpecularLighting in="noise" surfaceScale="1.5" specularConstant="0.6" specularExponent="20" result="specular">
-                    <fePointLight x="150" y="80" z="250" />
                 </feSpecularLighting>
                 <feComposite in="specular" in2="SourceGraphic" operator="in" result="specMask"/>
                 <feMerge>
@@ -98,7 +80,7 @@ $_versionLabel = getSetting('version_label', 'Beta');
 
     <!-- Navigation Bar -->
     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
-    <nav id="mainNav" class="lg-nav <?php echo !empty($heroPage) ? 'lg-nav--transparent' : ''; ?>">
+    <nav id="mainNav" class="lg-nav <?php echo !empty($heroPage) ? 'lg-nav--hero' : ''; ?>">
         <div class="lg-nav__inner">
             <a href="/" class="lg-nav__brand"><?php if ($_logoPath): ?><img src="/<?php echo htmlspecialchars($_logoPath); ?>" alt="<?php echo htmlspecialchars($_siteName); ?>" class="lg-nav__logo"><?php else: ?><?php echo htmlspecialchars($_siteName); ?><?php endif; ?> <?php if ($_versionLabel && $_versionLabel !== 'Estavel'): ?><span class="lg-nav__badge"><?php echo htmlspecialchars($_versionLabel); ?></span><?php endif; ?></a>
             <button class="lg-nav__hamburger" id="navHamburger" aria-label="Menu">
@@ -127,7 +109,7 @@ $_versionLabel = getSetting('version_label', 'Beta');
 
     <style>
     /* ================================================================
-       LIQUID GLASS NAVBAR
+       LIQUID GLASS NAVBAR — Light Theme
        ================================================================ */
     .lg-nav {
         position: fixed;
@@ -135,30 +117,29 @@ $_versionLabel = getSetting('version_label', 'Beta');
         left: 0;
         right: 0;
         z-index: 9999;
-        background: rgba(2, 10, 24, 0.6);
+        background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(30px) saturate(180%);
         -webkit-backdrop-filter: blur(30px) saturate(180%);
-        border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+        border-bottom: 1px solid rgba(0, 80, 120, 0.08);
         padding: 0 32px;
         font-family: 'Inter', 'Outfit', sans-serif;
         transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .lg-nav--transparent {
+    .lg-nav--hero {
         background: transparent;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         border-bottom-color: transparent;
     }
 
+    /* After scrolling on hero pages */
     .lg-nav--scrolled {
-        background: rgba(2, 10, 24, 0.85);
-        backdrop-filter: blur(40px) saturate(200%);
-        -webkit-backdrop-filter: blur(40px) saturate(200%);
-        border-bottom-color: rgba(0, 212, 255, 0.12);
-        box-shadow:
-            0 4px 30px rgba(0, 0, 0, 0.3),
-            0 0 60px rgba(0, 212, 255, 0.03);
+        background: rgba(255, 255, 255, 0.75) !important;
+        backdrop-filter: blur(40px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+        border-bottom-color: rgba(0, 80, 120, 0.1) !important;
+        box-shadow: 0 1px 20px rgba(0, 0, 0, 0.06);
     }
 
     .lg-nav__inner {
@@ -174,7 +155,7 @@ $_versionLabel = getSetting('version_label', 'Beta');
         font-family: 'Inter', sans-serif;
         font-weight: 800;
         font-size: 1.2rem;
-        color: #e8f4f8;
+        color: #0f2b3c;
         text-decoration: none;
         letter-spacing: -0.03em;
         transition: all 0.3s;
@@ -182,7 +163,9 @@ $_versionLabel = getSetting('version_label', 'Beta');
         align-items: center;
         gap: 4px;
     }
-    .lg-nav__brand:hover { color: #00d4ff; }
+    .lg-nav--hero .lg-nav__brand { color: #ffffff; }
+    .lg-nav--scrolled .lg-nav__brand { color: #0f2b3c !important; }
+    .lg-nav__brand:hover { opacity: 0.75; }
 
     .lg-nav__logo { height: 30px; vertical-align: middle; margin-right: 6px; }
 
@@ -192,8 +175,8 @@ $_versionLabel = getSetting('version_label', 'Beta');
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        background: linear-gradient(135deg, #00d4ff, #0d9488);
-        color: #020a18;
+        background: linear-gradient(135deg, #0891b2, #0d9488);
+        color: #fff;
         padding: 3px 8px;
         border-radius: 6px;
         margin-left: 8px;
@@ -208,53 +191,56 @@ $_versionLabel = getSetting('version_label', 'Beta');
     }
 
     .lg-nav__links a {
-        color: rgba(232, 244, 248, 0.55);
+        color: rgba(15, 43, 60, 0.55);
         text-decoration: none;
         font-size: 0.85rem;
         font-weight: 500;
-        transition: color 0.25s, text-shadow 0.25s;
+        transition: color 0.25s;
         position: relative;
     }
-    .lg-nav__links a:hover {
-        color: #e8f4f8;
-        text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-    }
+    .lg-nav--hero .lg-nav__links a { color: rgba(255,255,255,0.7); }
+    .lg-nav--scrolled .lg-nav__links a { color: rgba(15, 43, 60, 0.55) !important; }
+
+    .lg-nav__links a:hover { color: #0f2b3c; }
+    .lg-nav--hero .lg-nav__links a:hover { color: #ffffff; }
+    .lg-nav--scrolled .lg-nav__links a:hover { color: #0f2b3c !important; }
+
     .lg-nav__links a::after {
         content: '';
         position: absolute;
         bottom: -4px;
         left: 50%;
         width: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+        height: 1.5px;
+        background: #0891b2;
         transition: all 0.3s;
         transform: translateX(-50%);
     }
     .lg-nav__links a:hover::after { width: 100%; }
 
     .lg-nav__link--accent {
-        color: #00d4ff !important;
+        color: #0891b2 !important;
         font-weight: 600 !important;
     }
-    .lg-nav__link--accent:hover { text-shadow: 0 0 24px rgba(0, 212, 255, 0.5) !important; }
+    .lg-nav--hero .lg-nav__link--accent { color: #5eead4 !important; }
+    .lg-nav--scrolled .lg-nav__link--accent { color: #0891b2 !important; }
 
     .lg-nav__link--admin {
-        color: #fbbf24 !important;
+        color: #b45309 !important;
         font-weight: 600 !important;
     }
+    .lg-nav--hero .lg-nav__link--admin { color: #fbbf24 !important; }
+    .lg-nav--scrolled .lg-nav__link--admin { color: #b45309 !important; }
 
-    .lg-nav__link--logout {
-        color: rgba(255, 120, 120, 0.6) !important;
-    }
-    .lg-nav__link--logout:hover {
-        color: #ff7878 !important;
-        text-shadow: 0 0 16px rgba(255, 120, 120, 0.3) !important;
-    }
+    .lg-nav__link--logout { color: rgba(220, 60, 60, 0.5) !important; }
+    .lg-nav__link--logout:hover { color: #dc3c3c !important; }
 
     .lg-nav__user {
-        color: rgba(232, 244, 248, 0.3);
+        color: rgba(15, 43, 60, 0.3);
         font-size: 0.8rem;
     }
+    .lg-nav--hero .lg-nav__user { color: rgba(255,255,255,0.35); }
+    .lg-nav--scrolled .lg-nav__user { color: rgba(15, 43, 60, 0.3) !important; }
 
     /* Hamburger */
     .lg-nav__hamburger {
@@ -272,10 +258,13 @@ $_versionLabel = getSetting('version_label', 'Beta');
         display: block;
         width: 22px;
         height: 2px;
-        background: #e8f4f8;
+        background: #0f2b3c;
         border-radius: 2px;
         transition: all 0.3s ease;
     }
+    .lg-nav--hero .lg-nav__hamburger span { background: #ffffff; }
+    .lg-nav--scrolled .lg-nav__hamburger span { background: #0f2b3c !important; }
+
     .lg-nav__hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .lg-nav__hamburger.open span:nth-child(2) { opacity: 0; }
     .lg-nav__hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -290,7 +279,7 @@ $_versionLabel = getSetting('version_label', 'Beta');
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(2, 10, 24, 0.97);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
             flex-direction: column;
@@ -300,8 +289,8 @@ $_versionLabel = getSetting('version_label', 'Beta');
             z-index: 10000;
         }
         .lg-nav__links.open { display: flex; }
-        .lg-nav__links a { font-size: 1.1rem; }
-        .lg-nav__user { display: block; font-size: 0.85rem; }
+        .lg-nav__links a { font-size: 1.1rem; color: #0f2b3c !important; }
+        .lg-nav__user { display: block; font-size: 0.85rem; color: rgba(15,43,60,0.4) !important; }
     }
     </style>
 
