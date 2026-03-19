@@ -738,21 +738,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // ================================================================
     gsap.registerPlugin(ScrollTrigger);
 
-    // ============ SCROLL-DRIVEN VIDEO ============
+    // ============ SCROLL-DRIVEN VIDEO (smooth interpolation) ============
     var scrollVid = document.getElementById('scrollVideo');
     if (scrollVid) {
         scrollVid.currentTime = 0;
-        // Wait for video metadata to load
+        var targetTime = 0;
+        var currentSmooth = 0;
+        var isUpdating = false;
+
+        function smoothVideoFrame() {
+            // Lerp: smoothly interpolate toward target time
+            currentSmooth += (targetTime - currentSmooth) * 0.08;
+            // Only update if difference is meaningful
+            if (Math.abs(currentSmooth - scrollVid.currentTime) > 0.01) {
+                scrollVid.currentTime = currentSmooth;
+            }
+            // Keep loop running if not at target
+            if (Math.abs(targetTime - currentSmooth) > 0.005) {
+                requestAnimationFrame(smoothVideoFrame);
+            } else {
+                isUpdating = false;
+            }
+        }
+
         function initScrollVideo() {
             var dur = scrollVid.duration;
             if (!dur || isNaN(dur)) return;
+            currentSmooth = 0;
             ScrollTrigger.create({
                 trigger: document.documentElement,
                 start: 'top top',
                 end: 'bottom bottom',
-                scrub: 0.5,
+                scrub: true,
                 onUpdate: function(self) {
-                    scrollVid.currentTime = self.progress * dur;
+                    targetTime = self.progress * dur;
+                    if (!isUpdating) {
+                        isUpdating = true;
+                        requestAnimationFrame(smoothVideoFrame);
+                    }
                 }
             });
         }
