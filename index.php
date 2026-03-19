@@ -257,15 +257,43 @@ include 'includes/header.php';
     --lg-radius: 24px;
 }
 
-/* === RESET === */
+/* === RESET (override Tailwind output.css global dark theme) === */
 body {
     background: var(--lg-bg) !important;
-    color: var(--lg-text) !important;
     background-image: none !important;
+    color: var(--lg-text) !important;
     overflow-x: hidden;
-    font-family: var(--lg-font);
+    font-family: var(--lg-font) !important;
 }
 .light-rays { display: none !important; }
+
+/* Override Tailwind global typography (output.css sets dark theme colors) */
+.lg-hero h1, .lg-hero h2, .lg-hero h3,
+.lg-section h1, .lg-section h2, .lg-section h3,
+.lg-cta h1, .lg-cta h2, .lg-cta h3,
+.lg-h2 {
+    color: var(--lg-text) !important;
+    font-family: var(--lg-font) !important;
+}
+.lg-hero h1, .lg-hero .lg-h2 { color: #ffffff !important; }
+.lg-cta h1, .lg-cta .lg-cta__title { color: #ffffff !important; }
+
+.lg-section p, .lg-p {
+    color: var(--lg-text-secondary) !important;
+    font-family: var(--lg-font) !important;
+}
+.lg-hero p, .lg-hero .lg-hero__desc { color: rgba(255, 255, 255, 0.65) !important; }
+.lg-cta p, .lg-cta .lg-cta__desc { color: rgba(255, 255, 255, 0.6) !important; }
+
+.lg-glass--mission h3 {
+    color: var(--lg-text) !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+}
+.lg-glass--mission p {
+    color: var(--lg-text-muted) !important;
+    font-size: 0.88rem !important;
+}
 
 /* ================================================================
    FLOATING ORBS — Soft light accents behind glass
