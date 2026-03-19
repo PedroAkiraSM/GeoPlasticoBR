@@ -58,11 +58,13 @@ $_versionLabel = getSetting('version_label', 'Beta');
                     <feMergeNode in="specMask"/>
                 </feMerge>
             </filter>
-            <!-- Card-level glass: real displacement distortion like Apple Liquid Glass -->
-            <filter id="liquid-glass-subtle" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="42" result="noise"/>
-                <feGaussianBlur in="noise" stdDeviation="0.02" result="blur"/>
-                <feDisplacementMap in="SourceGraphic" in2="blur" scale="55" xChannelSelector="R" yChannelSelector="G"/>
+            <!-- Card-level glass: displacement distortion + smoothing for Chromium -->
+            <filter id="liquid-glass-subtle" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.012 0.012" numOctaves="3" seed="42" result="noise"/>
+                <feGaussianBlur in="noise" stdDeviation="1" result="smoothNoise"/>
+                <feDisplacementMap in="SourceGraphic" in2="smoothNoise" scale="22" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+                <feGaussianBlur in="displaced" stdDeviation="0.8" result="softened"/>
+                <feComposite in="softened" in2="SourceGraphic" operator="atop"/>
             </filter>
         </defs>
     </svg>

@@ -469,6 +469,7 @@ include 'includes/header.php';
     background: transparent;
     transition: all 0.5s var(--lg-ease);
     isolation: isolate;
+    overflow: hidden;
 }
 
 /* Inner glow border + glass tint */
