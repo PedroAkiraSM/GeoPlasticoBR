@@ -853,19 +853,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ScrollTrigger for sections
+    // ScrollTrigger for sections — use set + to instead of from to avoid flash
     gsap.utils.toArray('.lg-section, .lg-cta').forEach(function(section) {
         var elements = section.querySelectorAll('.lg-glass, .lg-h2, .lg-p, .lg-eyebrow, .lg-checklist__item, .lg-map-browser, .lg-chart-title');
-        gsap.from(elements, {
-            scrollTrigger: { trigger: section, start: 'top 80%', toggleActions: 'play none none none' },
-            opacity: 0, y: 40, duration: 0.8, stagger: 0.1, ease: 'power3.out'
+        gsap.set(elements, { opacity: 0, y: 40 });
+        ScrollTrigger.create({
+            trigger: section,
+            start: 'top 85%',
+            once: true,
+            onEnter: function() {
+                gsap.to(elements, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out' });
+            }
         });
     });
 
-    gsap.from('.lg-cta__title, .lg-cta__desc, .lg-cta__actions', {
-        scrollTrigger: { trigger: '.lg-cta', start: 'top 80%' },
-        opacity: 0, y: 40, duration: 0.8, stagger: 0.15, ease: 'power3.out'
-    });
+    var ctaEls = document.querySelectorAll('.lg-cta__title, .lg-cta__desc, .lg-cta__actions');
+    if (ctaEls.length) {
+        gsap.set(ctaEls, { opacity: 0, y: 40 });
+        ScrollTrigger.create({
+            trigger: '.lg-cta',
+            start: 'top 85%',
+            once: true,
+            onEnter: function() {
+                gsap.to(ctaEls, { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: 'power3.out' });
+            }
+        });
+    }
 
     // Glass card hover glow with GSAP
     document.querySelectorAll('.lg-glass:not(.lg-glass--hero)').forEach(function(card) {
