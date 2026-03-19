@@ -1,86 +1,54 @@
-// Spacing System - Sistema de espaçamento consistente
+/* Spacing System */
 
-// Section spacing
 .section {
   padding: clamp(4rem, 10vw, 8rem) clamp(1rem, 5vw, 3rem);
   position: relative;
   z-index: 1;
-
-  &-sm {
-    padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 3rem);
-  }
-
-  &-lg {
-    padding: clamp(6rem, 12vw, 10rem) clamp(1rem, 5vw, 3rem);
-  }
-
-  // Negative top margin para sobrepor seções
-  &-overlap {
-    margin-top: clamp(-3rem, -5vw, -5rem);
-    z-index: 20;
-  }
 }
 
-// Container
+.section-sm {
+  padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 3rem);
+}
+
+.section-lg {
+  padding: clamp(6rem, 12vw, 10rem) clamp(1rem, 5vw, 3rem);
+}
+
+.section-overlap {
+  margin-top: clamp(-3rem, -5vw, -5rem);
+  z-index: 20;
+}
+
 .container {
   margin-left: auto;
   margin-right: auto;
   padding-left: clamp(1rem, 3vw, 2rem);
   padding-right: clamp(1rem, 3vw, 2rem);
-
-  &-sm {
-    max-width: 48rem;
-  }
-
-  &-md {
-    max-width: 64rem;
-  }
-
-  &-lg {
-    max-width: 80rem;
-  }
-
-  &-xl {
-    max-width: 96rem;
-  }
 }
 
-// Vertical rhythm
-.vr {
-  &-xs {
-    margin-bottom: clamp(0.5rem, 1vw, 0.75rem);
-  }
+.container-sm { max-width: 48rem; }
+.container-md { max-width: 64rem; }
+.container-lg { max-width: 80rem; }
+.container-xl { max-width: 96rem; }
 
-  &-sm {
-    margin-bottom: clamp(1rem, 2vw, 1.5rem);
-  }
+.vr-xs { margin-bottom: clamp(0.5rem, 1vw, 0.75rem); }
+.vr-sm { margin-bottom: clamp(1rem, 2vw, 1.5rem); }
+.vr-md { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+.vr-lg { margin-bottom: clamp(2rem, 4vw, 3.5rem); }
+.vr-xl { margin-bottom: clamp(3rem, 6vw, 5rem); }
 
-  &-md {
-    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
-  }
-
-  &-lg {
-    margin-bottom: clamp(2rem, 4vw, 3.5rem);
-  }
-
-  &-xl {
-    margin-bottom: clamp(3rem, 6vw, 5rem);
-  }
-}
-
-// Grid spacing
 .grid-cards {
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
 
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+@media (min-width: 768px) {
+  .grid-cards { grid-template-columns: repeat(2, 1fr); }
+}
 
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
+@media (min-width: 1024px) {
+  .grid-cards { grid-template-columns: repeat(3, 1fr); }
 }
 
 .grid-timeline {

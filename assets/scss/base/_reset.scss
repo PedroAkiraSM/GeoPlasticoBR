@@ -1,4 +1,4 @@
-// Base Reset & Body Styles
+/* Base Reset & Body Styles — Light Theme */
 
 * {
   margin: 0;
@@ -12,19 +12,17 @@ html {
 }
 
 body {
-  @apply bg-ocean-gradient bg-fixed text-ocean-50 overflow-x-hidden min-h-screen relative;
-  font-family: theme('fontFamily.sans');
+  background: #f4f9fb;
+  color: #0f2b3c;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-// Selection
 ::selection {
-  background: theme('colors.biolume.cyan');
-  color: theme('colors.ocean.950');
-}
-
-::-moz-selection {
-  background: theme('colors.biolume.cyan');
-  color: theme('colors.ocean.950');
+  background: #0891b2;
+  color: #ffffff;
 }

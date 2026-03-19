@@ -257,42 +257,32 @@ include 'includes/header.php';
     --lg-radius: 24px;
 }
 
-/* === RESET (override Tailwind output.css global dark theme) === */
-body {
-    background: var(--lg-bg) !important;
-    background-image: none !important;
-    color: var(--lg-text) !important;
-    overflow-x: hidden;
-    font-family: var(--lg-font) !important;
-}
-.light-rays { display: none !important; }
-
-/* Override Tailwind global typography (output.css sets dark theme colors) */
+/* === Typography overrides for Liquid Glass sections === */
 .lg-hero h1, .lg-hero h2, .lg-hero h3,
 .lg-section h1, .lg-section h2, .lg-section h3,
 .lg-cta h1, .lg-cta h2, .lg-cta h3,
 .lg-h2 {
-    color: var(--lg-text) !important;
-    font-family: var(--lg-font) !important;
+    color: var(--lg-text);
+    font-family: var(--lg-font);
 }
-.lg-hero h1, .lg-hero .lg-h2 { color: #ffffff !important; }
-.lg-cta h1, .lg-cta .lg-cta__title { color: #ffffff !important; }
+.lg-hero h1, .lg-hero .lg-h2 { color: #ffffff; }
+.lg-cta h1, .lg-cta .lg-cta__title { color: #ffffff; }
 
 .lg-section p, .lg-p {
-    color: var(--lg-text-secondary) !important;
-    font-family: var(--lg-font) !important;
+    color: var(--lg-text-secondary);
+    font-family: var(--lg-font);
 }
-.lg-hero p, .lg-hero .lg-hero__desc { color: rgba(255, 255, 255, 0.65) !important; }
-.lg-cta p, .lg-cta .lg-cta__desc { color: rgba(255, 255, 255, 0.6) !important; }
+.lg-hero p, .lg-hero .lg-hero__desc { color: rgba(255, 255, 255, 0.65); }
+.lg-cta p, .lg-cta .lg-cta__desc { color: rgba(255, 255, 255, 0.6); }
 
 .lg-glass--mission h3 {
-    color: var(--lg-text) !important;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
+    color: var(--lg-text);
+    font-size: 1.05rem;
+    font-weight: 700;
 }
 .lg-glass--mission p {
-    color: var(--lg-text-muted) !important;
-    font-size: 0.88rem !important;
+    color: var(--lg-text-muted);
+    font-size: 0.88rem;
 }
 
 /* ================================================================
@@ -473,30 +463,30 @@ body {
    GLASS CARD — Light Liquid Glass
    ================================================================ */
 .lg-glass {
-    background: rgba(255, 255, 255, 0.75) !important;
-    border: 1px solid rgba(0, 80, 120, 0.12) !important;
-    border-radius: var(--lg-radius) !important;
-    padding: 28px !important;
-    position: relative !important;
-    overflow: hidden !important;
-    backdrop-filter: blur(25px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(150%) !important;
-    transition: all 0.5s var(--lg-ease) !important;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 80, 120, 0.12);
+    border-radius: var(--lg-radius);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(25px) saturate(150%);
+    -webkit-backdrop-filter: blur(25px) saturate(150%);
+    transition: all 0.5s var(--lg-ease);
     box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.08),
         0 2px 8px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .lg-glass:hover {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border-color: rgba(8, 145, 178, 0.25) !important;
-    transform: translateY(-4px) !important;
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(8, 145, 178, 0.25);
+    transform: translateY(-4px);
     box-shadow:
         0 16px 48px rgba(0, 0, 0, 0.1),
         0 4px 12px rgba(0, 0, 0, 0.06),
         0 0 0 1px rgba(8, 145, 178, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 /* Glass shine */
@@ -518,14 +508,14 @@ body {
 
 /* Hero glass card (dark context — opacity controlled by GSAP) */
 .lg-glass--hero {
-    width: 360px !important;
-    flex-shrink: 0 !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    width: 360px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
     box-shadow:
         0 24px 80px rgba(0, 0, 0, 0.3),
         0 8px 24px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
     opacity: 0;
     transform: translateY(30px);
 }

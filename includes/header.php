@@ -39,15 +39,6 @@ $_versionLabel = getSetting('version_label', 'Beta');
     <!-- GSAP -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <!-- Critical overrides for Tailwind dark theme reset -->
-    <style>
-    body {
-        background: #f4f9fb !important;
-        background-image: none !important;
-        color: #0f2b3c !important;
-    }
-    .light-rays { display: none !important; }
-    </style>
 </head>
 <body>
 

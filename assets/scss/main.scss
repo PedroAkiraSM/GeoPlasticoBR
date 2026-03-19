@@ -1,56 +1,49 @@
-// GeoPlásticoBR - Main Stylesheet
-// Sistema de design oceânico e bioluminescente
+/* GeoPlasticoBR - Main Stylesheet - Light Theme */
 
-// Tailwind directives
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// Base styles
 @import 'base/reset';
 @import 'base/typography';
 
-// Components
 @import 'components/particles';
 @import 'components/cards';
 @import 'components/buttons';
 @import 'components/icons';
 
-// Utilities
 @import 'utilities/spacing';
 @import 'utilities/animations';
 
-// Custom layer additions
 @layer utilities {
-  // Text shadows bioluminescentes
   .text-glow-sm {
-    text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    text-shadow: 0 0 10px rgba(8, 145, 178, 0.15);
   }
 
   .text-glow {
-    text-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+    text-shadow: 0 0 20px rgba(8, 145, 178, 0.2);
   }
 
   .text-glow-lg {
-    text-shadow: 0 0 40px rgba(0, 255, 255, 0.8);
+    text-shadow: 0 0 30px rgba(8, 145, 178, 0.3);
   }
 
-  // Gradient text
   .text-gradient-ocean {
-    @apply bg-gradient-to-r from-biolume-cyan via-biolume-blue to-biolume-teal bg-clip-text text-transparent;
-    filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5));
+    background: linear-gradient(135deg, #0891b2, #0d9488);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  // Glass morphism
   .glass {
-    background: rgba(0, 102, 153, 0.15);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 212, 255, 0.2);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 80, 120, 0.1);
   }
 
   .glass-strong {
-    background: rgba(0, 51, 102, 0.3);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(0, 212, 255, 0.3);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(0, 80, 120, 0.12);
   }
 }
