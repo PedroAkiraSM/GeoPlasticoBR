@@ -460,48 +460,61 @@ include 'includes/header.php';
 .lg-btn--lg { padding: 16px 36px; font-size: 0.95rem; }
 
 /* ================================================================
-   GLASS CARD — Light Liquid Glass
+   GLASS CARD — Liquid Glass with SVG Displacement
    ================================================================ */
 .lg-glass {
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(0, 80, 120, 0.12);
+    position: relative;
     border-radius: var(--lg-radius);
     padding: 28px;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(25px) saturate(150%);
-    -webkit-backdrop-filter: blur(25px) saturate(150%);
+    background: transparent;
     transition: all 0.5s var(--lg-ease);
+}
+
+/* Inner glow border (like the CodePen reference) */
+.lg-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: var(--lg-radius);
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        0 2px 8px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        inset 1px 1px 0px rgba(255, 255, 255, 0.6),
+        inset -1px -1px 0px rgba(255, 255, 255, 0.2),
+        inset 0 0 4px 1px rgba(255, 255, 255, 0.5),
+        0 8px 32px rgba(0, 0, 0, 0.06),
+        0 2px 8px rgba(0, 0, 0, 0.03);
+    background: rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+}
+
+/* SVG displacement distortion layer */
+.lg-glass::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: var(--lg-radius);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    filter: url(#liquid-glass-subtle);
+    -webkit-filter: url(#liquid-glass-subtle);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.lg-glass:hover::before {
+    box-shadow:
+        inset 1px 1px 0px rgba(255, 255, 255, 0.8),
+        inset -1px -1px 0px rgba(255, 255, 255, 0.3),
+        inset 0 0 6px 2px rgba(255, 255, 255, 0.6),
+        0 16px 48px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.22);
 }
 
 .lg-glass:hover {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(8, 145, 178, 0.25);
     transform: translateY(-4px);
-    box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.1),
-        0 4px 12px rgba(0, 0, 0, 0.06),
-        0 0 0 1px rgba(8, 145, 178, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 1);
-}
-
-/* Glass shine */
-.lg-glass__shine,
-.lg-glass::before {
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0) 40%,
-        rgba(255, 255, 255, 0.15) 100%
-    );
-    pointer-events: none; z-index: 1;
 }
 
 .lg-glass > *:not(.lg-glass__shine) { position: relative; z-index: 2; }
@@ -589,14 +602,25 @@ include 'includes/header.php';
 }
 
 /* ================================================================
-   SECTIONS
+   SECTIONS — mesh gradient backgrounds for glass refraction
    ================================================================ */
 .lg-section {
     position: relative;
     padding: clamp(80px, 10vw, 120px) 0;
     z-index: 1;
+    background:
+        radial-gradient(ellipse 80% 50% at 10% 90%, rgba(8, 145, 178, 0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 70% at 85% 15%, rgba(13, 148, 136, 0.08) 0%, transparent 65%),
+        radial-gradient(circle at 50% 50%, rgba(99, 179, 237, 0.04) 0%, transparent 50%),
+        linear-gradient(180deg, #f0f7fb 0%, #e8f1f6 100%);
 }
-.lg-section--tinted { background: var(--lg-bg-tinted); }
+.lg-section--tinted {
+    background:
+        radial-gradient(ellipse 70% 50% at 75% 80%, rgba(8, 145, 178, 0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 15% 25%, rgba(13, 148, 136, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 40% 10%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+        linear-gradient(180deg, #e4eff5 0%, #dae8ef 100%);
+}
 
 .lg-container { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
 

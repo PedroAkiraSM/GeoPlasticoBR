@@ -58,18 +58,11 @@ $_versionLabel = getSetting('version_label', 'Beta');
                     <feMergeNode in="specMask"/>
                 </feMerge>
             </filter>
-            <filter id="liquid-glass-subtle" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="5" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
-                <feGaussianBlur in="displaced" stdDeviation="0.3" result="blurred"/>
-                <feSpecularLighting in="noise" surfaceScale="1" specularConstant="0.5" specularExponent="30" result="specular">
-                    <fePointLight x="400" y="50" z="200" />
-                </feSpecularLighting>
-                <feComposite in="specular" in2="SourceGraphic" operator="in" result="specMask"/>
-                <feMerge>
-                    <feMergeNode in="blurred"/>
-                    <feMergeNode in="specMask"/>
-                </feMerge>
+            <!-- Card-level glass: real displacement distortion like Apple Liquid Glass -->
+            <filter id="liquid-glass-subtle" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="42" result="noise"/>
+                <feGaussianBlur in="noise" stdDeviation="0.02" result="blur"/>
+                <feDisplacementMap in="SourceGraphic" in2="blur" scale="55" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>
     </svg>
