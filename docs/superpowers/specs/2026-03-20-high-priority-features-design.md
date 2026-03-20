@@ -25,13 +25,22 @@ Terrestre    → [Floresta, Campo, Área urbana, Solo exposto]
 
 This mapping is defined once in PHP and exposed as `window.GEO_ECO_MAP` for JS consumption, avoiding duplication.
 
+**Legacy value handling:** Existing `sample_values` may contain old `tipo_ambiente` values (`"Doce"`, `"Salgado"`, `"Salobro"` from original seed data). The JS mapping must handle both old and new formats:
+```
+"Doce" OR "Água doce"       → [Lago, Reservatório, Rio, Córrego]
+"Salgado" OR "Água salgada" → [Mangue, Ilha, Oceano, Estuário, Restinga, Apicum]
+"Terrestre"                 → [Floresta, Campo, Área urbana, Solo exposto]
+```
+
 ### Where It Applies
 
 **1. Map (mapa.php + map_v2.js):**
 - Add `tipo_ambiente` filter to the filter panel (dropdown select)
 - When tipo_ambiente is selected, filter the ecossistema dropdown to show only matching options
 - Fix `applyFilters()` to actually use `activeFilters.ecossistema` and new `activeFilters.tipo_ambiente` — compare against sample's dynamic fields array
+- Also fix `activeFilters.concMin/concMax` — currently set by concentration chip filter but never checked in `applyFilters()` (same bug pattern)
 - Currently `activeFilters.ecossistema` is set on change but never checked in the filter function (bug)
+- Fix `clearFilter` handler to reset `tipo_ambiente` and `ecossistema` keys and their select elements
 
 **2. Admin (tab_dados.php):**
 - When the `tipo_ambiente` select changes, JS filters the `ecossistema` select options in the same form row
@@ -56,7 +65,7 @@ CREATE TABLE species (
     image_path VARCHAR(255),
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES sample_categories(id)
+    FOREIGN KEY (category_id) REFERENCES sample_categories(id) ON DELETE CASCADE
 );
 ```
 
@@ -85,7 +94,7 @@ Field `familia_biologica` remains as free text — families are too numerous and
 
 ### Map Popup Enhancement
 
-- `api/get_samples.php` includes species image path in response (JOIN with species table via the especie field value matching species.id)
+- Species image is resolved via **post-processing** in PHP (not a JOIN in the generic EAV query): after `getSamplesForMap()` returns samples with their fields, a second pass detects `especie` fields and looks up the species image from the `species` table. This avoids modifying the generic EAV query for a single field's special behavior.
 - In popup, if species has an image, display it at the top of the card (before header)
 - Size: thumbnail ~120x80px, rounded corners
 - Falls back to no image gracefully if species has no photo
@@ -94,6 +103,7 @@ Field `familia_biologica` remains as free text — families are too numerous and
 
 - Update `especie` field type from `text` to `select` in `category_fields` for all biotic categories
 - The `select_options` for especie will NOT be stored in `category_fields.select_options` — instead, the admin/form JS will fetch from the `species` table via API (special handling for this field)
+- **Existing data:** Currently only Peixes (210 samples) has `especie` field data (free text). Since species records don't exist yet, existing text values are preserved as-is in `sample_values.value_text`. New entries will store the species `name` (not ID) to maintain readability and backward compatibility. The popup displays the value directly — if a matching species record exists, it also shows the image.
 
 ## Feature 3: Dynamic Contribution Form
 
@@ -164,6 +174,11 @@ All fields from `category_fields` where `is_active=1`, ordered by `display_order
 - Fields with `is_required=1`: validated client-side (HTML required attribute) and server-side before INSERT
 - Coordinates: validated as valid lat/lng ranges
 - Multicheck: stored as JSON array in `value_text`
+
+## Implementation Notes
+
+- **Authentication:** The contribution form requires login (`requireLogin()`), same as current. New API endpoints (`get_category_fields.php`, `get_species.php`) are public (read-only metadata). Submit endpoint requires login.
+- **`approved=0` by default:** New submissions require admin approval before appearing on the map. Uses `$_SESSION['user_id']` for `submitted_by`.
 
 ## Implementation Order
 
