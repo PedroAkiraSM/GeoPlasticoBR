@@ -93,6 +93,14 @@ The SQL migration will execute the following steps inside a single transaction:
 
 **Step 0: Backup** — Full database dump before execution
 
+**Step 0.5: Ensure `multicheck` in ENUM** — The original `category_fields.field_type` ENUM may not include `multicheck`. Run:
+```sql
+ALTER TABLE category_fields
+  MODIFY COLUMN field_type ENUM('text','number','decimal','checkbox','multicheck','select','textarea')
+  NOT NULL DEFAULT 'text';
+```
+This is idempotent — safe to run even if `multicheck` already exists.
+
 **Step 1: Create Répteis category** — Insert into `sample_categories` with appropriate color and display_order
 
 **Step 2: Migrate Peixes `fiber` data** — The existing `fiber` field (multicheck) contains forma data stored as JSON arrays with English values. Migration is a **COPY** (INSERT new rows, keep originals):
