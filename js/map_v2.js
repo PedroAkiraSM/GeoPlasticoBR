@@ -17,7 +17,9 @@
         search: '',
         category: 'all',
         concMin: 0,
-        concMax: 999999
+        concMax: 999999,
+        ecossistema: '',
+        tipoAmbiente: ''
     };
 
     var API_URL = '/api/get_samples.php';
@@ -355,6 +357,43 @@
                     }
                 }
                 if (title.indexOf(q) === -1 && author.indexOf(q) === -1 && catName.indexOf(q) === -1 && !fieldMatch) return false;
+            }
+
+            // Tipo de Ambiente filter
+            if (activeFilters.tipoAmbiente) {
+                var itemTipo = getFieldValue(item, 'tipo_ambiente');
+                if (!itemTipo) return false;
+                // Handle legacy values: "Doce" → "Água doce", "Salgado" → "Água salgada"
+                var normalizedTipo = itemTipo;
+                if (itemTipo === 'Doce') normalizedTipo = 'Água doce';
+                else if (itemTipo === 'Salgado') normalizedTipo = 'Água salgada';
+                else if (itemTipo === 'Salobro') normalizedTipo = 'Água salgada';
+                if (normalizedTipo !== activeFilters.tipoAmbiente) return false;
+            }
+
+            // Ecossistema filter
+            if (activeFilters.ecossistema) {
+                var itemEco = getFieldValue(item, 'ecossistema');
+                if (!itemEco || itemEco !== activeFilters.ecossistema) return false;
+            }
+
+            // Concentration filter
+            if (activeFilters.concMin > 0 || activeFilters.concMax < 999999) {
+                var concVal = null;
+                if (item.fields) {
+                    for (var i = 0; i < item.fields.length; i++) {
+                        if (item.fields[i].name === 'concentration_value') {
+                            concVal = parseFloat(item.fields[i].value);
+                            break;
+                        }
+                    }
+                }
+                // Also check legacy concentration_value
+                if (concVal === null && item.concentration_value !== undefined) {
+                    concVal = parseFloat(item.concentration_value);
+                }
+                if (concVal === null) return false;
+                if (concVal < activeFilters.concMin || concVal > activeFilters.concMax) return false;
             }
 
             return true;
@@ -798,6 +837,36 @@
             });
         }
 
+        // Tipo de Ambiente filter — cascades to ecossistema
+        var tipoFilter = document.getElementById('filterTipoAmbiente');
+        if (tipoFilter) {
+            tipoFilter.addEventListener('change', function() {
+                activeFilters.tipoAmbiente = this.value;
+                // Cascade: filter ecossistema dropdown options
+                var ecoSelect = document.getElementById('filterEcossistema');
+                if (ecoSelect && window.GEO_ECO_MAP) {
+                    var currentEco = ecoSelect.value;
+                    var opts = ecoSelect.querySelectorAll('option');
+                    if (this.value === '') {
+                        // Show all
+                        for (var i = 0; i < opts.length; i++) opts[i].style.display = '';
+                    } else {
+                        var allowed = window.GEO_ECO_MAP[this.value] || [];
+                        for (var i = 0; i < opts.length; i++) {
+                            if (opts[i].value === '') { opts[i].style.display = ''; continue; }
+                            opts[i].style.display = allowed.indexOf(opts[i].value) !== -1 ? '' : 'none';
+                        }
+                        // If current eco selection is not in allowed, reset it
+                        if (currentEco && allowed.indexOf(currentEco) === -1) {
+                            ecoSelect.value = '';
+                            activeFilters.ecossistema = '';
+                        }
+                    }
+                }
+                applyFilters();
+            });
+        }
+
         var ecoFilter = document.getElementById('filterEcossistema');
         if (ecoFilter) {
             ecoFilter.addEventListener('change', function() {
@@ -835,8 +904,20 @@
         var clearBtn = document.getElementById('filterClear');
         if (clearBtn) {
             clearBtn.addEventListener('click', function() {
-                activeFilters = { search: '', category: 'all', concMin: 0, concMax: 999999 };
+                activeFilters = { search: '', category: 'all', concMin: 0, concMax: 999999, ecossistema: '', tipoAmbiente: '' };
                 if (searchInput) searchInput.value = '';
+                var tipoSel = document.getElementById('filterTipoAmbiente');
+                if (tipoSel) tipoSel.value = '';
+                var ecoSel = document.getElementById('filterEcossistema');
+                if (ecoSel) {
+                    ecoSel.value = '';
+                    // Show all eco options
+                    ecoSel.querySelectorAll('option').forEach(function(o) { o.style.display = ''; });
+                }
+                // Reset concentration chips
+                document.querySelectorAll('#filterConcentration .chip').forEach(function(c, i) { c.classList.toggle('active', i === 0); });
+                // Reset category chips
+                document.querySelectorAll('#filterCategory .chip').forEach(function(c) { c.classList.toggle('active', c.dataset.value === 'all'); });
                 var envContainer = document.getElementById('envToggle');
                 if (envContainer) {
                     envContainer.querySelectorAll('.env-btn').forEach(function(b, i) { b.classList.toggle('active', i === 0); });
