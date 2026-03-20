@@ -26,7 +26,7 @@ include 'includes/header.php';
 
 <!-- ============ SCROLL-DRIVEN BACKGROUND VIDEO ============ -->
 <div class="lg-bg-video" aria-hidden="true">
-    <video muted playsinline preload="auto" id="scrollVideo">
+    <video muted playsinline autoplay webkit-playsinline preload="auto" id="scrollVideo">
         <source src="/videos/Ocean_descent_marine_202603192005.mp4" type="video/mp4">
     </video>
     <div class="lg-bg-video__overlay"></div>
@@ -738,22 +738,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // ================================================================
     gsap.registerPlugin(ScrollTrigger);
 
-    // ============ SCROLL-DRIVEN VIDEO (smooth interpolation) ============
+    // ============ SCROLL-DRIVEN VIDEO (smooth interpolation + iOS fix) ============
     var scrollVid = document.getElementById('scrollVideo');
     if (scrollVid) {
-        scrollVid.currentTime = 0;
         var targetTime = 0;
         var currentSmooth = 0;
         var isUpdating = false;
+        var iOSUnlocked = false;
+
+        // iOS Safari requires play() from user gesture to unlock video
+        function unlockiOSVideo() {
+            if (iOSUnlocked) return;
+            var p = scrollVid.play();
+            if (p && p.then) {
+                p.then(function() {
+                    scrollVid.pause();
+                    scrollVid.currentTime = 0;
+                    iOSUnlocked = true;
+                }).catch(function() {});
+            } else {
+                scrollVid.pause();
+                scrollVid.currentTime = 0;
+                iOSUnlocked = true;
+            }
+        }
+
+        // Unlock on first touch/scroll/click
+        ['touchstart', 'scroll', 'click'].forEach(function(evt) {
+            window.addEventListener(evt, unlockiOSVideo, { once: true, passive: true });
+        });
+
+        // Also try to auto-unlock (works on some browsers)
+        scrollVid.play().then(function() {
+            scrollVid.pause();
+            scrollVid.currentTime = 0;
+            iOSUnlocked = true;
+        }).catch(function() {});
 
         function smoothVideoFrame() {
-            // Lerp: smoothly interpolate toward target time
             currentSmooth += (targetTime - currentSmooth) * 0.04;
-            // Only update if difference is meaningful
             if (Math.abs(currentSmooth - scrollVid.currentTime) > 0.01) {
-                scrollVid.currentTime = currentSmooth;
+                try { scrollVid.currentTime = currentSmooth; } catch(e) {}
             }
-            // Keep loop running if not at target
             if (Math.abs(targetTime - currentSmooth) > 0.005) {
                 requestAnimationFrame(smoothVideoFrame);
             } else {
