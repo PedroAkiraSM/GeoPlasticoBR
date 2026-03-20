@@ -104,6 +104,20 @@
         html += '<span class="popup-badge popup-badge-outline">' + (item.category_type === 'biotico' ? 'Biotico' : 'Abiotico') + '</span>';
         html += '</div></div>';
 
+        // Species image (if available)
+        var speciesImage = null;
+        if (item.fields) {
+            for (var i = 0; i < item.fields.length; i++) {
+                if (item.fields[i].name === 'especie' && item.fields[i].species_image) {
+                    speciesImage = item.fields[i].species_image;
+                    break;
+                }
+            }
+        }
+        if (speciesImage) {
+            html += '<div class="popup-species-img"><img src="/' + speciesImage + '" alt="" style="width:100%;max-height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px;"></div>';
+        }
+
         html += '<div class="popup-body">';
 
         if (item.fields && item.fields.length > 0) {
@@ -220,6 +234,20 @@
         html += '<span class="popup-badge" style="background:' + color + ';">' + (item.category_name || '') + '</span>';
         html += '<span class="popup-badge popup-badge-outline">Biotico</span>';
         html += '</div></div>';
+
+        // Species image
+        var speciesImage2 = null;
+        if (item.fields) {
+            for (var i = 0; i < item.fields.length; i++) {
+                if (item.fields[i].name === 'especie' && item.fields[i].species_image) {
+                    speciesImage2 = item.fields[i].species_image;
+                    break;
+                }
+            }
+        }
+        if (speciesImage2) {
+            html += '<div class="popup-species-img"><img src="/' + speciesImage2 + '" alt="" style="width:100%;max-height:100px;object-fit:cover;border-radius:8px;margin-bottom:8px;"></div>';
+        }
 
         html += '<div class="popup-body">';
 

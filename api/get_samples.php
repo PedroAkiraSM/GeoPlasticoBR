@@ -56,6 +56,25 @@ try {
         ];
     }
 
+    // Post-processing: resolve species images for especie fields
+    $speciesImageCache = [];
+    foreach ($formattedSamples as &$sample) {
+        foreach ($sample['fields'] as &$field) {
+            if ($field['name'] === 'especie' && !empty($field['value'])) {
+                $speciesName = $field['value'];
+                if (!isset($speciesImageCache[$speciesName])) {
+                    $spStmt = $pdo->prepare("SELECT image_path FROM species WHERE name = :name AND is_active = 1 LIMIT 1");
+                    $spStmt->execute([':name' => $speciesName]);
+                    $spRow = $spStmt->fetch();
+                    $speciesImageCache[$speciesName] = $spRow ? $spRow['image_path'] : null;
+                }
+                $field['species_image'] = $speciesImageCache[$speciesName];
+            }
+        }
+        unset($field);
+    }
+    unset($sample);
+
     echo json_encode([
         'success' => true,
         'count' => count($formattedSamples),
