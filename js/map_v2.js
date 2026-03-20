@@ -705,7 +705,32 @@
     function setupGeocoding() {
         var input = document.getElementById('geocodeInput');
         var results = document.getElementById('geocodeResults');
-        if (!input || !results) return;
+        var bar = document.getElementById('geocodingBar');
+        var toggleBtn = document.getElementById('geoToggleBtn');
+        if (!input || !results || !bar) return;
+
+        // Expand/collapse logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (bar.classList.contains('expanded')) {
+                    bar.classList.remove('expanded');
+                    input.value = '';
+                    results.classList.remove('open');
+                } else {
+                    bar.classList.add('expanded');
+                    setTimeout(function() { input.focus(); }, 350);
+                }
+            });
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            if (bar && !bar.contains(e.target)) {
+                bar.classList.remove('expanded');
+                results.classList.remove('open');
+            }
+        });
 
         var geoTimer;
         var geoMarker = null;
@@ -741,10 +766,6 @@
             }, 400);
         });
 
-        document.addEventListener('click', function(e) {
-            var bar = document.getElementById('geocodingBar');
-            if (bar && !bar.contains(e.target)) results.classList.remove('open');
-        });
     }
 
     // ===== UI SETUP =====

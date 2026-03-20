@@ -144,10 +144,12 @@ $_thresholdUnits = getUnitsWithThresholds();
         </div>
     </div>
 
-    <!-- Geocoding Search -->
+    <!-- Geocoding Search (expandable) -->
     <div class="geocoding-bar" id="geocodingBar">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="geocodeInput" placeholder="Buscar local (ex: Sao Paulo, Manaus...)" autocomplete="off">
+        <button type="button" class="geo-icon-btn" id="geoToggleBtn" title="Buscar local">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <input type="text" id="geocodeInput" placeholder="Buscar local..." autocomplete="off">
         <div class="geocode-results" id="geocodeResults"></div>
     </div>
 
