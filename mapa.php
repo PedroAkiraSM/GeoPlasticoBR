@@ -4,6 +4,11 @@ requireLogin();
 require_once __DIR__ . '/config/cms.php';
 $_mapaBlocks = getBlocks('mapa');
 $_thresholdUnits = getUnitsWithThresholds();
+$_ecoMap = [
+    'Água doce' => ['Lago', 'Reservatório', 'Rio', 'Córrego'],
+    'Água salgada' => ['Mangue', 'Ilha', 'Oceano', 'Estuário', 'Restinga', 'Apicum'],
+    'Terrestre' => ['Floresta', 'Campo', 'Área urbana', 'Solo exposto'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -21,6 +26,9 @@ $_thresholdUnits = getUnitsWithThresholds();
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
     <link rel="stylesheet" href="/css/map_v2.css?v=<?php echo time(); ?>">
+    <script>
+window.GEO_ECO_MAP = <?php echo json_encode($_ecoMap, JSON_UNESCAPED_UNICODE); ?>;
+</script>
 </head>
 <body>
     <!-- Top Bar -->
@@ -70,6 +78,15 @@ $_thresholdUnits = getUnitsWithThresholds();
             <div class="filter-section">
                 <label class="filter-label">Buscar sistema</label>
                 <input type="text" class="filter-input" id="filterSearch" placeholder="Ex: Amazon, Santos..." autocomplete="off">
+            </div>
+            <div class="filter-section">
+                <label class="filter-label">Tipo de Ambiente</label>
+                <select class="filter-select" id="filterTipoAmbiente">
+                    <option value="">Todos</option>
+                    <option value="Água doce">Água doce</option>
+                    <option value="Água salgada">Água salgada</option>
+                    <option value="Terrestre">Terrestre</option>
+                </select>
             </div>
             <div class="filter-section">
                 <label class="filter-label">Ecossistema</label>
