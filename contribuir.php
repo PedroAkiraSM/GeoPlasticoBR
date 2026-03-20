@@ -476,6 +476,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (marker) minimap.removeLayer(marker);
         marker = L.marker([lat, lng]).addTo(minimap);
     });
+
+    // Tipo ambiente → Ecossistema cascading
+    var ecoMap = {
+        'Água doce': ['Lago', 'Reservatório', 'Rio', 'Córrego'],
+        'Água salgada': ['Mangue', 'Ilha', 'Oceano', 'Estuário', 'Restinga', 'Apicum'],
+        'Terrestre': ['Floresta', 'Campo', 'Área urbana', 'Solo exposto']
+    };
+    var legacyMap = {'Doce': 'Água doce', 'Salgado': 'Água salgada', 'Salobro': 'Água salgada'};
+
+    var tipoSel = document.querySelector('select[name="tipo_ambiente"]');
+    var ecoSel = document.querySelector('select[name="ecossistema"]');
+    if (tipoSel && ecoSel) {
+        tipoSel.addEventListener('change', function() {
+            var val = this.value;
+            var normalized = legacyMap[val] || val;
+            var allowed = ecoMap[normalized] || [];
+            var opts = ecoSel.options;
+            if (!val) {
+                for (var i = 0; i < opts.length; i++) opts[i].style.display = '';
+            } else {
+                for (var i = 0; i < opts.length; i++) {
+                    if (opts[i].value === '') { opts[i].style.display = ''; continue; }
+                    opts[i].style.display = allowed.indexOf(opts[i].value) !== -1 ? '' : 'none';
+                }
+                if (allowed.indexOf(ecoSel.value) === -1) ecoSel.value = '';
+            }
+        });
+    }
 });
 </script>
 
