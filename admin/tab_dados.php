@@ -128,6 +128,8 @@ if ($selectedCatId > 0) {
     $samples = $stmt->fetchAll();
 }
 
+$GLOBALS['selectedCatId'] = $selectedCatId;
+
 // Helper to render a field input
 function renderFieldInput($field, $value = '', $prefix = 'field_') {
     $name = $prefix . $field['id'];
@@ -136,6 +138,32 @@ function renderFieldInput($field, $value = '', $prefix = 'field_') {
     $cls = 'w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow';
 
     if ($field['field_type'] === 'select') {
+        // Special handling for especie — fetch from species table instead of select_options
+        if ($field['field_name'] === 'especie') {
+            $html = "<select name=\"$name\" $req class=\"$cls\" data-species-select=\"1\"><option value=\"\">-- Selecione especie --</option>";
+            $html .= '</select>';
+            $html .= "<script>
+(function() {
+    var sel = document.querySelector('[name=\"$name\"]');
+    var catId = " . ((int)($GLOBALS['selectedCatId'] ?? 0)) . ";
+    if (!sel || !catId) return;
+    fetch('/api/get_species.php?category_id=' + catId)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success) return;
+            var currentVal = " . json_encode($value, JSON_UNESCAPED_UNICODE) . ";
+            data.data.forEach(function(sp) {
+                var opt = document.createElement('option');
+                opt.value = sp.name;
+                opt.textContent = sp.name + (sp.scientific_name ? ' (' + sp.scientific_name + ')' : '');
+                if (sp.name === currentVal) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        });
+})();
+</script>";
+            return $html;
+        }
         $html = "<select name=\"$name\" $req class=\"$cls\"><option value=\"\">-- Selecione --</option>";
         foreach (json_decode($field['select_options'] ?? '[]', true) ?: [] as $opt) {
             $sel = $value === $opt ? 'selected' : '';
