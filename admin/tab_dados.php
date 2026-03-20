@@ -533,3 +533,71 @@ function filterSamples(query) {
     });
 }
 </script>
+
+<script>
+(function() {
+    var ecoMap = <?php echo json_encode([
+        'Água doce' => ['Lago', 'Reservatório', 'Rio', 'Córrego'],
+        'Água salgada' => ['Mangue', 'Ilha', 'Oceano', 'Estuário', 'Restinga', 'Apicum'],
+        'Terrestre' => ['Floresta', 'Campo', 'Área urbana', 'Solo exposto'],
+    ], JSON_UNESCAPED_UNICODE); ?>;
+
+    var legacyMap = {'Doce': 'Água doce', 'Salgado': 'Água salgada', 'Salobro': 'Água salgada'};
+
+    function cascadeEco(tipoSelect) {
+        var form = tipoSelect.closest('form');
+        if (!form) return;
+        var ecoSelects = form.querySelectorAll('select');
+        var ecoSelect = null;
+        for (var i = 0; i < ecoSelects.length; i++) {
+            var opts = ecoSelects[i].options;
+            for (var j = 0; j < opts.length; j++) {
+                if (['Lago', 'Mangue', 'Floresta'].indexOf(opts[j].value) !== -1) {
+                    ecoSelect = ecoSelects[i];
+                    break;
+                }
+            }
+            if (ecoSelect) break;
+        }
+        if (!ecoSelect) return;
+
+        var val = tipoSelect.value;
+        var normalized = legacyMap[val] || val;
+        var allowed = ecoMap[normalized] || [];
+        var opts = ecoSelect.options;
+
+        if (!val) {
+            for (var i = 0; i < opts.length; i++) opts[i].style.display = '';
+        } else {
+            for (var i = 0; i < opts.length; i++) {
+                if (opts[i].value === '') { opts[i].style.display = ''; continue; }
+                opts[i].style.display = allowed.indexOf(opts[i].value) !== -1 ? '' : 'none';
+            }
+            if (allowed.indexOf(ecoSelect.value) === -1) ecoSelect.value = '';
+        }
+    }
+
+    document.addEventListener('change', function(e) {
+        var sel = e.target;
+        if (sel.tagName !== 'SELECT') return;
+        var opts = sel.options;
+        var isTipo = false;
+        for (var i = 0; i < opts.length; i++) {
+            if (['Água doce', 'Água salgada', 'Terrestre', 'Doce', 'Salgado'].indexOf(opts[i].value) !== -1) {
+                isTipo = true; break;
+            }
+        }
+        if (isTipo) cascadeEco(sel);
+    });
+
+    document.querySelectorAll('select').forEach(function(sel) {
+        var opts = sel.options;
+        for (var i = 0; i < opts.length; i++) {
+            if (['Água doce', 'Água salgada', 'Terrestre'].indexOf(opts[i].value) !== -1 && sel.value) {
+                cascadeEco(sel);
+                return;
+            }
+        }
+    });
+})();
+</script>
