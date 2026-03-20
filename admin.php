@@ -2,8 +2,8 @@
 require_once __DIR__ . '/auth.php';
 requireLogin();
 
-// Apenas admin pode acessar
-if (!isAdmin()) {
+// Verificar acesso ao painel
+if (!canAccessAdmin()) {
     header('Location: /');
     exit;
 }
@@ -38,10 +38,79 @@ if (isset($_POST['reject_user'])) {
 // Alterar role
 if (isset($_POST['change_role'])) {
     $new_role = $_POST['new_role'];
-    if (in_array($new_role, ['user', 'scientist', 'admin'])) {
-        $stmt = $pdo->prepare("UPDATE users SET role = :role WHERE id = :id");
-        $stmt->execute([':role' => $new_role, ':id' => $_POST['user_id']]);
-        $message = 'Permissao do usuario atualizada!';
+    $targetId = (int)$_POST['user_id'];
+
+    // Validate role exists
+    $roleCheck = $pdo->prepare("SELECT level FROM roles WHERE name = :name");
+    $roleCheck->execute([':name' => $new_role]);
+    $newRoleData = $roleCheck->fetch();
+
+    if (!$newRoleData) {
+        $message = 'Cargo invalido.';
+        $messageType = 'error';
+    } else {
+        $newRoleLevel = (int)$newRoleData['level'];
+        $myLevel = getRoleLevel();
+
+        // Check target user's current role level
+        $target = $pdo->prepare("SELECT u.role, COALESCE(r.level, 0) as role_level FROM users u LEFT JOIN roles r ON u.role = r.name WHERE u.id = :id");
+        $target->execute([':id' => $targetId]);
+        $targetData = $target->fetch();
+        $targetLevel = (int)($targetData['role_level'] ?? 0);
+
+        if ($targetLevel >= $myLevel && !isOwner()) {
+            $message = 'Voce so pode alterar cargos de usuarios com nivel inferior ao seu.';
+            $messageType = 'error';
+        } elseif ($newRoleLevel > $myLevel && !isOwner()) {
+            $message = 'Voce nao pode atribuir um cargo com nivel superior ao seu.';
+            $messageType = 'error';
+        } else {
+            $stmt = $pdo->prepare("UPDATE users SET role = :role WHERE id = :id");
+            $stmt->execute([':role' => $new_role, ':id' => $targetId]);
+            $message = 'Cargo do usuario atualizado!';
+            $messageType = 'success';
+        }
+    }
+}
+
+// Bloquear usuario
+if (isset($_POST['block_user']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    $targetId = (int)$_POST['user_id'];
+    $target = $pdo->prepare("SELECT role FROM users WHERE id = :id");
+    $target->execute([':id' => $targetId]);
+    $targetRole = $target->fetchColumn();
+    if ($targetRole === 'owner') {
+        $message = 'Nao e possivel bloquear um dono.';
+        $messageType = 'error';
+    } else {
+        $pdo->prepare("UPDATE users SET status = 'blocked' WHERE id = :id")->execute([':id' => $targetId]);
+        $message = 'Usuario bloqueado.';
+        $messageType = 'success';
+    }
+}
+
+// Desbloquear usuario
+if (isset($_POST['unblock_user']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
+    $pdo->prepare("UPDATE users SET status = 'approved' WHERE id = :id")->execute([':id' => (int)$_POST['user_id']]);
+    $message = 'Usuario desbloqueado.';
+    $messageType = 'success';
+}
+
+// Excluir usuario (apenas owners)
+if (isset($_POST['delete_user']) && validateCsrfToken($_POST['csrf_token'] ?? '') && isOwner()) {
+    $targetId = (int)$_POST['user_id'];
+    $target = $pdo->prepare("SELECT role FROM users WHERE id = :id");
+    $target->execute([':id' => $targetId]);
+    $targetRole = $target->fetchColumn();
+    if ($targetRole === 'owner') {
+        $message = 'Nao e possivel excluir um dono.';
+        $messageType = 'error';
+    } elseif ($targetId === (int)$_SESSION['user_id']) {
+        $message = 'Nao e possivel excluir a si mesmo.';
+        $messageType = 'error';
+    } else {
+        $pdo->prepare("DELETE FROM users WHERE id = :id")->execute([':id' => $targetId]);
+        $message = 'Usuario excluido permanentemente.';
         $messageType = 'success';
     }
 }
@@ -60,176 +129,6 @@ if (isset($_POST['reject_data'])) {
     $stmt->execute([':id' => $_POST['data_id']]);
     $message = 'Dado rejeitado e removido.';
     $messageType = 'success';
-}
-
-// Adicionar sedimento
-if (isset($_POST['add_sediment']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    try {
-        $stmt = $pdo->prepare("INSERT INTO microplastics_sediment
-            (tipo_ambiente, ecossistema, system, sampling_point, latitude, longitude,
-             concentration_sediment, concentration_value, matriz, unidade,
-             total_concentration, concentration_variation, depth, author, reference, doi, approved)
-            VALUES (:tipo_ambiente, :ecossistema, :system, :sampling_point, :latitude, :longitude,
-                    :concentration_sediment, :concentration_value, :matriz, :unidade,
-                    :total_concentration, :concentration_variation, :depth, :author, :reference, :doi, 1)");
-
-        $stmt->execute([
-            ':tipo_ambiente' => $_POST['tipo_ambiente'] ?: null,
-            ':ecossistema' => $_POST['ecossistema'] ?: null,
-            ':system' => $_POST['system'],
-            ':sampling_point' => $_POST['sampling_point'] ?: null,
-            ':latitude' => $_POST['latitude'] ?: null,
-            ':longitude' => $_POST['longitude'] ?: null,
-            ':concentration_sediment' => $_POST['concentration_sediment'] ?: null,
-            ':concentration_value' => $_POST['concentration_value'] ?: 0,
-            ':matriz' => $_POST['matriz'] ?: null,
-            ':unidade' => $_POST['unidade'] ?: null,
-            ':total_concentration' => $_POST['total_concentration'] ?: null,
-            ':concentration_variation' => $_POST['concentration_variation'] ?: null,
-            ':depth' => $_POST['depth'] ?: null,
-            ':author' => $_POST['author'] ?: null,
-            ':reference' => $_POST['reference'] ?: null,
-            ':doi' => $_POST['doi'] ?: null,
-        ]);
-
-        $message = 'Dados adicionados com sucesso!';
-        $messageType = 'success';
-    } catch (PDOException $e) {
-        $message = 'Erro ao adicionar dados: ' . $e->getMessage();
-        $messageType = 'error';
-    }
-}
-
-// Adicionar peixe
-if (isset($_POST['add_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    try {
-        $stmt = $pdo->prepare("INSERT INTO microplastics_fish
-            (species, habit, total_individuals, individuals_with_microplastics, fiber, film, fragment,
-             foam, pellets, sphere, plastic_dimension, occurrence_tissues, freshwater_system, latitude, longitude, author, reference, doi)
-            VALUES (:species, :habit, :total_individuals, :individuals_with_microplastics, :fiber, :film,
-                    :fragment, :foam, :pellets, :sphere, :plastic_dimension, :occurrence_tissues,
-                    :freshwater_system, :latitude, :longitude, :author, :reference, :doi)");
-
-        $stmt->execute([
-            ':species' => $_POST['species'],
-            ':habit' => $_POST['habit'] ?: null,
-            ':total_individuals' => $_POST['total_individuals'] ?: 0,
-            ':individuals_with_microplastics' => $_POST['individuals_with_microplastics'] ?: 0,
-            ':fiber' => isset($_POST['fiber']) ? 1 : 0,
-            ':film' => isset($_POST['film']) ? 1 : 0,
-            ':fragment' => isset($_POST['fragment']) ? 1 : 0,
-            ':foam' => isset($_POST['foam']) ? 1 : 0,
-            ':pellets' => isset($_POST['pellets']) ? 1 : 0,
-            ':sphere' => isset($_POST['sphere']) ? 1 : 0,
-            ':plastic_dimension' => $_POST['plastic_dimension'] ?: null,
-            ':occurrence_tissues' => $_POST['occurrence_tissues'] ?: null,
-            ':freshwater_system' => $_POST['freshwater_system'] ?: null,
-            ':latitude' => !empty($_POST['latitude']) ? (float)$_POST['latitude'] : null,
-            ':longitude' => !empty($_POST['longitude']) ? (float)$_POST['longitude'] : null,
-            ':author' => $_POST['author'] ?: null,
-            ':reference' => $_POST['reference'] ?: null,
-            ':doi' => $_POST['doi'] ?: null,
-        ]);
-
-        $message = 'Dados de peixe adicionados com sucesso!';
-        $messageType = 'success';
-    } catch (PDOException $e) {
-        $message = 'Erro: ' . $e->getMessage();
-        $messageType = 'error';
-    }
-}
-
-// Atualizar coordenadas de peixe existente
-if (isset($_POST['update_fish_coords']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    try {
-        $fishId = (int)$_POST['fish_id'];
-        $lat = !empty($_POST['fish_lat']) ? (float)$_POST['fish_lat'] : null;
-        $lng = !empty($_POST['fish_lng']) ? (float)$_POST['fish_lng'] : null;
-
-        $stmt = $pdo->prepare("UPDATE microplastics_fish SET latitude = :lat, longitude = :lng WHERE id = :id");
-        $stmt->execute([':lat' => $lat, ':lng' => $lng, ':id' => $fishId]);
-
-        $message = 'Coordenadas atualizadas com sucesso!';
-        $messageType = 'success';
-    } catch (PDOException $e) {
-        $message = 'Erro: ' . $e->getMessage();
-        $messageType = 'error';
-    }
-}
-
-// Atualizar coordenadas em lote
-if (isset($_POST['bulk_update_fish_coords']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    $updated = 0;
-    $ids = $_POST['bulk_fish_id'] ?? [];
-    $lats = $_POST['bulk_fish_lat'] ?? [];
-    $lngs = $_POST['bulk_fish_lng'] ?? [];
-
-    $stmt = $pdo->prepare("UPDATE microplastics_fish SET latitude = :lat, longitude = :lng WHERE id = :id");
-
-    for ($i = 0; $i < count($ids); $i++) {
-        $lat = !empty($lats[$i]) ? (float)$lats[$i] : null;
-        $lng = !empty($lngs[$i]) ? (float)$lngs[$i] : null;
-        if ($lat !== null && $lng !== null) {
-            $stmt->execute([':lat' => $lat, ':lng' => $lng, ':id' => (int)$ids[$i]]);
-            $updated++;
-        }
-    }
-
-    $message = "$updated coordenadas atualizadas com sucesso!";
-    $messageType = 'success';
-}
-
-// Editar peixe completo
-if (isset($_POST['edit_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    try {
-        $stmt = $pdo->prepare("UPDATE microplastics_fish SET
-            species = :species, habit = :habit, total_individuals = :total_individuals,
-            individuals_with_microplastics = :individuals_with_microplastics,
-            fiber = :fiber, film = :film, fragment = :fragment, foam = :foam, pellets = :pellets, sphere = :sphere,
-            plastic_dimension = :plastic_dimension, occurrence_tissues = :occurrence_tissues,
-            freshwater_system = :freshwater_system, latitude = :latitude, longitude = :longitude,
-            author = :author, reference = :reference, doi = :doi
-            WHERE id = :id");
-        $stmt->execute([
-            ':id' => (int)$_POST['fish_id'],
-            ':species' => $_POST['species'],
-            ':habit' => $_POST['habit'] ?: null,
-            ':total_individuals' => $_POST['total_individuals'] ?: 0,
-            ':individuals_with_microplastics' => $_POST['individuals_with_microplastics'] ?: 0,
-            ':fiber' => isset($_POST['fiber']) ? 1 : 0,
-            ':film' => isset($_POST['film']) ? 1 : 0,
-            ':fragment' => isset($_POST['fragment']) ? 1 : 0,
-            ':foam' => isset($_POST['foam']) ? 1 : 0,
-            ':pellets' => isset($_POST['pellets']) ? 1 : 0,
-            ':sphere' => isset($_POST['sphere']) ? 1 : 0,
-            ':plastic_dimension' => $_POST['plastic_dimension'] ?: null,
-            ':occurrence_tissues' => $_POST['occurrence_tissues'] ?: null,
-            ':freshwater_system' => $_POST['freshwater_system'] ?: null,
-            ':latitude' => !empty($_POST['latitude']) ? (float)$_POST['latitude'] : null,
-            ':longitude' => !empty($_POST['longitude']) ? (float)$_POST['longitude'] : null,
-            ':author' => $_POST['author'] ?: null,
-            ':reference' => $_POST['reference'] ?: null,
-            ':doi' => $_POST['doi'] ?: null,
-        ]);
-        $message = 'Peixe atualizado com sucesso!';
-        $messageType = 'success';
-    } catch (PDOException $e) {
-        $message = 'Erro: ' . $e->getMessage();
-        $messageType = 'error';
-    }
-}
-
-// Excluir peixe
-if (isset($_POST['delete_fish']) && validateCsrfToken($_POST['csrf_token'] ?? '')) {
-    try {
-        $stmt = $pdo->prepare("DELETE FROM microplastics_fish WHERE id = :id");
-        $stmt->execute([':id' => (int)$_POST['fish_id']]);
-        $message = 'Registro excluido com sucesso!';
-        $messageType = 'success';
-    } catch (PDOException $e) {
-        $message = 'Erro: ' . $e->getMessage();
-        $messageType = 'error';
-    }
 }
 
 // Importar planilha CSV
@@ -404,24 +303,109 @@ if (isset($_POST['import_csv']) && validateCsrfToken($_POST['csrf_token'] ?? '')
     }
 }
 
+// Criar cargo (apenas owners)
+if (isset($_POST['create_role']) && validateCsrfToken($_POST['csrf_token'] ?? '') && isOwner()) {
+    $newLabel = trim($_POST['new_label'] ?? '');
+    $newLevel = (int)($_POST['new_level'] ?? 0);
+    $newColor = $_POST['new_color'] ?? '#6b7280';
+    $newPerms = $_POST['new_perms'] ?? [];
+
+    if (empty($newLabel)) {
+        $message = 'Nome do cargo e obrigatorio.';
+        $messageType = 'error';
+    } elseif ($newLevel < 1 || $newLevel > 99) {
+        $message = 'Nivel deve ser entre 1 e 99.';
+        $messageType = 'error';
+    } else {
+        $slug = strtolower(preg_replace('/[^a-z0-9]+/', '_', iconv('UTF-8', 'ASCII//TRANSLIT', $newLabel)));
+        $slug = trim($slug, '_');
+
+        $check = $pdo->prepare("SELECT id FROM roles WHERE name = :name");
+        $check->execute([':name' => $slug]);
+        if ($check->fetch()) {
+            $message = 'Ja existe um cargo com esse nome interno (' . $slug . ').';
+            $messageType = 'error';
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO roles (name, label, level, color, can_access_admin, can_manage_users, can_manage_data, can_manage_categories, can_import_csv, can_manage_site, is_system)
+                VALUES (:name, :label, :level, :color, :p1, :p2, :p3, :p4, :p5, :p6, 0)");
+            $stmt->execute([
+                ':name' => $slug, ':label' => $newLabel, ':level' => $newLevel, ':color' => $newColor,
+                ':p1' => isset($newPerms['can_access_admin']) ? 1 : 0,
+                ':p2' => isset($newPerms['can_manage_users']) ? 1 : 0,
+                ':p3' => isset($newPerms['can_manage_data']) ? 1 : 0,
+                ':p4' => isset($newPerms['can_manage_categories']) ? 1 : 0,
+                ':p5' => isset($newPerms['can_import_csv']) ? 1 : 0,
+                ':p6' => isset($newPerms['can_manage_site']) ? 1 : 0,
+            ]);
+            $message = 'Cargo "' . htmlspecialchars($newLabel) . '" criado com sucesso!';
+            $messageType = 'success';
+        }
+    }
+    $activeTab = 'cargos';
+}
+
+// Atualizar cargo (apenas owners, nao pode alterar cargos de sistema)
+if (isset($_POST['update_role']) && validateCsrfToken($_POST['csrf_token'] ?? '') && isOwner()) {
+    $roleId = (int)$_POST['role_id'];
+    $check = $pdo->prepare("SELECT is_system FROM roles WHERE id = :id");
+    $check->execute([':id' => $roleId]);
+    $roleData = $check->fetch();
+
+    if ($roleData && $roleData['is_system']) {
+        $message = 'Cargos de sistema nao podem ser alterados.';
+        $messageType = 'error';
+    } elseif ($roleData) {
+        $perms = $_POST['perms'] ?? [];
+        $stmt = $pdo->prepare("UPDATE roles SET label = :label, level = :level, color = :color,
+            can_access_admin = :p1, can_manage_users = :p2, can_manage_data = :p3,
+            can_manage_categories = :p4, can_import_csv = :p5, can_manage_site = :p6
+            WHERE id = :id AND is_system = 0");
+        $stmt->execute([
+            ':label' => trim($_POST['label'] ?? ''), ':level' => (int)($_POST['level'] ?? 0),
+            ':color' => $_POST['color'] ?? '#6b7280', ':id' => $roleId,
+            ':p1' => isset($perms['can_access_admin']) ? 1 : 0,
+            ':p2' => isset($perms['can_manage_users']) ? 1 : 0,
+            ':p3' => isset($perms['can_manage_data']) ? 1 : 0,
+            ':p4' => isset($perms['can_manage_categories']) ? 1 : 0,
+            ':p5' => isset($perms['can_import_csv']) ? 1 : 0,
+            ':p6' => isset($perms['can_manage_site']) ? 1 : 0,
+        ]);
+        $message = 'Cargo atualizado com sucesso!';
+        $messageType = 'success';
+    }
+    $activeTab = 'cargos';
+}
+
+// Excluir cargo (apenas owners, nao pode excluir cargos de sistema)
+if (isset($_POST['delete_role']) && validateCsrfToken($_POST['csrf_token'] ?? '') && isOwner()) {
+    $roleId = (int)$_POST['role_id'];
+    $check = $pdo->prepare("SELECT name, is_system FROM roles WHERE id = :id");
+    $check->execute([':id' => $roleId]);
+    $roleData = $check->fetch();
+
+    if ($roleData && $roleData['is_system']) {
+        $message = 'Cargos de sistema nao podem ser excluidos.';
+        $messageType = 'error';
+    } elseif ($roleData) {
+        // Mover usuarios desse cargo para 'user'
+        $pdo->prepare("UPDATE users SET role = 'user' WHERE role = :role")->execute([':role' => $roleData['name']]);
+        $pdo->prepare("DELETE FROM roles WHERE id = :id AND is_system = 0")->execute([':id' => $roleId]);
+        $message = 'Cargo excluido. Usuarios foram movidos para "Usuario".';
+        $messageType = 'success';
+    }
+    $activeTab = 'cargos';
+}
+
 // ========================================
 // Buscar dados para exibicao
 // ========================================
 $pending_users = $pdo->query("SELECT * FROM users WHERE status = 'pending' ORDER BY created_at DESC")->fetchAll();
-$approved_users = $pdo->query("SELECT * FROM users WHERE status = 'approved' ORDER BY nome")->fetchAll();
+$approved_users = $pdo->query("SELECT * FROM users WHERE status = 'approved' ORDER BY FIELD(role, 'owner', 'admin', 'scientist', 'user'), nome")->fetchAll();
+$blocked_users = $pdo->query("SELECT * FROM users WHERE status = 'blocked' ORDER BY nome")->fetchAll();
+$userIsOwner = isOwner();
+$all_roles = [];
+try { $all_roles = $pdo->query("SELECT * FROM roles ORDER BY level DESC")->fetchAll(); } catch (Exception $e) {}
 $pending_data = $pdo->query("SELECT ms.*, u.nome as submitter_name FROM microplastics_sediment ms LEFT JOIN users u ON ms.submitted_by = u.id WHERE ms.approved = 0 ORDER BY ms.created_at DESC")->fetchAll();
-$fish_no_coords = $pdo->query("SELECT id, species, freshwater_system, latitude, longitude FROM microplastics_fish WHERE latitude IS NULL OR longitude IS NULL ORDER BY freshwater_system, species")->fetchAll();
-$fish_with_coords = $pdo->query("SELECT id, species, freshwater_system, latitude, longitude FROM microplastics_fish WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY freshwater_system, species")->fetchAll();
-$fish_total = $pdo->query("SELECT COUNT(*) FROM microplastics_fish")->fetchColumn();
-$all_fish = $pdo->query("SELECT * FROM microplastics_fish ORDER BY species")->fetchAll();
-
-// Peixe sendo editado
-$editing_fish = null;
-if (isset($_GET['edit_fish_id'])) {
-    $stmtEdit = $pdo->prepare("SELECT * FROM microplastics_fish WHERE id = :id");
-    $stmtEdit->execute([':id' => (int)$_GET['edit_fish_id']]);
-    $editing_fish = $stmtEdit->fetch();
-}
 
 $user = getCurrentUser();
 ?>
@@ -434,58 +418,282 @@ $user = getCurrentUser();
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Sidebar */
+        .admin-sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(148,163,184,0.08);
+            transition: transform 0.3s ease;
+        }
+        .admin-main {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        .sidebar-section-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(148,163,184,0.45);
+            padding: 20px 20px 6px;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: rgba(148,163,184,0.75);
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .sidebar-item:hover {
+            color: #e2e8f0;
+            background: rgba(148,163,184,0.06);
+        }
+        .sidebar-item.active {
+            color: #22d3ee;
+            background: rgba(34,211,238,0.06);
+            border-left-color: #22d3ee;
+        }
+        .sidebar-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            opacity: 0.65;
+        }
+        .sidebar-item.active svg { opacity: 1; }
+        .sidebar-badge {
+            margin-left: auto;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 50px;
+            line-height: 1.4;
+        }
+        /* Bell animation */
+        @keyframes bellShake {
+            0%, 100% { transform: rotate(0); }
+            15% { transform: rotate(12deg); }
+            30% { transform: rotate(-10deg); }
+            45% { transform: rotate(6deg); }
+            60% { transform: rotate(-4deg); }
+            75% { transform: rotate(2deg); }
+        }
+        .notif-bell-animate {
+            animation: bellShake 0.8s ease-in-out;
+            animation-delay: 1s;
+            transform-origin: top center;
+        }
+        /* Mobile overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 35;
+        }
+        .mobile-header {
+            display: none;
+        }
+        @media (max-width: 1024px) {
+            .admin-sidebar { transform: translateX(-100%); }
+            .admin-sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
+            .admin-main { margin-left: 0; }
+            .mobile-header { display: flex; }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-cyan-400">GeoPlasticoBR</h1>
-                <p class="text-sm text-gray-400">Painel de Administracao</p>
-            </div>
-            <div class="flex gap-4 items-center">
-                <span class="text-sm text-gray-300"><?php echo htmlspecialchars($user['nome']); ?></span>
-                <a href="/mapa.php" class="text-cyan-400 hover:text-cyan-300 text-sm font-medium">Mapa</a>
-                <a href="/" class="text-gray-300 hover:text-white text-sm font-medium">Inicio</a>
-                <a href="/login.php?logout=1" class="text-red-400 hover:text-red-300 text-sm font-medium">Sair</a>
-            </div>
-        </div>
+    <!-- Mobile Header -->
+    <div class="mobile-header bg-slate-900 px-4 py-3 items-center justify-between sticky top-0 z-30">
+        <button onclick="toggleSidebar()" class="text-gray-300 hover:text-white">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="text-cyan-400 font-bold text-lg">GeoPlasticoBR</span>
+        <a href="/login.php?logout=1" class="text-red-400 text-sm font-medium">Sair</a>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <!-- Logo + Notification Bell -->
+        <div class="px-5 py-5 border-b border-white/5 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-extrabold text-cyan-400 tracking-tight">GeoPlasticoBR</h1>
+                <p class="text-[0.68rem] text-slate-500 mt-0.5">Painel de Administracao</p>
+            </div>
+            <?php
+                $notifs = [];
+                if (count($pending_users) > 0) $notifs[] = ['count' => count($pending_users), 'label' => count($pending_users) === 1 ? 'usuario pendente' : 'usuarios pendentes', 'tab' => 'users', 'color' => '#ef4444'];
+                if (count($pending_data) > 0) $notifs[] = ['count' => count($pending_data), 'label' => count($pending_data) === 1 ? 'dado pendente' : 'dados pendentes', 'tab' => 'pending_data', 'color' => '#f59e0b'];
+                $totalNotifs = array_sum(array_column($notifs, 'count'));
+            ?>
+            <div class="relative" id="notifWrapper">
+                <button onclick="toggleNotifs()" class="relative p-2 rounded-lg hover:bg-white/8 transition group" title="Notificacoes">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition <?php echo $totalNotifs > 0 ? 'notif-bell-animate' : ''; ?>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                    </svg>
+                    <?php if ($totalNotifs > 0): ?>
+                    <span class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[0.6rem] font-bold rounded-full px-1 shadow-lg shadow-red-500/30"><?php echo $totalNotifs; ?></span>
+                    <?php endif; ?>
+                </button>
+                <!-- Dropdown -->
+                <div id="notifDropdown" class="hidden absolute right-0 top-full mt-2 w-72 bg-slate-800 border border-white/10 rounded-xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Notificacoes</span>
+                        <?php if ($totalNotifs > 0): ?>
+                        <span class="text-[0.6rem] font-bold text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded-full"><?php echo $totalNotifs; ?> nova<?php echo $totalNotifs > 1 ? 's' : ''; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($totalNotifs === 0): ?>
+                    <div class="px-4 py-8 text-center">
+                        <svg class="w-8 h-8 text-slate-600 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                        <p class="text-xs text-slate-500">Nenhuma notificacao</p>
+                    </div>
+                    <?php else: ?>
+                    <div class="max-h-64 overflow-y-auto" style="scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;">
+                        <?php foreach ($notifs as $n): ?>
+                        <button onclick="showTab('<?php echo $n['tab']; ?>'); toggleNotifs();" class="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition text-left">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background: <?php echo $n['color']; ?>15;">
+                                <span class="text-sm font-bold" style="color: <?php echo $n['color']; ?>;"><?php echo $n['count']; ?></span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm text-slate-200 font-medium"><?php echo $n['count']; ?> <?php echo $n['label']; ?></div>
+                                <div class="text-[0.65rem] text-slate-500">Clique para revisar</div>
+                            </div>
+                            <svg class="w-4 h-4 text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-2" style="scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent;">
+
+            <?php if (hasPermission('can_manage_users')): ?>
+            <div class="sidebar-section-label">Moderacao</div>
+            <button onclick="showTab('users')" id="tab-users" class="sidebar-item tab-btn <?php echo $activeTab === 'users' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                <span>Usuarios</span>
+                <?php if (count($pending_users) > 0): ?>
+                <span class="sidebar-badge bg-red-500 text-white"><?php echo count($pending_users); ?></span>
+                <?php endif; ?>
+            </button>
+            <button onclick="showTab('pending_data')" id="tab-pending_data" class="sidebar-item tab-btn <?php echo $activeTab === 'pending_data' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Dados Pendentes</span>
+                <?php if (count($pending_data) > 0): ?>
+                <span class="sidebar-badge bg-amber-500 text-white"><?php echo count($pending_data); ?></span>
+                <?php endif; ?>
+            </button>
+            <?php endif; ?>
+
+            <?php if (hasPermission('can_manage_data') || hasPermission('can_manage_categories') || hasPermission('can_import_csv')): ?>
+            <div class="sidebar-section-label">Banco de Dados</div>
+            <?php if (hasPermission('can_manage_data')): ?>
+            <button onclick="showTab('dados')" id="tab-dados" class="sidebar-item tab-btn <?php echo $activeTab === 'dados' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                <span>Dados / Amostras</span>
+            </button>
+            <?php endif; ?>
+            <?php if (hasPermission('can_manage_data')): ?>
+            <button onclick="showTab('especies')" id="tab-especies" class="sidebar-item tab-btn <?php echo $activeTab === 'especies' ? 'active' : ''; ?>">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Especies</span>
+            </button>
+            <?php endif; ?>
+            <?php if (hasPermission('can_manage_categories')): ?>
+            <button onclick="showTab('categorias')" id="tab-categorias" class="sidebar-item tab-btn <?php echo $activeTab === 'categorias' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13c0 1.1.9 2 2 2z"/></svg>
+                <span>Categorias</span>
+            </button>
+            <button onclick="showTab('campos')" id="tab-campos" class="sidebar-item tab-btn <?php echo $activeTab === 'campos' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Campos</span>
+            </button>
+            <?php endif; ?>
+            <?php if (hasPermission('can_import_csv')): ?>
+            <button onclick="showTab('importar')" id="tab-importar" class="sidebar-item tab-btn <?php echo $activeTab === 'importar' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Importar CSV</span>
+            </button>
+            <?php endif; ?>
+            <?php endif; ?>
+
+            <?php if ($userIsOwner): ?>
+            <div class="sidebar-section-label">Dono</div>
+            <button onclick="showTab('cargos')" id="tab-cargos" class="sidebar-item tab-btn <?php echo $activeTab === 'cargos' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15l-2 5l9-11h-5l2-5l-9 11h5z"/></svg>
+                <span>Cargos</span>
+            </button>
+            <button onclick="showTab('configuracoes')" id="tab-configuracoes" class="sidebar-item tab-btn <?php echo $activeTab === 'configuracoes' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                <span>Configuracoes</span>
+            </button>
+            <button onclick="showTab('blocos')" id="tab-blocos" class="sidebar-item tab-btn <?php echo $activeTab === 'blocos' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <span>Blocos de Conteudo</span>
+            </button>
+            <button onclick="showTab('tipos')" id="tab-tipos" class="sidebar-item tab-btn <?php echo $activeTab === 'tipos' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <span>Tipos de Dados</span>
+            </button>
+            <button onclick="showTab('unidades')" id="tab-unidades" class="sidebar-item tab-btn <?php echo $activeTab === 'unidades' ? 'active' : ''; ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Unidades</span>
+            </button>
+            <?php endif; ?>
+        </nav>
+
+        <!-- User footer -->
+        <div class="px-5 py-4 border-t border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-cyan-500/15 flex items-center justify-center text-cyan-400 text-xs font-bold">
+                    <?php echo strtoupper(substr($user['nome'], 0, 1)); ?>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-gray-300 truncate"><?php echo htmlspecialchars($user['nome']); ?></div>
+                    <div class="text-[0.65rem] text-slate-500"><?php echo htmlspecialchars(getRoleLabel()); ?></div>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-3">
+                <a href="/mapa.php" class="flex-1 text-center text-xs py-1.5 rounded-md bg-white/5 text-slate-400 hover:text-cyan-400 hover:bg-white/8 transition font-medium">Mapa</a>
+                <a href="/" class="flex-1 text-center text-xs py-1.5 rounded-md bg-white/5 text-slate-400 hover:text-white hover:bg-white/8 transition font-medium">Inicio</a>
+                <a href="/login.php?logout=1" class="flex-1 text-center text-xs py-1.5 rounded-md bg-white/5 text-red-400 hover:bg-red-500/10 transition font-medium">Sair</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <div class="max-w-6xl mx-auto px-6 lg:px-10 py-8">
 
         <?php if ($message): ?>
         <div class="mb-6 p-4 rounded-lg <?php echo $messageType === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'; ?>">
             <?php echo htmlspecialchars($message); ?>
         </div>
         <?php endif; ?>
-
-        <!-- Tab Navigation -->
-        <div class="mb-8">
-            <?php
-            $tabs = [
-                'users' => 'Usuarios' . (count($pending_users) > 0 ? ' <span class="bg-red-500 text-white rounded-full px-2 py-0.5 text-xs ml-1">' . count($pending_users) . '</span>' : ''),
-                'pending_data' => 'Dados Pendentes' . (count($pending_data) > 0 ? ' <span class="bg-orange-500 text-white rounded-full px-2 py-0.5 text-xs ml-1">' . count($pending_data) . '</span>' : ''),
-                'sediment' => '+ Sedimento',
-                'fish' => '+ Peixes',
-                'importar' => 'Importar CSV',
-                'configuracoes' => 'Configuracoes',
-                'blocos' => 'Blocos',
-                'tipos' => 'Tipos',
-                'unidades' => 'Unidades',
-            ];
-            ?>
-            <nav class="flex space-x-1 bg-gray-100 rounded-lg p-1 flex-wrap">
-                <?php foreach ($tabs as $tabKey => $tabLabel): ?>
-                <button onclick="showTab('<?php echo $tabKey; ?>')" id="tab-<?php echo $tabKey; ?>"
-                        class="tab-btn flex-1 py-3 px-4 rounded-md text-sm font-semibold <?php echo $activeTab === $tabKey ? 'bg-white shadow text-slate-800' : 'text-gray-500 hover:text-gray-700'; ?>">
-                    <?php echo $tabLabel; ?>
-                </button>
-                <?php endforeach; ?>
-            </nav>
-        </div>
 
         <!-- ========== TAB: USUARIOS ========== -->
         <div id="form-users" class="tab-content <?php echo $activeTab !== 'users' ? 'hidden' : ''; ?>">
@@ -537,7 +745,7 @@ $user = getCurrentUser();
 
             <!-- Usuarios aprovados -->
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-4">Usuarios Aprovados</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Usuarios Ativos</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50">
@@ -545,36 +753,78 @@ $user = getCurrentUser();
                                 <th class="px-4 py-3 text-left font-semibold text-gray-600">Nome</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-600">Email</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-600">Tipo</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-600">Permissao</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-600">Alterar Permissao</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-600">Cargo</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-600">Alterar Cargo</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-600">Acoes</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            <?php foreach ($approved_users as $u): ?>
+                            <?php
+                                // Build role lookup from $all_roles
+                                $roleLookup = [];
+                                foreach ($all_roles as $rl) { $roleLookup[$rl['name']] = $rl; }
+                            ?>
+                            <?php foreach ($approved_users as $u):
+                                $rd = $roleLookup[$u['role']] ?? null;
+                                $roleColor = $rd ? $rd['color'] : '#6b7280';
+                                $roleLabel = $rd ? $rd['label'] : ucfirst($u['role']);
+                                $isSelf = (int)$u['id'] === (int)$_SESSION['user_id'];
+                                $isTargetOwner = $u['role'] === 'owner';
+                                $canEdit = $userIsOwner || (!$isTargetOwner);
+                            ?>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium"><?php echo htmlspecialchars($u['nome']); ?></td>
-                                <td class="px-4 py-3 text-gray-600"><?php echo htmlspecialchars($u['email']); ?></td>
+                                <td class="px-4 py-3 font-medium">
+                                    <?php echo htmlspecialchars($u['nome']); ?>
+                                    <?php if ($isSelf): ?><span class="text-xs text-gray-400 ml-1">(voce)</span><?php endif; ?>
+                                </td>
+                                <td class="px-4 py-3 text-gray-600 text-xs"><?php echo htmlspecialchars($u['email']); ?></td>
                                 <td class="px-4 py-3"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"><?php echo htmlspecialchars($u['tipo_usuario']); ?></span></td>
                                 <td class="px-4 py-3">
-                                    <?php
-                                    $roleBadge = match($u['role']) {
-                                        'admin' => 'bg-purple-100 text-purple-700',
-                                        'scientist' => 'bg-green-100 text-green-700',
-                                        default => 'bg-gray-100 text-gray-700',
-                                    };
-                                    ?>
-                                    <span class="<?php echo $roleBadge; ?> px-2 py-1 rounded text-xs font-semibold"><?php echo htmlspecialchars($u['role']); ?></span>
+                                    <span class="px-2 py-1 rounded text-xs font-semibold" style="background: <?php echo htmlspecialchars($roleColor); ?>15; color: <?php echo htmlspecialchars($roleColor); ?>; border: 1px solid <?php echo htmlspecialchars($roleColor); ?>30;"><?php echo htmlspecialchars($roleLabel); ?></span>
                                 </td>
                                 <td class="px-4 py-3">
+                                    <?php if ($canEdit && !$isSelf): ?>
                                     <form method="POST" class="flex gap-2 items-center">
                                         <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
                                         <select name="new_role" class="text-xs border rounded px-2 py-1.5">
-                                            <option value="user" <?php echo $u['role'] === 'user' ? 'selected' : ''; ?>>Usuario</option>
-                                            <option value="scientist" <?php echo $u['role'] === 'scientist' ? 'selected' : ''; ?>>Cientista</option>
-                                            <option value="admin" <?php echo $u['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                                            <?php foreach ($all_roles as $r):
+                                                // Non-owners can't assign owner role
+                                                if ($r['level'] >= 100 && !$userIsOwner) continue;
+                                                // Can only assign roles at or below your level
+                                                if ($r['level'] > getRoleLevel() && !$userIsOwner) continue;
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($r['name']); ?>" <?php echo $u['role'] === $r['name'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($r['label']); ?></option>
+                                            <?php endforeach; ?>
                                         </select>
                                         <button name="change_role" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded text-xs font-semibold">Salvar</button>
                                     </form>
+                                    <?php else: ?>
+                                    <span class="text-xs text-gray-400">—</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <?php if (!$isSelf && !$isTargetOwner): ?>
+                                    <div class="flex gap-1 justify-center">
+                                        <form method="POST" class="inline" onsubmit="return confirm('Bloquear <?php echo htmlspecialchars(addslashes($u['nome'])); ?>?');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                            <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                            <button name="block_user" class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium hover:bg-orange-200 transition" title="Bloquear">
+                                                <svg class="inline w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                            </button>
+                                        </form>
+                                        <?php if ($userIsOwner): ?>
+                                        <form method="POST" class="inline" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE <?php echo htmlspecialchars(addslashes($u['nome'])); ?>? Esta acao nao pode ser desfeita!');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                            <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                            <button name="delete_user" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition" title="Excluir">
+                                                <svg class="inline w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                            </button>
+                                        </form>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php else: ?>
+                                    <span class="text-xs text-gray-400">—</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -582,6 +832,48 @@ $user = getCurrentUser();
                     </table>
                 </div>
             </div>
+
+            <!-- Usuarios bloqueados -->
+            <?php if (count($blocked_users) > 0): ?>
+            <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Usuarios Bloqueados</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-red-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-600">Nome</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-600">Email</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-600">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <?php foreach ($blocked_users as $u): ?>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-500"><?php echo htmlspecialchars($u['nome']); ?></td>
+                                <td class="px-4 py-3 text-gray-400 text-xs"><?php echo htmlspecialchars($u['email']); ?></td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex gap-1 justify-center">
+                                        <form method="POST" class="inline">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                            <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                            <button name="unblock_user" class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition">Desbloquear</button>
+                                        </form>
+                                        <?php if ($userIsOwner): ?>
+                                        <form method="POST" class="inline" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE <?php echo htmlspecialchars(addslashes($u['nome'])); ?>?');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                            <input type="hidden" name="user_id" value="<?php echo $u['id']; ?>">
+                                            <button name="delete_user" class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition">Excluir</button>
+                                        </form>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- ========== TAB: DADOS PENDENTES ========== -->
@@ -628,349 +920,6 @@ $user = getCurrentUser();
             </div>
         </div>
 
-        <!-- ========== TAB: SEDIMENTO ========== -->
-        <div id="form-sediment" class="tab-content <?php echo $activeTab !== 'sediment' ? 'hidden' : ''; ?>">
-            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Adicionar Dados de Microplasticos</h2>
-                <form method="POST" class="space-y-6">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Ambiente <span class="text-red-500">*</span></label>
-                            <select name="tipo_ambiente" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selecione...</option>
-                                <?php foreach (getDataTypes('ambiente') as $a): ?>
-                                <option value="<?= htmlspecialchars($a['name']) ?>"><?= htmlspecialchars($a['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Ecossistema</label>
-                            <select name="ecossistema" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selecione...</option>
-                                <?php foreach (getDataTypes('ecossistema') as $e): ?>
-                                <option value="<?= htmlspecialchars($e['name']) ?>"><?= htmlspecialchars($e['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Matriz</label>
-                            <select name="matriz" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selecione...</option>
-                                <?php foreach (getDataTypes('matriz') as $m): ?>
-                                <option value="<?= htmlspecialchars($m['name']) ?>"><?= htmlspecialchars($m['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sistema Aquatico <span class="text-red-500">*</span></label>
-                            <input type="text" name="system" required placeholder="Ex: Amazon River, Santos beach" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Ponto de Amostragem</label>
-                            <input type="text" name="sampling_point" placeholder="Ex: AMZ1, P1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Latitude</label>
-                            <input type="number" step="0.000001" name="latitude" placeholder="Ex: -3.146601" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Longitude</label>
-                            <input type="number" step="0.000001" name="longitude" placeholder="Ex: -59.383157" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Concentracao (texto)</label>
-                            <input type="text" name="concentration_sediment" placeholder="Ex: 2101/Kg" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Valor Numerico</label>
-                            <input type="number" step="0.01" name="concentration_value" placeholder="Ex: 2101" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Unidade</label>
-                            <select name="unidade" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selecione...</option>
-                                <?php foreach (getUnitsWithThresholds() as $u): ?>
-                                <option value="<?= htmlspecialchars($u['name']) ?>"><?= htmlspecialchars($u['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Variacao</label>
-                            <select name="concentration_variation" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selecione...</option>
-                                <option value="Space">Espacial</option>
-                                <option value="Time">Temporal</option>
-                                <option value="SPACE + TIME">Espacial + Temporal</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Concentracao Total</label>
-                            <input type="text" name="total_concentration" placeholder="Ex: 417/Kg - 2.101/Kg" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Profundidade (m)</label>
-                            <input type="text" name="depth" placeholder="Ex: 5, 0.05" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Autor(es)</label>
-                            <input type="text" name="author" placeholder="Ex: Gerolin, C. et al. (2020)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Referencia</label>
-                            <input type="text" name="reference" placeholder="Titulo do artigo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">DOI</label>
-                            <input type="text" name="doi" placeholder="Ex: https://doi.org/10.1016/j.scitotenv.2020.139484" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                    <button type="submit" name="add_sediment" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">Adicionar Dados</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ========== TAB: PEIXES ========== -->
-        <div id="form-fish" class="tab-content <?php echo $activeTab !== 'fish' ? 'hidden' : ''; ?>">
-            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Adicionar Dados de Peixes</h2>
-                <form method="POST" class="space-y-6">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Especie <span class="text-red-500">*</span></label>
-                            <input type="text" name="species" required placeholder="Ex: Astyanax lacustris" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Habito Alimentar</label>
-                            <select name="habit" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selecione...</option>
-                                <option value="Omnivore">Onivoro</option>
-                                <option value="Carnivore">Carnivoro</option>
-                                <option value="Herbivore">Herbivoro</option>
-                                <option value="Insectivore">Insetivoro</option>
-                                <option value="Detritivore">Detritivoro</option>
-                                <option value="Piscivore">Piscivoro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Total Individuos</label>
-                            <input type="number" name="total_individuals" placeholder="132" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Individuos c/ Microplasticos</label>
-                            <input type="number" name="individuals_with_microplastics" placeholder="38" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">Tipos de Microplasticos</label>
-                            <div class="grid grid-cols-3 gap-3">
-                                <label class="flex items-center gap-2"><input type="checkbox" name="fiber" class="w-4 h-4"> Fibras</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" name="film" class="w-4 h-4"> Filmes</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" name="fragment" class="w-4 h-4"> Fragmentos</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" name="foam" class="w-4 h-4"> Espumas</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" name="pellets" class="w-4 h-4"> Pellets</label>
-                                <label class="flex items-center gap-2"><input type="checkbox" name="sphere" class="w-4 h-4"> Esferas</label>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Dimensao Plasticos</label>
-                            <input type="text" name="plastic_dimension" placeholder="<5mm, 1-5mm" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sistema de Agua Doce</label>
-                            <input type="text" name="freshwater_system" placeholder="Amazon River" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Latitude</label>
-                            <input type="text" name="latitude" placeholder="Ex: -23.5505" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Longitude</label>
-                            <input type="text" name="longitude" placeholder="Ex: -46.6333" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tecidos Afetados</label>
-                            <input type="text" name="occurrence_tissues" placeholder="Stomach, intestine" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Autor(es)</label>
-                            <input type="text" name="author" placeholder="Silva, A. et al. (2023)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Referencia</label>
-                            <textarea name="reference" rows="2" placeholder="Titulo do artigo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">DOI</label>
-                            <input type="text" name="doi" placeholder="Ex: https://doi.org/10.1016/j.scitotenv.2020.139484" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                    <button type="submit" name="add_fish" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">Adicionar Dados de Peixe</button>
-                </form>
-            </div>
-
-            <!-- Formulario de edicao (aparece quando clica em Editar) -->
-            <?php if ($editing_fish): ?>
-            <div class="bg-yellow-50 border border-yellow-300 rounded-xl shadow-lg p-6 md:p-8 mt-6" id="editFishForm">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-900">Editando: <span class="italic text-blue-700"><?php echo htmlspecialchars($editing_fish['species']); ?></span> <span class="text-sm text-gray-500">(ID <?php echo $editing_fish['id']; ?>)</span></h2>
-                    <a href="admin.php?tab=fish" class="text-sm text-gray-500 hover:text-gray-800 font-medium">Cancelar</a>
-                </div>
-                <form method="POST" class="space-y-4">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                    <input type="hidden" name="fish_id" value="<?php echo $editing_fish['id']; ?>">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Especie *</label>
-                            <input type="text" name="species" required value="<?php echo htmlspecialchars($editing_fish['species']); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Habito Alimentar</label>
-                            <select name="habit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                                <option value="">Selecione...</option>
-                                <?php foreach(['Omnivore'=>'Onivoro','Carnivore'=>'Carnivoro','Herbivore'=>'Herbivoro','Insectivore'=>'Insetivoro','Detritivore'=>'Detritivoro','Piscivore'=>'Piscivoro'] as $v=>$l): ?>
-                                <option value="<?php echo $v; ?>" <?php echo ($editing_fish['habit'] === $v) ? 'selected' : ''; ?>><?php echo $l; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Total Individuos</label>
-                            <input type="number" name="total_individuals" value="<?php echo $editing_fish['total_individuals']; ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">C/ Microplasticos</label>
-                            <input type="number" name="individuals_with_microplastics" value="<?php echo $editing_fish['individuals_with_microplastics']; ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Tipos de Microplasticos</label>
-                            <div class="flex flex-wrap gap-4">
-                                <?php foreach(['fiber'=>'Fibras','film'=>'Filmes','fragment'=>'Fragmentos','foam'=>'Espumas','pellets'=>'Pellets','sphere'=>'Esferas'] as $k=>$l): ?>
-                                <label class="flex items-center gap-1.5 text-sm"><input type="checkbox" name="<?php echo $k; ?>" class="w-4 h-4" <?php echo $editing_fish[$k] ? 'checked' : ''; ?>> <?php echo $l; ?></label>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Dimensao Plasticos</label>
-                            <input type="text" name="plastic_dimension" value="<?php echo htmlspecialchars($editing_fish['plastic_dimension'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Sistema de Agua Doce</label>
-                            <input type="text" name="freshwater_system" value="<?php echo htmlspecialchars($editing_fish['freshwater_system'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Latitude</label>
-                            <input type="text" name="latitude" value="<?php echo $editing_fish['latitude']; ?>" placeholder="-23.5505" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Longitude</label>
-                            <input type="text" name="longitude" value="<?php echo $editing_fish['longitude']; ?>" placeholder="-46.6333" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Tecidos Afetados</label>
-                            <input type="text" name="occurrence_tissues" value="<?php echo htmlspecialchars($editing_fish['occurrence_tissues'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Autor(es)</label>
-                            <input type="text" name="author" value="<?php echo htmlspecialchars($editing_fish['author'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Referencia</label>
-                            <textarea name="reference" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"><?php echo htmlspecialchars($editing_fish['reference'] ?? ''); ?></textarea>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">DOI</label>
-                            <input type="text" name="doi" value="<?php echo htmlspecialchars($editing_fish['doi'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                        </div>
-                    </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" name="edit_fish" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">Salvar Alteracoes</button>
-                        <a href="admin.php?tab=fish" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition text-center">Cancelar</a>
-                    </div>
-                </form>
-            </div>
-            <script>document.getElementById('editFishForm').scrollIntoView({behavior:'smooth'});</script>
-            <?php endif; ?>
-
-            <!-- Status dos peixes -->
-            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mt-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-900">Todos os Peixes</h2>
-                    <div class="flex gap-3 text-sm">
-                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium"><?php echo count($fish_with_coords); ?> no mapa</span>
-                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full font-medium"><?php echo count($fish_no_coords); ?> sem coords</span>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium"><?php echo $fish_total; ?> total</span>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
-                    <div class="bg-green-500 h-3 rounded-full transition-all" style="width: <?php echo $fish_total > 0 ? round(count($fish_with_coords) / $fish_total * 100) : 0; ?>%"></div>
-                </div>
-
-                <!-- Filtro -->
-                <div class="mb-4">
-                    <input type="text" id="fishListFilter" placeholder="Filtrar por especie, sistema ou habito..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" oninput="filterAllFish()">
-                </div>
-
-                <!-- Tabela completa -->
-                <div class="overflow-x-auto max-h-[600px] overflow-y-auto border rounded-lg">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50 sticky top-0 z-10">
-                            <tr>
-                                <th class="px-2 py-2 text-left font-semibold text-gray-700 w-8">#</th>
-                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Especie</th>
-                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Habito</th>
-                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Sistema</th>
-                                <th class="px-2 py-2 text-center font-semibold text-gray-700">Ind.</th>
-                                <th class="px-2 py-2 text-center font-semibold text-gray-700">C/MP</th>
-                                <th class="px-2 py-2 text-left font-semibold text-gray-700">Coords</th>
-                                <th class="px-2 py-2 text-center font-semibold text-gray-700 w-24">Acoes</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <?php foreach ($all_fish as $fish): ?>
-                            <tr class="fish-list-row hover:bg-gray-50 transition"
-                                data-search="<?php echo strtolower(htmlspecialchars($fish['species'] . ' ' . ($fish['freshwater_system'] ?? '') . ' ' . ($fish['habit'] ?? ''))); ?>">
-                                <td class="px-2 py-1.5 text-gray-400 text-xs"><?php echo $fish['id']; ?></td>
-                                <td class="px-2 py-1.5 font-medium text-gray-900 italic text-xs"><?php echo htmlspecialchars($fish['species']); ?></td>
-                                <td class="px-2 py-1.5 text-gray-600 text-xs"><?php echo htmlspecialchars($fish['habit'] ?? '—'); ?></td>
-                                <td class="px-2 py-1.5 text-gray-600 text-xs"><?php echo htmlspecialchars($fish['freshwater_system'] ?? '—'); ?></td>
-                                <td class="px-2 py-1.5 text-center text-xs"><?php echo $fish['total_individuals'] ?? 0; ?></td>
-                                <td class="px-2 py-1.5 text-center text-xs"><?php echo $fish['individuals_with_microplastics'] ?? 0; ?></td>
-                                <td class="px-2 py-1.5 text-xs">
-                                    <?php if ($fish['latitude'] && $fish['longitude']): ?>
-                                        <span class="text-green-600" title="<?php echo $fish['latitude'] . ', ' . $fish['longitude']; ?>">&#10003; <?php echo round($fish['latitude'], 2) . ', ' . round($fish['longitude'], 2); ?></span>
-                                    <?php else: ?>
-                                        <span class="text-red-400">Sem coords</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="px-2 py-1.5 text-center">
-                                    <div class="flex gap-1 justify-center">
-                                        <a href="admin.php?tab=fish&edit_fish_id=<?php echo $fish['id']; ?>"
-                                           class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition">Editar</a>
-                                        <form method="POST" class="inline" onsubmit="return confirm('Excluir <?php echo htmlspecialchars(addslashes($fish['species'])); ?>?');">
-                                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                            <input type="hidden" name="fish_id" value="<?php echo $fish['id']; ?>">
-                                            <button type="submit" name="delete_fish" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition">Excluir</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <script>
-            function filterAllFish() {
-                var q = document.getElementById('fishListFilter').value.toLowerCase();
-                document.querySelectorAll('.fish-list-row').forEach(function(row) {
-                    row.style.display = row.getAttribute('data-search').indexOf(q) !== -1 ? '' : 'none';
-                });
-            }
-            </script>
-        </div>
         <!-- ========== TAB: IMPORTAR CSV ========== -->
         <div id="form-importar" class="tab-content <?php echo $activeTab !== 'importar' ? 'hidden' : ''; ?>">
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
@@ -1086,6 +1035,11 @@ $user = getCurrentUser();
             </div>
         </div>
 
+        <!-- ========== TAB: CARGOS (owner only) ========== -->
+        <div id="form-cargos" class="tab-content <?php echo $activeTab !== 'cargos' ? 'hidden' : ''; ?>">
+            <?php if ($userIsOwner && file_exists(__DIR__ . '/admin/tab_cargos.php')) include __DIR__ . '/admin/tab_cargos.php'; ?>
+        </div>
+
         <!-- ========== TAB: CONFIGURACOES ========== -->
         <div id="form-configuracoes" class="tab-content <?php echo $activeTab !== 'configuracoes' ? 'hidden' : ''; ?>">
             <?php if (file_exists(__DIR__ . '/admin/tab_configuracoes.php')) include __DIR__ . '/admin/tab_configuracoes.php'; ?>
@@ -1105,21 +1059,59 @@ $user = getCurrentUser();
         <div id="form-unidades" class="tab-content <?php echo $activeTab !== 'unidades' ? 'hidden' : ''; ?>">
             <?php if (file_exists(__DIR__ . '/admin/tab_unidades.php')) include __DIR__ . '/admin/tab_unidades.php'; ?>
         </div>
+
+        <!-- ========== TAB: CATEGORIAS ========== -->
+        <div id="form-categorias" class="tab-content <?php echo $activeTab !== 'categorias' ? 'hidden' : ''; ?>">
+            <?php if (file_exists(__DIR__ . '/admin/tab_categorias.php')) include __DIR__ . '/admin/tab_categorias.php'; ?>
+        </div>
+
+        <!-- ========== TAB: CAMPOS ========== -->
+        <div id="form-campos" class="tab-content <?php echo $activeTab !== 'campos' ? 'hidden' : ''; ?>">
+            <?php if (file_exists(__DIR__ . '/admin/tab_campos.php')) include __DIR__ . '/admin/tab_campos.php'; ?>
+        </div>
+
+        <!-- ========== TAB: DADOS ========== -->
+        <div id="form-dados" class="tab-content <?php echo $activeTab !== 'dados' ? 'hidden' : ''; ?>">
+            <?php if (file_exists(__DIR__ . '/admin/tab_dados.php')) include __DIR__ . '/admin/tab_dados.php'; ?>
+        </div>
+
+        <div id="form-especies" class="tab-content <?php echo $activeTab !== 'especies' ? 'hidden' : ''; ?>">
+            <?php if (file_exists(__DIR__ . '/admin/tab_especies.php')) include __DIR__ . '/admin/tab_especies.php'; ?>
+        </div>
+
+        </div>
     </div>
 
     <script>
         function showTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('bg-white', 'shadow', 'text-slate-800');
-                el.classList.add('text-gray-500');
-            });
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('form-' + tab).classList.remove('hidden');
             const btn = document.getElementById('tab-' + tab);
-            btn.classList.add('bg-white', 'shadow', 'text-slate-800');
-            btn.classList.remove('text-gray-500');
-            // Persistir tab ativa na URL
+            if (btn) btn.classList.add('active');
             history.replaceState(null, '', 'admin.php?tab=' + tab + window.location.hash);
+            // Close sidebar on mobile after selecting
+            if (window.innerWidth <= 1024) {
+                document.getElementById('adminSidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay').classList.remove('open');
+            }
+        }
+
+        function toggleNotifs() {
+            var dd = document.getElementById('notifDropdown');
+            dd.classList.toggle('hidden');
+        }
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            var w = document.getElementById('notifWrapper');
+            if (w && !w.contains(e.target)) {
+                document.getElementById('notifDropdown').classList.add('hidden');
+            }
+        });
+
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
         }
 
         // Ao submeter qualquer form, injetar _tab para voltar na mesma aba
