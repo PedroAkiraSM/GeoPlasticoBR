@@ -748,7 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function smoothVideoFrame() {
             // Lerp: smoothly interpolate toward target time
-            currentSmooth += (targetTime - currentSmooth) * 0.08;
+            currentSmooth += (targetTime - currentSmooth) * 0.04;
             // Only update if difference is meaningful
             if (Math.abs(currentSmooth - scrollVid.currentTime) > 0.01) {
                 scrollVid.currentTime = currentSmooth;
