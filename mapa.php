@@ -81,11 +81,13 @@ $_thresholdUnits = getUnitsWithThresholds();
                 </select>
             </div>
             <div class="filter-section">
-                <label class="filter-label">Matriz</label>
-                <div class="filter-chips" id="filterMatriz">
-                    <button class="chip active" data-value="">Todas</button>
-                    <?php foreach (getDataTypes('matriz') as $dt): ?>
-                    <button class="chip" data-value="<?php echo htmlspecialchars($dt['name']); ?>"><?php echo htmlspecialchars($dt['name']); ?></button>
+                <label class="filter-label">Categoria</label>
+                <div class="filter-chips" id="filterCategory">
+                    <button class="chip active" data-value="all">Todas</button>
+                    <?php foreach (getCategories() as $cat): ?>
+                    <button class="chip" data-value="<?php echo $cat['id']; ?>">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:<?php echo htmlspecialchars($cat['color']); ?>;margin-right:4px;vertical-align:middle;"></span><?php echo htmlspecialchars($cat['name']); ?>
+                    </button>
                     <?php endforeach; ?>
                 </div>
             </div>
