@@ -58,12 +58,13 @@ try {
 
     // Post-processing: resolve species images for especie fields
     $speciesImageCache = [];
+    $spPdo = getDatabaseConnection();
     foreach ($formattedSamples as &$sample) {
         foreach ($sample['fields'] as &$field) {
             if ($field['name'] === 'especie' && !empty($field['value'])) {
                 $speciesName = $field['value'];
                 if (!isset($speciesImageCache[$speciesName])) {
-                    $spStmt = $pdo->prepare("SELECT image_path FROM species WHERE name = :name AND is_active = 1 LIMIT 1");
+                    $spStmt = $spPdo->prepare("SELECT image_path FROM species WHERE name = :name AND is_active = 1 LIMIT 1");
                     $spStmt->execute([':name' => $speciesName]);
                     $spRow = $spStmt->fetch();
                     $speciesImageCache[$speciesName] = $spRow ? $spRow['image_path'] : null;

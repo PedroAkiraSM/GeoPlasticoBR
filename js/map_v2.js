@@ -140,8 +140,10 @@
                     var items = [];
                     try { items = JSON.parse(f.value); } catch(e) { items = [f.value]; }
                     if (items && items.length > 0) {
-                        html += '<div class="popup-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="popup-key">' + f.label + '</span><span class="popup-val" style="text-align:left;">' + items.join(', ') + '</span></div>';
+                        html += '<div class="popup-row"><span class="popup-key">' + f.label + ':</span> <span class="popup-val" style="text-align:left;">' + items.join(', ') + '</span></div>';
                     }
+                } else if (f.name === 'especie') {
+                    html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val" style="font-style:italic;">' + f.value + '</span></div>';
                 } else {
                     html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + f.value + '</span></div>';
                 }
@@ -186,7 +188,7 @@
             html += '<div class="popup-species-item">';
             html += '<div class="popup-species-row" onclick="document.getElementById(\'' + uid + '\').classList.toggle(\'open\')">';
             html += '<div class="popup-species-info">';
-            html += '<span class="popup-species-name">' + (item.title || 'Sem nome') + '</span>';
+            html += '<span class="popup-species-name" style="font-style:italic;">' + (item.title || 'Sem nome') + '</span>';
             if (familia) html += '<span class="popup-species-family">' + familia + '</span>';
             html += '</div>';
             html += '<svg class="popup-species-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
@@ -203,7 +205,9 @@
                         html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + (f.value === '1' || f.value === 1 ? 'Sim' : 'Nao') + '</span></div>';
                     } else if (f.type === 'multicheck') {
                         var mcItems = []; try { mcItems = JSON.parse(f.value); } catch(e) { mcItems = [f.value]; }
-                        if (mcItems && mcItems.length > 0) html += '<div class="popup-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="popup-key">' + f.label + '</span><span class="popup-val" style="text-align:left;">' + mcItems.join(', ') + '</span></div>';
+                        if (mcItems && mcItems.length > 0) html += '<div class="popup-row"><span class="popup-key">' + f.label + ':</span> <span class="popup-val" style="text-align:left;">' + mcItems.join(', ') + '</span></div>';
+                    } else if (f.name === 'especie') {
+                        html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val" style="font-style:italic;">' + f.value + '</span></div>';
                     } else {
                         html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + f.value + '</span></div>';
                     }
@@ -260,7 +264,9 @@
                     html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + (f.value === '1' || f.value === 1 ? 'Sim' : 'Nao') + '</span></div>';
                 } else if (f.type === 'multicheck') {
                     var mcItems2 = []; try { mcItems2 = JSON.parse(f.value); } catch(e) { mcItems2 = [f.value]; }
-                    if (mcItems2 && mcItems2.length > 0) html += '<div class="popup-row" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="popup-key">' + f.label + '</span><span class="popup-val" style="text-align:left;">' + mcItems2.join(', ') + '</span></div>';
+                    if (mcItems2 && mcItems2.length > 0) html += '<div class="popup-row"><span class="popup-key">' + f.label + ':</span> <span class="popup-val" style="text-align:left;">' + mcItems2.join(', ') + '</span></div>';
+                } else if (f.name === 'especie') {
+                    html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val" style="font-style:italic;">' + f.value + '</span></div>';
                 } else {
                     html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + f.value + '</span></div>';
                 }

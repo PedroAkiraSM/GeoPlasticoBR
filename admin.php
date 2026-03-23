@@ -423,7 +423,8 @@ $user = getCurrentUser();
         /* Sidebar */
         .admin-sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100dvh;
+            height: 100vh; /* fallback for older browsers */
             background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
             position: fixed;
             top: 0;
@@ -433,6 +434,9 @@ $user = getCurrentUser();
             flex-direction: column;
             border-right: 1px solid rgba(148,163,184,0.08);
             transition: transform 0.3s ease;
+        }
+        @supports (height: 100dvh) {
+            .admin-sidebar { height: 100dvh; }
         }
         .admin-main {
             margin-left: 260px;
@@ -667,7 +671,7 @@ $user = getCurrentUser();
         </nav>
 
         <!-- User footer -->
-        <div class="px-5 py-4 border-t border-white/5">
+        <div class="px-5 py-4 border-t border-white/5" style="flex-shrink:0;">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-cyan-500/15 flex items-center justify-center text-cyan-400 text-xs font-bold">
                     <?php echo strtoupper(substr($user['nome'], 0, 1)); ?>
