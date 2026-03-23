@@ -214,7 +214,7 @@ function getSamplesForMap(?int $categoryId = null): array {
     $valStmt = $pdo->prepare("SELECT sv.sample_id, cf.field_name, cf.field_label, cf.field_type, sv.value_text, sv.value_number
                               FROM sample_values sv
                               JOIN category_fields cf ON sv.field_id = cf.id
-                              WHERE sv.sample_id IN ($placeholders)
+                              WHERE sv.sample_id IN ($placeholders) AND cf.is_active = 1
                               ORDER BY cf.display_order");
     $valStmt->execute($sampleIds);
     $allValues = $valStmt->fetchAll();

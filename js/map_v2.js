@@ -123,7 +123,8 @@
         if (item.fields && item.fields.length > 0) {
             for (var i = 0; i < item.fields.length; i++) {
                 var f = item.fields[i];
-                if (f.value === null || f.value === '' || f.value === '0') continue;
+                if (f.value === null || f.value === '' || f.value === '0' || f.value === 0) continue;
+                if (f.type === 'checkbox' && (f.value !== '1' && f.value !== 1)) continue;
 
                 if (f.name === 'concentration_value' && f.type === 'decimal') {
                     var val = parseFloat(f.value) || 0;
@@ -199,7 +200,8 @@
             if (item.fields && item.fields.length > 0) {
                 for (var j = 0; j < item.fields.length; j++) {
                     var f = item.fields[j];
-                    if (f.value === null || f.value === '' || f.value === '0') continue;
+                    if (f.value === null || f.value === '' || f.value === '0' || f.value === 0) continue;
+                if (f.type === 'checkbox' && (f.value !== '1' && f.value !== 1)) continue;
                     if (f.name === 'familia') continue; // Already shown in header
                     if (f.type === 'checkbox') {
                         html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + (f.value === '1' || f.value === 1 ? 'Sim' : 'Nao') + '</span></div>';
@@ -258,7 +260,8 @@
         if (item.fields && item.fields.length > 0) {
             for (var i = 0; i < item.fields.length; i++) {
                 var f = item.fields[i];
-                if (f.value === null || f.value === '' || f.value === '0') continue;
+                if (f.value === null || f.value === '' || f.value === '0' || f.value === 0) continue;
+                if (f.type === 'checkbox' && (f.value !== '1' && f.value !== 1)) continue;
                 if (f.name === 'familia') continue;
                 if (f.type === 'checkbox') {
                     html += '<div class="popup-row"><span class="popup-key">' + f.label + '</span><span class="popup-val">' + (f.value === '1' || f.value === 1 ? 'Sim' : 'Nao') + '</span></div>';
